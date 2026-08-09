@@ -1,0 +1,30 @@
+{
+  "name": "openvideo-plugin-otp",
+  "version": "1.0.0",
+  "description": "OpenVideoAPI OTP 双因素登录插件：TOTP 动态验证码（Google Authenticator 等兼容）+ 恢复码，登录页注入验证码输入",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "keywords": ["openvideo", "plugin", "otp", "totp", "2fa", "mfa", "authenticator", "security", "login"],
+  "files": ["lib", "README.md"],
+  "openvideoPlugin": {
+    "name": "otp",
+    "description": "管理员双因素登录（2FA）：TOTP 动态验证码 + 一次性恢复码，登录页自动注入验证码输入框",
+    "inject": ["store", "model", "app", "logger", "http"],
+    "schema": [
+      { "key": "enabled", "label": "启用 OTP 插件", "type": "boolean", "default": true, "hint": "关闭后登录不校验验证码（已启用用户的密钥保留）" },
+      { "key": "issuer", "label": "OTP 发行方名称", "type": "string", "default": "OpenVideoAPI", "hint": "显示在验证器 App 中的发行方名（otpauth:// URI 的 issuer）" },
+      { "key": "period", "label": "刷新周期（秒）", "type": "number", "default": 30, "hint": "验证码刷新周期，常见为 30" },
+      { "key": "digits", "label": "验证码位数", "type": "number", "default": 6, "hint": "TOTP 验证码长度，常见为 6" },
+      { "key": "window", "label": "容错窗口（±步数）", "type": "number", "default": 1, "hint": "前后各允许多少个周期的验证码（补偿时钟偏差）" }
+    ],
+    "client": {
+      "login": {
+        "scripts": ["lib/client/login/otp.js"]
+      },
+      "admin": {
+        "scripts": ["lib/client/admin/otp.js"],
+        "tabs": [{ "id": "otp-manage", "title": "OTP 登录" }]
+      }
+    }
+  }
+}

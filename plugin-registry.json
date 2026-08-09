@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-08",
+  "updated": "2026-08-09",
   "plugins": [
     {
       "name": "openvideo-plugin-demo",
@@ -7,6 +7,15 @@
       "author": "yangyang8002",
       "homepage": "https://github.com/yangyang8002/OpenVideoAPI",
       "tags": ["官方", "示例", "demo"],
+      "versions": ["1.0.0"],
+      "dependencies": []
+    },
+    {
+      "name": "openvideo-plugin-otp",
+      "description": "管理员双因素登录（2FA）：TOTP 动态验证码（Google Authenticator 等兼容）+ 一次性恢复码，登录页自动注入验证码输入",
+      "author": "yangyang8002",
+      "homepage": "https://github.com/yangyang8002/openvideo-plugin-otp",
+      "tags": ["官方", "安全", "2FA", "OTP", "登录"],
       "versions": ["1.0.0"],
       "dependencies": []
     }

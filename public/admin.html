@@ -1513,7 +1513,7 @@
                     自研 Canvas 弹幕引擎 · API 限流与实时统计 · PoW 防火墙 · 双主题系统 · 多字幕 · 文件管理
                 </p>
                 <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-                    <span class="ab-badge" id="aboutVersion">v26.8.11</span>
+                    <span class="ab-badge" id="aboutVersion">v26.8.12</span>
                     <span class="ab-badge b2" style="cursor:pointer" onclick="window.open('https://github.com/yangyang8002/OpenVideoAPI')">GitHub</span>
                     <span class="ab-badge b3" style="cursor:pointer" onclick="window.open('https://doc.mbps.top/')">Docs</span>
                     <span class="ab-badge b4">MIT License</span>
@@ -1578,7 +1578,7 @@
             </div>
             <div style="text-align:center;padding:16px">
                 <p style="font-size:12px;color:var(--text3)">Made with ♥ by yangyang8002</p>
-                <p style="font-size:11px;color:var(--text3);margin-top:4px">MIT License &copy; 2024-2026 · <span id="aboutFooterVer">v26.8.11</span></p>
+                <p style="font-size:11px;color:var(--text3);margin-top:4px">MIT License &copy; 2024-2026 · <span id="aboutFooterVer">v26.8.12</span></p>
             </div>
         </div>
 
@@ -1725,6 +1725,32 @@
                     });
                     let i = 0;
                     const next = () => { if (i >= chain.length) { window.OpenVideoAdmin._ready = true; renderExtTabs(); return; } chain[i++]().then(next); };
+                    next();
+                }).catch(() => {});
+        }
+        /* 登录页插件扩展（scope=login）：无需登录即可加载，用于扩展登录表单等（如 OTP 验证码输入） */
+        function loadLoginPlugins() {
+            return fetch('/api/plugins/manifest?scope=login')
+                .then(r => r.json()).then(d => {
+                    if (d.code !== 0) return;
+                    const list = d.data.plugins || [];
+                    const chain = [];
+                    list.forEach(p => {
+                        (p.styles || []).forEach(s => chain.push(() => {
+                            const el = document.createElement('link');
+                            el.rel = 'stylesheet'; el.href = s;
+                            document.head.appendChild(el);
+                            return Promise.resolve();
+                        }));
+                        (p.scripts || []).forEach(s => chain.push(() => new Promise(resolve => {
+                            const el = document.createElement('script');
+                            el.src = s;
+                            el.onload = resolve; el.onerror = resolve;
+                            document.body.appendChild(el);
+                        })));
+                    });
+                    let i = 0;
+                    const next = () => { if (i >= chain.length) { window._loginPluginsReady = true; return; } chain[i++]().then(next); };
                     next();
                 }).catch(() => {});
         }
@@ -3624,6 +3650,7 @@
         document.getElementById('passwordInput').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
         document.getElementById('newWordInput').addEventListener('keypress', e => { if (e.key === 'Enter') addBannedWord(); });
         loadAdminTheme();
+        loadLoginPlugins();
     </script>
 </body>
 </html>

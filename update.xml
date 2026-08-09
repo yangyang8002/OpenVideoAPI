@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 版本清单：更新进程依据此文件校验与执行更新（data/ 目录不参与更新） -->
 <update>
-  <version>26.8.11</version>
+  <version>26.8.12</version>
   <date>2026-08-09</date>
-  <message>v26.8.11: remove Koishi references</message>
+  <message>v26.8.12: OTP 2FA plugin (TOTP + recovery codes) with login-scope plugin extensions; complete 6-language i18n</message>
   <files>
   <file path=".dockerignore" sha256="92b725988b57a03160cb825d470f929fbecbf4ee25b4dbc28a7fdb3a8c41a781" size="78"/>
   <file path=".github/social-preview.png" sha256="0949997a033350b2096a95f68c4a3eaabe2e3952913e91a0bec59807bbfdb246" size="21642"/>
@@ -11,12 +11,12 @@
   <file path=".github/workflows/npm-publish-github-packages.yml" sha256="e7b7ac761eaa5af1c6b59f2f79bdbf1c48a32cd8db949b7bf3fc3e92f72f7286" size="570"/>
   <file path=".gitignore" sha256="a7eb71a4bb93a4e18c12dbf9192c2c53bc938615112c977e258c30b492526a64" size="69"/>
   <file path=".npmignore" sha256="408a2ab327b75ed60f56173f106c02754a75a569a02648a633c243c34cd935e8" size="130"/>
-  <file path="DOCKER.md" sha256="99fa28499ce640dafd68e7f56c8bcc896cde267dda8804ee7441f333f997a0a7" size="3507"/>
+  <file path="DOCKER.md" sha256="cd82ac2fc0a8425f67ca7ece74533417e3f6d285ecae5ccb5bc39736bdd34b89" size="3507"/>
   <file path="Dockerfile" sha256="c844310f89d85988e9d6073f5a205015a486e8f632ef91fb7fbef3a7248f02a6" size="439"/>
   <file path="LICENSE" sha256="d5f812f2f7d23c443ffaff5391be83cd3fcca32c68b8f792cb03937d5a1fc027" size="1090"/>
-  <file path="README.md" sha256="9fb7fcfcf779920c69b9c9397e5d93b1447997bc5f33974f6c22f9286b8900fd" size="5262"/>
-  <file path="README_CN.md" sha256="e6b06d60a5bd449ecdebc3b1d1629cf520c0ce04ac36b09032d9782662354fe5" size="26563"/>
-  <file path="README_EN.md" sha256="c57280cee319ba99b66426555174807379d795543010464d51d5c5df1752d7b9" size="24554"/>
+  <file path="README.md" sha256="482f4a57416d805dab7e506f8aa4dab324fc133f5f1e3893ca69a367bd0466bc" size="5262"/>
+  <file path="README_CN.md" sha256="39042a4d4f88eee7b079721c4831349b624f417c81aa9e171f4b3353943b653b" size="26811"/>
+  <file path="README_EN.md" sha256="72d77d863bd187c717833084f2fc1acf7402bcd275dea76bc36937c4c2f4078c" size="24777"/>
   <file path="docker-compose.yml" sha256="bea2a4570ceedeab63ba86f85c879f804b8b08f9b60400c07893f339e8493be6" size="422"/>
   <file path="gen_perf_danmu.js" sha256="3902ae3de3e80c90089ee646a273922da4447dfdd9b86dab15d9c4ecba126b3e" size="2249"/>
   <file path="lib/backends/mongodb.js" sha256="81ba976701b40992c09f14c12c88c404372f93b8c01cc8774093619008ee4bc4" size="10709"/>
@@ -25,21 +25,26 @@
   <file path="lib/backends/sqlite.js" sha256="625b1d8600c2a0f25a243e4f42d3d929e57a44e11e11e03f9f2f9d003b667735" size="2453"/>
   <file path="lib/cloud.js" sha256="5b48ed67112b97f27dae7b853d16c96675a48591024c7a74bc5f5642d67d7653" size="10133"/>
   <file path="lib/model.js" sha256="bec025ba75882a022ca57de8ff4e8d7ec69dde319a6a885aebbd2b9eff54efcb" size="5401"/>
-  <file path="lib/plugin.js" sha256="574f7754843c3622d07fa2dc6bf93da19a04b39091ee92a64b4d05859a6766e0" size="25933"/>
+  <file path="lib/plugin.js" sha256="2682dbcdbd17e20c9c7876789261e2e8ff4237870017e9ec624188db689c696c" size="26058"/>
   <file path="lib/store.js" sha256="7b3d44de4d2e432acfa8913e49f2ced618d433dd221ae28a97356e1748e680b7" size="29717"/>
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
-  <file path="package-lock.json" sha256="07753dd82aec66a96b4c7c50a880bb2a0b5415cb4839d9d05f03a6e2834d8301" size="41173"/>
-  <file path="package.json" sha256="450348efb3093d76ab9911690a2da76892eb9be30a3163489759b165a94a58ff" size="1536"/>
-  <file path="plugin-registry.json" sha256="0267d335339867040330c78618f80edf051f5d5d1c8d34369babc59e93e9f132" size="441"/>
+  <file path="package-lock.json" sha256="d534f1a11a3c6508ab0b7c2bfe7c02f521224eaade185904071602e5c4fc0be8" size="41173"/>
+  <file path="package.json" sha256="fecf84c540ec66396f5d266a35c878f4820b97f5d6f62641963c760033edc30f" size="1536"/>
+  <file path="plugin-registry.json" sha256="0652a12592b34f651b514663ea3ddd8757fe562181a82d891a665bcbb50d9471" size="888"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/admin/debug.js" sha256="3464753a927d51247d75172d3bd06fdb8c8a3391b9b39e6d4837b01de4e877fc" size="6036"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/player/overlay.js" sha256="56322175b4de4075511e9587a30e6bf6a830a67e4e210edf2081e1687dc70874" size="1356"/>
   <file path="plugins/openvideo-plugin-demo/lib/index.js" sha256="0a193d7d1f101de41c4be8cd8a18941e71155e501909193c1c200755d89c08a2" size="3811"/>
   <file path="plugins/openvideo-plugin-demo/package.json" sha256="8ee40affefa20d00eff1dd1ebf6004985df58e3f4f6b692b22d5046cb74e17d8" size="1257"/>
+  <file path="plugins/openvideo-plugin-otp/package.json" sha256="2d662fa47f2a254bb869cb4b1fcc8f4e374b02b754b9eff736d706e59ad44a74" size="1722"/>
+  <file path="plugins/openvideo-plugin-otp/README.md" sha256="842425470e92812f21be21b067ca53fb3d93c867ee035596d613b6a007e39b14" size="3940"/>
+  <file path="plugins/openvideo-plugin-otp/lib/index.js" sha256="a199c3d55ead7cc498601f2765ad9857c32c2009039645d95ceba60730dd47f2" size="14297"/>
+  <file path="plugins/openvideo-plugin-otp/lib/client/login/otp.js" sha256="46d3bc1d6053f6ba96b7edc9d67cf48ac49b8932f44b76904ef213efa8886da5" size="5031"/>
+  <file path="plugins/openvideo-plugin-otp/lib/client/admin/otp.js" sha256="9a506e5499c8271bf6d5b7713deb1e259c84fa180b61aa8a74f5338b9f364cb5" size="19796"/>
   <file path="public/CUSTOM_THEME.md" sha256="a4394eb9fd4e0d7b68d0273fd957ec17cadfa2a0481aa28f5f55298c006008c0" size="3271"/>
-  <file path="public/admin.html" sha256="7e836e829389027b1ac30c55a9cf65946c5e2721893fb2b9a64e3d30084a2b67" size="269560"/>
+  <file path="public/admin.html" sha256="b35befbab907871d8150d714e7288f5f9cdd19daa2d8ffd23c5d1732783bf95f" size="271069"/>
   <file path="public/favicon-128.png" sha256="de8371137f6c9648f8728550e71de67fb5460771062ec1b45970909a1e5dd3dc" size="2034"/>
   <file path="public/favicon.svg" sha256="ca0f3061d459fc5636914978579613a6a8b626dc69123909eceee07d2f3c8d9f" size="555"/>
-  <file path="public/i18n.js" sha256="cde80d9cd028498a277f50502ed36c3ddbf195246ece08e18fc10afaad33de4d" size="106092"/>
+  <file path="public/i18n.js" sha256="0594c1793d3c8c0dc5af258371e12259af922b6fcac7165baed3bf97b17039db" size="227973"/>
   <file path="public/player.html" sha256="0319bab8ee5dc1cfb7c2b70f9d6e17cd10e4512f04ab803bd1385624ff41950a" size="76936"/>
   <file path="public/test_video1.en.vtt" sha256="2854f0cb4a81a3f7c02842ab8a6fac8fabe7d33384182be3653c663e131c4a1d" size="182"/>
   <file path="public/test_video1.mp4" sha256="0d55da42748dca33b1e175f0ad6855c060d4587dfc0a6b525c2c731a64e94f9f" size="6962589"/>
@@ -48,7 +53,7 @@
   <file path="public/test_video1.vtt" sha256="65bf5090bbb808e9825b4205eff66e8f3799b9ef482070ae54a460b6ac18eb0d" size="115"/>
   <file path="public/test_video2.mp4" sha256="f192304389dbc213c8dde5dc6f6b77cdd09f1785dbef6255a9857b108757eb8e" size="330061"/>
   <file path="public/test_video3.mp4" sha256="5520e9715ab6371aaf5532877a3dff6010ce57793cd6cc89752aa4116d4b9d50" size="108190"/>
-  <file path="server.js" sha256="f710477283f38b51ea6c328e7e84cea949e3ae9c22c52b3490da4191d247934b" size="186220"/>
+  <file path="server.js" sha256="d1bf2fe9d13e34d1362967923ba1e39b0544bdaa1edfa7009835e216c562b094" size="186420"/>
   <file path="theme/README.md" sha256="d3f4cc2fbc639f7eb6cbd98b210dd6642a840ecbbbda1b86944d574ec348746e" size="4676"/>
   <file path="theme/admin.css" sha256="2748ab4434965280b2993b3e9c565c2684bd389414fa873459c630060bd825f7" size="10177"/>
   <file path="theme/admin/bilibili/style.css" sha256="1bf60cf612a5a20cecf5f0bf8676c9831af78b54d30314bf5d27e3cc3bdec703" size="132"/>

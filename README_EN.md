@@ -16,7 +16,7 @@
 
 A self-hosted danmaku video player + web admin panel built on [ArtPlayer](https://artplayer.org) and Express. Features a custom Canvas danmaku engine, dual theme system, PoW anti-bot protection, per-API rate limiting with 1-second-precision live stats, multi-subtitle support, a full file manager, and multi-database storage.
 
-**v26.8.11** · MIT License
+**v26.8.12** · MIT License
 
 ## Table of Contents
 
@@ -422,13 +422,14 @@ See the [Plugin Guide](https://doc.mbps.top/plugins/guide.html).
 - **Package structure **: plugins are npm packages whose `main` exports `apply(ctx, config)` (function / class / object with apply); the `openvideoPlugin` field in package.json declares metadata, service dependencies, config schema and client extensions
 - **Service layer**: built-in services `store` / `model` (dynamic tables) / `app` (version, restart, config) / `logger` (leveled logs) / `http` / `router`; plugins provide services via `ctx.provide(name, svc)` and declare dependencies with `inject` (auto topo-sorted loading)
 - **Dynamic tables**: `ctx.model.define(name, schema)` — plugin-defined tables, migrated automatically on storage switch
-- **Client extensions**: plugins can register **admin tabs** (`OpenVideoAdmin.registerTab`), **player replacement** (`OpenVideoPlayer.replace`) and player hooks (`onReady` / `video:load`); assets are injected via `/api/plugins/manifest` + `/api/plugins/client/*`
+- **Client extensions**: plugins can register **admin tabs** (`OpenVideoAdmin.registerTab`), **player replacement** (`OpenVideoPlayer.replace`) and player hooks (`onReady` / `video:load`); assets are injected via `/api/plugins/manifest` + `/api/plugins/client/*`. A `login` scope (`client.login.scripts`) loads extensions on the **login page** without authentication (e.g. OTP code input)
 - **Lifecycle events**: `ready` / `dispose` / `before:restart` / `danmaku:send` / custom events (`ctx.on` / `ctx.emit`)
 - **Service control**: `ctx.app.restart()` graceful restart (new process waits for the port), `ctx.app.getConfig/saveConfig`
 - **Config schema**: `openvideoPlugin.schema` auto-renders admin config forms; saving hot-reloads
 - **Install**: by npm package name (optional version); via the admin "Plugins" tab or the marketplace (registry with versions & dependencies, configurable URL)
 - **Update**: npm packages update to `@latest` (config & enabled state preserved)
 - Example plugin: `plugins/openvideo-plugin-demo` (services / model / events / debug tab / player overlay)
+- Official plugin: `openvideo-plugin-otp` (admin two-factor login: TOTP codes + recovery codes)
 
 ## License
 

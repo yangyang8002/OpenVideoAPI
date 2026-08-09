@@ -3452,9 +3452,10 @@ app.get('/api/admin/plugins/logs', checkAdmin, (req, res) => {
     res.json({ code: 0, data: pluginLogs.slice(-limit).reverse() });
 });
 
-/* 客户端扩展清单：player 公开，admin 需鉴权 */
+/* 客户端扩展清单：player / login 公开，admin 需鉴权
+   login 作用域：登录页加载的插件资源（用于扩展登录表单等，无需登录即可获取） */
 app.get('/api/plugins/manifest', async (req, res) => {
-    const scope = req.query.scope === 'admin' ? 'admin' : 'player';
+    const scope = ['admin', 'player', 'login'].includes(req.query.scope) ? req.query.scope : 'player';
     if (scope === 'admin') {
         const auth = checkAdminAuth(req);
         if (!auth) return res.status(401).json({ code: 401, msg: '未授权' });
@@ -3467,9 +3468,9 @@ app.get('/api/plugins/manifest', async (req, res) => {
     }
 });
 
-/* 客户端资源：/api/plugins/client/:scope/:pkg/* （admin 需鉴权，player 公开） */
+/* 客户端资源：/api/plugins/client/:scope/:pkg/* （admin 需鉴权，player / login 公开） */
 app.get('/api/plugins/client/:scope/:pkg/*splat', (req, res) => {
-    const scope = req.params.scope === 'admin' ? 'admin' : 'player';
+    const scope = ['admin', 'player', 'login'].includes(req.params.scope) ? req.params.scope : 'player';
     if (scope === 'admin' && !checkAdminAuth(req)) return res.status(401).json({ code: 401, msg: '未授权' });
     try {
         const splat = req.params.splat;

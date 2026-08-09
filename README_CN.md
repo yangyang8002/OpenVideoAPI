@@ -16,7 +16,7 @@
 
 基于 [ArtPlayer](https://artplayer.org) 的弹幕视频播放器 + Web 管理后台。自带自研 Canvas 弹幕引擎、多主题系统、PoW 防爬虫、API 限流与统计、文件管理、多字幕支持、多数据库存储。
 
-**v26.8.11** · MIT License
+**v26.8.12** · MIT License
 
 ## 目录
 
@@ -444,13 +444,14 @@ JSON 存储无主键约束，历史上可能产生重复 id 的记录。迁入 S
 - **包结构**：插件为 npm 包，包内 `main` 导出 `apply(ctx, config)`（函数 / 类 / 带 apply 的对象）；`package.json` 的 `openvideoPlugin` 字段声明元数据 / 依赖服务 / 配置 Schema / 前端扩展
 - **服务层**：内置服务 `store` / `model`（动态表）/ `app`（版本、重启、配置）/ `logger`（分级日志）/ `http` / `router`；插件间通过 `ctx.provide(name, svc)` 提供服务、`inject` 声明依赖（自动拓扑排序加载）
 - **动态表**：`ctx.model.define(name, schema)` 插件自定义数据表，随存储切换自动迁移
-- **前端扩展**：插件可注册**后台 tab**（`OpenVideoAdmin.registerTab`）、**播放器替换**（`OpenVideoPlayer.replace`）与播放器钩子（`onReady`/`video:load`），资源由 `/api/plugins/manifest` + `/api/plugins/client/*` 注入
+- **前端扩展**：插件可注册**后台 tab**（`OpenVideoAdmin.registerTab`）、**播放器替换**（`OpenVideoPlayer.replace`）与播放器钩子（`onReady`/`video:load`），资源由 `/api/plugins/manifest` + `/api/plugins/client/*` 注入；另有 `login` 作用域（`client.login.scripts`）可在**登录页**加载扩展（如 OTP 验证码输入，无需登录即可获取）
 - **生命周期事件**：`ready` / `dispose` / `before:restart` / `danmu:send` / 自定义事件（`ctx.on` / `ctx.emit`）
 - **服务控制**：`ctx.app.restart()` 优雅重启（新进程等待端口释放），`ctx.app.getConfig/saveConfig`
 - **配置 Schema**：`openvideoPlugin.schema` 数组自动生成后台配置表单，保存即热重载
 - **安装**：npm 包名（可指定版本）；后台「插件管理」或「插件市场」（registry 含版本与依赖，URL 可配置）一键安装
 - **更新**：npm 包一键 `@latest` 更新（保留配置与启用状态）
 - 示例插件：`plugins/openvideo-plugin-demo`（服务 / 动态表 / 事件 / 调试 tab / 播放器浮层）
+- 官方插件：`openvideo-plugin-otp`（管理员双因素登录：TOTP 动态验证码 + 恢复码）
 
 ## License
 
