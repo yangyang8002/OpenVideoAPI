@@ -45,7 +45,7 @@ A self-hosted danmaku video player + web admin panel built on [ArtPlayer](https:
 - **Dual theme system**: independent player & admin themes, 10 themes each (incl. StyleKit anime/manga styles), custom themes supported
 - **Admin panel**: danmaku / videos / banned words / files / logs / API stats / database in one place
 - **Console dashboard**: total visits, today requests, active IPs (24h), danmaku/video/subtitle counts, performance monitor (memory / CPU / PID / disk), live request chart
-- **Plugin system (Koishi-style)**: plugin = function / class / object with `apply(ctx, config)`; ctx injects Express router, data store, event bus (`danmaku:send`), http client, nested plugins; install via upload / GitHub-URL / npm; metadata & config schema auto-render admin forms; official marketplace with one-click install; npm/URL plugins update from source
+- **Plugin system **: plugin = function / class / object with `apply(ctx, config)`; ctx injects Express router, data store, event bus (`danmaku:send`), http client, nested plugins; install via upload / GitHub-URL / npm; metadata & config schema auto-render admin forms; official marketplace with one-click install; npm/URL plugins update from source
 - **Dependencies & updates**: one-click app update (auto backup + restart), per-dependency or bulk npm updates, plugin updates
 - **API management**: per-API enable switch, RPS limit, bandwidth stats; live chart at 1s precision, selectable span (5 min ~ 3 months)
 - **Security**: PoW proof-of-work firewall (Anubis-style), session tokens, login rate limit, global API rate limit
@@ -419,7 +419,7 @@ Via the admin panel, or edit `data/accounts.json` directly (salt + sha256); if a
 
 See the [Plugin Guide](https://doc.mbps.top/plugins/guide.html).
 
-- **Package structure (Koishi-style)**: plugins are npm packages whose `main` exports `apply(ctx, config)` (function / class / object with apply); the `openvideoPlugin` field in package.json declares metadata, service dependencies, config schema and client extensions
+- **Package structure **: plugins are npm packages whose `main` exports `apply(ctx, config)` (function / class / object with apply); the `openvideoPlugin` field in package.json declares metadata, service dependencies, config schema and client extensions
 - **Service layer**: built-in services `store` / `model` (dynamic tables) / `app` (version, restart, config) / `logger` (leveled logs) / `http` / `router`; plugins provide services via `ctx.provide(name, svc)` and declare dependencies with `inject` (auto topo-sorted loading)
 - **Dynamic tables**: `ctx.model.define(name, schema)` — plugin-defined tables, migrated automatically on storage switch
 - **Client extensions**: plugins can register **admin tabs** (`OpenVideoAdmin.registerTab`), **player replacement** (`OpenVideoPlayer.replace`) and player hooks (`onReady` / `video:load`); assets are injected via `/api/plugins/manifest` + `/api/plugins/client/*`

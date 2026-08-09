@@ -991,7 +991,7 @@
                 <h3><span class="dot" style="background:var(--primary);box-shadow:0 0 6px var(--primary)"></span>安装插件</h3>
                 <div class="cfg-row"><span>npm 包名</span><input type="text" id="plNpm" placeholder="openvideo-plugin-xxx（支持 @scope/name，可加 @版本）" style="flex:1"></div>
                 <div style="margin-top:12px"><button class="btn btn-sm btn-primary" onclick="installPlugin()">安装</button><button class="btn btn-sm" onclick="loadPlugins()">刷新</button></div>
-                <div class="cfg-hint">插件为 Koishi 风格的 npm 包：包内 package.json 的 <b>openvideoPlugin</b> 字段声明元数据 / 依赖服务（inject）/ 提供服务（provide）/ 配置 Schema / 前端扩展（后台 tabs、播放器替换）。安装到 plugins/node_modules/，安装后需启用。</div>
+                <div class="cfg-hint">插件为 npm 包：包内 package.json 的 <b>openvideoPlugin</b> 字段声明元数据 / 依赖服务（inject）/ 提供服务（provide）/ 配置 Schema / 前端扩展（后台 tabs、播放器替换）。安装到 plugins/node_modules/，安装后需启用。</div>
             </div>
             <div class="card">
                 <h3><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>插件列表 <span id="plCount" style="font-weight:400;font-size:12px;color:var(--text3);margin-left:6px"></span></h3>
@@ -2743,7 +2743,7 @@
             if (dashReqTimer) { clearInterval(dashReqTimer); dashReqTimer = null; }
         }
 
-        /* ===== 插件管理（Koishi 风格：npm 包 + 服务 + 前端扩展） ===== */
+        /* ===== 插件管理（npm 包 + 服务 + 前端扩展） ===== */
         function installPlugin() {
             const input = document.getElementById('plNpm').value.trim();
             if (!input) return toast('请输入 npm 包名', false);

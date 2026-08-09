@@ -1,7 +1,7 @@
 {
   "name": "open-video-api",
   "version": "26.8.11",
-  "description": "OpenVideoAPI - self-hosted danmaku video player with web admin: PoW firewall, rate limiting, multi-theme, plugin system (Koishi-style), subtitle support, multi-database storage",
+  "description": "OpenVideoAPI - self-hosted danmaku video player with web admin: PoW firewall, rate limiting, multi-theme, plugin system, subtitle support, multi-database storage",
   "main": "server.js",
   "bin": {
     "open-video-api": "server.js"

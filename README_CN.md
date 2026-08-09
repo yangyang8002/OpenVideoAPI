@@ -47,7 +47,7 @@
 - **API 管理**：每个 API 独立开关、RPS 限速、带宽统计；1 秒精度实时曲线，时间跨度可调（5 分钟 ~ 3 个月）
 - **安全防护**：PoW 工作量证明（Anubis 同款）、登录令牌、登录限流、全局速率限制
 - **文件管理**：在线预览、批量删除/复制、压缩（zip/7z/tar/tar.gz）、解压（多格式）、多文件上传
-- **插件系统（Koishi 风格）**：插件 = 函数/类/带 apply 的对象，ctx 注入 Express 路由 / 数据存储 / 事件总线（danmu:send）/ http / 嵌套插件；支持上传 .js、GitHub/URL、npm 三种安装方式；元数据（名称/版本/作者/主页）与配置 Schema 自动生成后台表单；官方插件市场一键安装；npm/URL 插件可一键更新
+- **插件系统**：插件 = 函数/类/带 apply 的对象，ctx 注入 Express 路由 / 数据存储 / 事件总线（danmu:send）/ http / 嵌套插件；支持上传 .js、GitHub/URL、npm 三种安装方式；元数据（名称/版本/作者/主页）与配置 Schema 自动生成后台表单；官方插件市场一键安装；npm/URL 插件可一键更新
 - **依赖与更新**：程序版本一键更新（自动备份数据 + 重启）、npm 依赖逐个或全部更新、插件按来源更新
 - **多数据库存储**：JSON 文件（默认）/ SQLite / MySQL / MariaDB / PostgreSQL / MongoDB 六种存储后端，任意互转、热切换自动迁移
 
@@ -441,7 +441,7 @@ JSON 存储无主键约束，历史上可能产生重复 id 的记录。迁入 S
 
 详见 [插件指南](https://doc.mbps.top/plugins/guide.html)。
 
-- **包结构（Koishi 风格）**：插件为 npm 包，包内 `main` 导出 `apply(ctx, config)`（函数 / 类 / 带 apply 的对象）；`package.json` 的 `openvideoPlugin` 字段声明元数据 / 依赖服务 / 配置 Schema / 前端扩展
+- **包结构**：插件为 npm 包，包内 `main` 导出 `apply(ctx, config)`（函数 / 类 / 带 apply 的对象）；`package.json` 的 `openvideoPlugin` 字段声明元数据 / 依赖服务 / 配置 Schema / 前端扩展
 - **服务层**：内置服务 `store` / `model`（动态表）/ `app`（版本、重启、配置）/ `logger`（分级日志）/ `http` / `router`；插件间通过 `ctx.provide(name, svc)` 提供服务、`inject` 声明依赖（自动拓扑排序加载）
 - **动态表**：`ctx.model.define(name, schema)` 插件自定义数据表，随存储切换自动迁移
 - **前端扩展**：插件可注册**后台 tab**（`OpenVideoAdmin.registerTab`）、**播放器替换**（`OpenVideoPlayer.replace`）与播放器钩子（`onReady`/`video:load`），资源由 `/api/plugins/manifest` + `/api/plugins/client/*` 注入

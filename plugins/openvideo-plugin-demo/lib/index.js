@@ -1,5 +1,5 @@
 /* ==========================================================================
- * OpenVideoAPI 示例插件（Koishi 风格 npm 包）
+ * OpenVideoAPI 示例插件
  *
  * 演示能力：
  *   1. 服务层：ctx.provide('stats') 提供服务；inject 声明依赖（store/model/app/logger/http）
