@@ -737,6 +737,7 @@
             <button class="nav-item" data-tab="videos" onclick="switchTab('videos')"><span class="icon">&#9654;</span><span>视频管理</span></button>
             <button class="nav-item" data-tab="subs" onclick="switchTab('subs')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 1.5 17V7A2.5 2.5 0 0 1 4 4.5h16A2.5 2.5 0 0 1 22.5 7v10a2.5 2.5 0 0 1-2.5 2.5H4z"/><path d="m8 16 2.5-4 2 3 2.5-5 5 6"/></svg></span><span>字幕管理</span></button>
             <button class="nav-item" data-tab="plugins" onclick="switchTab('plugins')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9l-1-2H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z"/><circle cx="17" cy="12" r="2.5"/></svg></span><span>插件管理</span></button>
+            <button class="nav-item" data-tab="market" onclick="switchTab('market')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4.5 4h15L21 9"/><path d="M4 9h16v11H4z"/><path d="M9 20v-6h6v6"/><path d="M2 9h20"/></svg></span><span>插件市场</span></button>
             <button class="nav-item" data-tab="deps" onclick="switchTab('deps')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16"/><path d="M6 6h12"/><path d="M8 14h8"/><path d="M10 18h4"/></svg></span><span>依赖与更新</span></button>
             <button class="nav-item" data-tab="config" onclick="switchTab('config')"><span class="icon">&#9776;</span><span>服务器配置</span></button>
             <button class="nav-item" data-tab="files" onclick="switchTab('files')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><span>文件管理</span></button>
@@ -997,13 +998,6 @@
                 <h3><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>插件列表 <span id="plCount" style="font-weight:400;font-size:12px;color:var(--text3);margin-left:6px"></span></h3>
                 <div id="plList" style="font-size:12px">加载中...</div>
             </div>
-            <div class="card">
-                <h3><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>插件市场
-                    <button class="btn btn-sm" style="margin-left:10px" onclick="loadMarket(true)">刷新</button>
-                    <span id="marketChecked" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:8px"></span>
-                </h3>
-                <div id="marketList" class="empty-state">点击刷新加载官方插件市场</div>
-            </div>
             <div id="plConfigModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;align-items:center;justify-content:center" onclick="if(event.target===this)closePlConfig()">
                 <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:22px 24px;width:min(460px,92vw);max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.45)">
                     <h3 style="margin-bottom:14px">插件配置 <span id="plConfigTitle" style="font-weight:400;font-size:12px;color:var(--text3);margin-left:6px"></span></h3>
@@ -1013,6 +1007,29 @@
                         <button class="btn btn-sm btn-primary" onclick="savePluginConfig()">保存并热重载</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Plugin Market -->
+        <div class="panel" id="marketPanel">
+            <div class="card">
+                <h3><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>插件市场
+                    <button class="btn btn-sm" style="margin-left:10px" onclick="loadMarket(true)">刷新</button>
+                    <span id="marketChecked" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:8px"></span>
+                </h3>
+                <div class="cfg-row" style="margin-top:10px">
+                    <span>市场源</span>
+                    <select id="mktSourceSel" onchange="onMarketSourceChange()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer">
+                        <option value="official">官方源</option>
+                        <option value="local">本地源（file://plugins/registry.json）</option>
+                        <option value="custom">自定义源</option>
+                    </select>
+                    <input type="text" id="mktSourceUrl" placeholder="https://... 或 file://plugins/registry.json" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
+                    <button class="btn btn-sm btn-primary" onclick="saveMarketSource()">保存并刷新</button>
+                    <span id="mktSrcMsg" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:6px"></span>
+                </div>
+                <div class="cfg-hint">插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。</div>
+                <div id="marketList" class="empty-state" style="margin-top:6px">点击刷新加载官方插件市场</div>
             </div>
         </div>
 
@@ -1822,6 +1839,7 @@
             if (name === 'console') startDashPanel();
             else stopDashPanel();
             if (name === 'plugins' && !window._plLoaded) { window._plLoaded = true; loadPlugins(); }
+            if (name === 'market' && !window._marketLoaded) { window._marketLoaded = true; loadMarket(false); loadMarketSrc(); }
             if (name === 'deps' && !window._depsLoaded) { window._depsLoaded = true; loadDeps(false); }
             if (name === 'db' && !window._dbLoaded) { window._dbLoaded = true; loadDbInfo(); loadDbBrowse(); }
             if (name === 'backup' && !window._bkLoaded) { window._bkLoaded = true; loadBackups(); loadCloudList(); }
@@ -2895,12 +2913,59 @@
                 .then(r => r.json()).then(d => { toast(d.msg, d.code === 0); if (d.code === 0) { closePlConfig(); loadPlugins(); } });
         }
         /* 插件市场 v2（版本 + 依赖，安装走 npm） */
+        /* ===== 插件市场（独立 tab，支持自定义源） ===== */
+        const MARKET_PRESETS = {
+            official: 'https://raw.githubusercontent.com/yangyang8002/OpenVideoAPI/master/plugin-registry.json',
+            local: 'file://plugins/registry.json'
+        };
+        function loadMarketSrc() {
+            fetch('/api/admin/config', { headers: authHeaders() }).then(r => r.json()).then(d => {
+                if (d.code !== 0 || !d.data.plugin) return;
+                const url = d.data.plugin.registry || '';
+                const sel = document.getElementById('mktSourceSel');
+                const input = document.getElementById('mktSourceUrl');
+                if (!sel || !input) return;
+                if (url === MARKET_PRESETS.official) sel.value = 'official';
+                else if (url === MARKET_PRESETS.local) sel.value = 'local';
+                else { sel.value = 'custom'; }
+                input.value = sel.value === 'custom' ? url : MARKET_PRESETS[sel.value];
+                input.disabled = sel.value !== 'custom';
+            });
+        }
+        function onMarketSourceChange() {
+            const sel = document.getElementById('mktSourceSel');
+            const input = document.getElementById('mktSourceUrl');
+            if (!sel || !input) return;
+            if (sel.value === 'custom') { input.disabled = false; input.focus(); }
+            else { input.value = MARKET_PRESETS[sel.value]; input.disabled = true; }
+        }
+        function saveMarketSource() {
+            const sel = document.getElementById('mktSourceSel');
+            const input = document.getElementById('mktSourceUrl');
+            const url = sel.value === 'custom' ? input.value.trim() : MARKET_PRESETS[sel.value];
+            if (!/^(https?:\/\/|file:\/\/)/i.test(url)) { toast('无效的源地址', false); return; }
+            fetch('/api/admin/update/config', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ pluginRegistry: url }) })
+                .then(r => r.json()).then(d => {
+                    if (d.code !== 0) { toast(d.msg, false); return; }
+                    const m = document.getElementById('mktSrcMsg');
+                    if (m) m.textContent = '已保存';
+                    toast('已保存', true);
+                    loadMarket(true);
+                }).catch(() => toast('请求失败', false));
+        }
         function loadMarket(force) {
             fetch('/api/admin/plugins/market' + (force ? '?force=1' : ''), { headers: authHeaders() })
                 .then(r => r.json()).then(d => {
                     if (d.code !== 0) { document.getElementById('marketList').innerHTML = '<div class="empty-state">' + esc(d.msg || '插件市场获取失败') + '</div>'; return; }
                     const list = d.data.list || [];
                     document.getElementById('marketChecked').textContent = d.data.updated ? '更新于 ' + d.data.updated : '';
+                    /* 回显实际使用的市场源 */
+                    const srcUrl = document.getElementById('mktSourceUrl');
+                    const srcSel = document.getElementById('mktSourceSel');
+                    if (srcUrl && srcSel && d.data.registry) {
+                        if (srcSel.value === 'custom') srcUrl.value = d.data.registry;
+                        else if (srcUrl.value !== d.data.registry && srcUrl.value !== MARKET_PRESETS[srcSel.value]) srcUrl.value = d.data.registry;
+                    }
                     const c = document.getElementById('marketList');
                     if (!list.length) { c.innerHTML = '<div class="empty-state">暂无可用插件</div>'; return; }
                     fetch('/api/admin/plugins', { headers: authHeaders() }).then(r2 => r2.json()).then(d2 => {

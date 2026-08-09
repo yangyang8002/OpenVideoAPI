@@ -3335,7 +3335,8 @@ app.post('/api/admin/update/config', checkAdmin, (req, res) => {
         }
         if (pluginRegistry !== undefined) {
             const r2 = String(pluginRegistry).trim();
-            config.plugin.registry = r2 && /^https?:\/\//i.test(r2) ? r2 : '';
+            /* 市场源支持 http(s) 与本地 file:// 清单（开发环境用） */
+            config.plugin.registry = r2 && /^(https?:\/\/|file:\/\/)/i.test(r2) ? r2 : '';
         }
         writeConfig(config);
         marketCache = null; /* 源变化后清除市场缓存 */
@@ -3404,12 +3405,12 @@ app.post('/api/admin/plugins/update', checkAdmin, async (req, res) => {
     }
 });
 
-/* 插件市场 v2：registry 含版本列表与依赖（URL 可配置） */
+/* 插件市场 v2：registry 含版本列表与依赖（URL 可配置；?force=1 强制刷新，忽略缓存） */
 let marketCache = null;
 app.get('/api/admin/plugins/market', checkAdmin, async (req, res) => {
     try {
         const now = Date.now();
-        if (marketCache && now - marketCache.at < 10 * 60 * 1000) {
+        if (!req.query.force && marketCache && now - marketCache.at < 10 * 60 * 1000) {
             return res.json({ code: 0, data: marketCache.data });
         }
         const cfg = getPluginConfig();

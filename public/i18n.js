@@ -315,6 +315,12 @@ var I18N = (function () {
         '本地包': 'Local', '列表加载失败': 'Failed to load list', '插件市场获取失败（网络不可达）': 'Market unavailable (network unreachable)',
         '（无描述）': '(no description)', '选项': 'Options', '无数据': 'No data',
 
+        /* ===== 补齐：插件市场 ===== */
+        '市场源': 'Market source', '官方源': 'Official', '自定义源': 'Custom',
+        '本地源（file://plugins/registry.json）': 'Local file (file://plugins/registry.json)',
+        '保存并刷新': 'Save & reload', '无效的源地址': 'Invalid source URL',
+        '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': 'The market source is the manifest URL (JSON with versions & dependencies). The official source points to this repo\'s registry; a custom source can point to your own manifest (GitHub raw / any HTTP / a local file:// file, e.g. plugins/registry.json in the dev environment).',
+
         /* ===== 补齐：主题 ===== */
         'bilibili - 深蓝粉': 'bilibili - Deep blue & pink', 'sakura - 粉白樱': 'sakura - Cherry pink & white', 'ocean - 深海蓝': 'ocean - Deep sea blue', 'sunset - 日落橙': 'sunset - Sunset orange', 'forest - 森林绿': 'forest - Forest green', 'mono - 黑白极简': 'mono - Minimal black & white', 'cyber - 赛博霓虹': 'cyber - Neon cyberpunk', 'shoujo - 少女漫画': 'shoujo - Shojo manga', 'jrpg - 日式RPG': 'jrpg - JRPG', 'neon - 霓虹武士': 'neon - Neon samurai',
 
@@ -790,6 +796,12 @@ var ZH_HANT = {
     '本地包': '本地包', '列表加载失败': '列表加載失敗', '插件市场获取失败（网络不可达）': '插件市場獲取失敗（網絡不可達）',
     '（无描述）': '（無描述）', '选项': '選項', '无数据': '無數據',
 
+    /* ===== 补齐：插件市场 ===== */
+    '市场源': '市場源', '官方源': '官方源', '自定义源': '自定義源',
+    '本地源（file://plugins/registry.json）': '本地源（file://plugins/registry.json）',
+    '保存并刷新': '保存並刷新', '无效的源地址': '無效的源地址',
+    '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': '插件市場源為市場清單地址（JSON，含版本與依賴）。官方源指向本倉庫 registry；自定義源可指向你自己的清單（GitHub raw / 任意 HTTP / 本地 file:// 文件，如開發環境的 plugins/registry.json）。',
+
     /* ===== 补齐：主题 ===== */
     'bilibili - 深蓝粉': 'bilibili - 深藍粉', 'sakura - 粉白樱': 'sakura - 粉白櫻', 'ocean - 深海蓝': 'ocean - 深海藍', 'sunset - 日落橙': 'sunset - 日落橙', 'forest - 森林绿': 'forest - 森林綠', 'mono - 黑白极简': 'mono - 黑白極簡', 'cyber - 赛博霓虹': 'cyber - 賽博霓虹', 'shoujo - 少女漫画': 'shoujo - 少女漫畫', 'jrpg - 日式RPG': 'jrpg - 日式RPG', 'neon - 霓虹武士': 'neon - 霓虹武士',
 
@@ -1196,6 +1208,12 @@ var DICT_WYW = {
     '本地包': '本地之包', '列表加载失败': '錄載未成', '插件市场获取失败（网络不可达）': '插件市取未成（網不可達）',
     '（无描述）': '（無述）', '选项': '選', '无数据': '無數據',
 
+    /* ===== 补齐：插件市场 ===== */
+    '市场源': '市之源', '官方源': '官源', '自定义源': '自定源',
+    '本地源（file://plugins/registry.json）': '本地源（file://plugins/registry.json）',
+    '保存并刷新': '存之且新', '无效的源地址': '無效之源址',
+    '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': '插件市源為市單之址（JSON，含本與賴）。官源指本庫 registry；自定源可指爾之單（GitHub raw / 任意 HTTP / 本地 file:// 文，如開發境之 plugins/registry.json）。',
+
     /* ===== 补齐：主题 ===== */
     'bilibili - 深蓝粉': 'bilibili - 深藍粉', 'sakura - 粉白樱': 'sakura - 粉白櫻', 'ocean - 深海蓝': 'ocean - 深海藍', 'sunset - 日落橙': 'sunset - 日落橙', 'forest - 森林绿': 'forest - 森林綠', 'mono - 黑白极简': 'mono - 黑白極簡', 'cyber - 赛博霓虹': 'cyber - 賽博霓虹', 'shoujo - 少女漫画': 'shoujo - 少女漫畫', 'jrpg - 日式RPG': 'jrpg - 日式RPG', 'neon - 霓虹武士': 'neon - 霓虹武士',
 
@@ -1489,6 +1507,12 @@ var DICT_JA = {
     '插件': 'プラグイン', '版本': 'バージョン',
     '本地包': 'ローカル', '列表加载失败': 'リストの読み込みに失敗', '插件市场获取失败（网络不可达）': 'マーケット取得失敗（ネットワーク不通）',
     '（无描述）': '（説明なし）', '选项': 'オプション', '无数据': 'データなし',
+
+    /* ===== 補完：プラグインマーケット ===== */
+    '市场源': 'マーケットソース', '官方源': '公式', '自定义源': 'カスタム',
+    '本地源（file://plugins/registry.json）': 'ローカルファイル（file://plugins/registry.json）',
+    '保存并刷新': '保存して更新', '无效的源地址': '無効なソースURL',
+    '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': 'プラグインマーケットのソースはマニフェストURL（バージョンと依存関係を含むJSON）。公式ソースはこのリポジトリのregistryを指します。カスタムソースは独自のマニフェストを指定できます（GitHub raw / 任意のHTTP / ローカルのfile://ファイル、例：開発環境の plugins/registry.json）。',
 
     /* ===== 補完：テーマ ===== */
     'bilibili - 深蓝粉': 'bilibili - 深青&ピンク', 'sakura - 粉白樱': 'sakura - 桜ピンク&白', 'ocean - 深海蓝': 'ocean - 深海ブルー', 'sunset - 日落橙': 'sunset - 夕日オレンジ', 'forest - 森林绿': 'forest - 森林グリーン', 'mono - 黑白极简': 'mono - モノクロミニマル', 'cyber - 赛博霓虹': 'cyber - サイバーネオン', 'shoujo - 少女漫画': 'shoujo - 少女マンガ', 'jrpg - 日式RPG': 'jrpg - JRPG', 'neon - 霓虹武士': 'neon - ネオン侍',
@@ -1787,6 +1811,12 @@ var DICT_FR = {
     '插件': 'Plugin', '版本': 'Version',
     '本地包': 'Local', '列表加载失败': 'Échec du chargement de la liste', '插件市场获取失败（网络不可达）': 'Marché indisponible (réseau injoignable)',
     '（无描述）': '(aucune description)', '选项': 'Options', '无数据': 'Aucune donnée',
+
+    /* ===== Complément : marché de plugins ===== */
+    '市场源': 'Source du marché', '官方源': 'Officielle', '自定义源': 'Personnalisée',
+    '本地源（file://plugins/registry.json）': 'Fichier local (file://plugins/registry.json)',
+    '保存并刷新': 'Enregistrer et actualiser', '无效的源地址': 'URL de source invalide',
+    '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': 'La source du marché est l\'URL du manifeste (JSON avec versions et dépendances). La source officielle pointe vers le registre de ce dépôt ; une source personnalisée peut pointer vers votre propre manifeste (GitHub raw / n\'importe quel HTTP / un fichier file:// local, ex. plugins/registry.json dans l\'environnement de dev).',
 
     /* ===== Complément : thèmes ===== */
     'bilibili - 深蓝粉': 'bilibili - Bleu profond & rose', 'sakura - 粉白樱': 'sakura - Rose cerisier & blanc', 'ocean - 深海蓝': 'ocean - Bleu océan', 'sunset - 日落橙': 'sunset - Orange coucher de soleil', 'forest - 森林绿': 'forest - Vert forêt', 'mono - 黑白极简': 'mono - Noir et blanc minimaliste', 'cyber - 赛博霓虹': 'cyber - Néon cyberpunk', 'shoujo - 少女漫画': 'shoujo - Manga shojo', 'jrpg - 日式RPG': 'jrpg - JRPG', 'neon - 霓虹武士': 'neon - Samouraï néon',
