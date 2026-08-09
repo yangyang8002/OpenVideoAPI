@@ -30,7 +30,7 @@
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
   <file path="package-lock.json" sha256="d534f1a11a3c6508ab0b7c2bfe7c02f521224eaade185904071602e5c4fc0be8" size="41173"/>
   <file path="package.json" sha256="fecf84c540ec66396f5d266a35c878f4820b97f5d6f62641963c760033edc30f" size="1536"/>
-  <file path="plugin-registry.json" sha256="0652a12592b34f651b514663ea3ddd8757fe562181a82d891a665bcbb50d9471" size="888"/>
+  <file path="plugin-registry.json" sha256="78ccf34dbdea23c86dc2b972a6b0e194b8fe755bdfcb70c3c08783b653062a75" size="1290"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/admin/debug.js" sha256="3464753a927d51247d75172d3bd06fdb8c8a3391b9b39e6d4837b01de4e877fc" size="6036"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/player/overlay.js" sha256="56322175b4de4075511e9587a30e6bf6a830a67e4e210edf2081e1687dc70874" size="1356"/>
   <file path="plugins/openvideo-plugin-demo/lib/index.js" sha256="0a193d7d1f101de41c4be8cd8a18941e71155e501909193c1c200755d89c08a2" size="3811"/>
@@ -41,10 +41,10 @@
   <file path="plugins/openvideo-plugin-otp/lib/client/login/otp.js" sha256="46d3bc1d6053f6ba96b7edc9d67cf48ac49b8932f44b76904ef213efa8886da5" size="5031"/>
   <file path="plugins/openvideo-plugin-otp/lib/client/admin/otp.js" sha256="9a506e5499c8271bf6d5b7713deb1e259c84fa180b61aa8a74f5338b9f364cb5" size="19796"/>
   <file path="public/CUSTOM_THEME.md" sha256="a4394eb9fd4e0d7b68d0273fd957ec17cadfa2a0481aa28f5f55298c006008c0" size="3271"/>
-  <file path="public/admin.html" sha256="636e0ae920bb763dead777d65b0ae62c7bd2c77250295547c2e935ac4dbe16ab" size="276161"/>
+  <file path="public/admin.html" sha256="c6b6e06f4d5154aa0b2d3de3ce10309f58dccd72cd1c296c7d549dfa9b4d90d8" size="288115"/>
   <file path="public/favicon-128.png" sha256="de8371137f6c9648f8728550e71de67fb5460771062ec1b45970909a1e5dd3dc" size="2034"/>
   <file path="public/favicon.svg" sha256="ca0f3061d459fc5636914978579613a6a8b626dc69123909eceee07d2f3c8d9f" size="555"/>
-  <file path="public/i18n.js" sha256="38658edd0114a2cd37d2e2b3630925a1a01478b449d7630e433179629359b33c" size="232386"/>
+  <file path="public/i18n.js" sha256="4dc950d1d78a0106d818b37afe5a9bd6adb7e092e83592feca32d80e16bb3a3b" size="236217"/>
   <file path="public/player.html" sha256="0319bab8ee5dc1cfb7c2b70f9d6e17cd10e4512f04ab803bd1385624ff41950a" size="76936"/>
   <file path="public/test_video1.en.vtt" sha256="2854f0cb4a81a3f7c02842ab8a6fac8fabe7d33384182be3653c663e131c4a1d" size="182"/>
   <file path="public/test_video1.mp4" sha256="0d55da42748dca33b1e175f0ad6855c060d4587dfc0a6b525c2c731a64e94f9f" size="6962589"/>
@@ -53,7 +53,7 @@
   <file path="public/test_video1.vtt" sha256="65bf5090bbb808e9825b4205eff66e8f3799b9ef482070ae54a460b6ac18eb0d" size="115"/>
   <file path="public/test_video2.mp4" sha256="f192304389dbc213c8dde5dc6f6b77cdd09f1785dbef6255a9857b108757eb8e" size="330061"/>
   <file path="public/test_video3.mp4" sha256="5520e9715ab6371aaf5532877a3dff6010ce57793cd6cc89752aa4116d4b9d50" size="108190"/>
-  <file path="server.js" sha256="4bd18c27d1e6f79120e62da7ba97d92623ce9e6a0de7a5b11f57c1fe46b9afee" size="186580"/>
+  <file path="server.js" sha256="1f592853f30ef8d218e4132e7ee1a327b1a14c7b65f77d751d0bfea8e2bebec5" size="186928"/>
   <file path="theme/README.md" sha256="d3f4cc2fbc639f7eb6cbd98b210dd6642a840ecbbbda1b86944d574ec348746e" size="4676"/>
   <file path="theme/admin.css" sha256="2748ab4434965280b2993b3e9c565c2684bd389414fa873459c630060bd825f7" size="10177"/>
   <file path="theme/admin/bilibili/style.css" sha256="1bf60cf612a5a20cecf5f0bf8676c9831af78b54d30314bf5d27e3cc3bdec703" size="132"/>

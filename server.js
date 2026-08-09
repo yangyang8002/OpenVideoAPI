@@ -3434,12 +3434,19 @@ app.get('/api/admin/plugins/market', checkAdmin, async (req, res) => {
             description: p.description || '',
             author: p.author || '',
             homepage: p.homepage || '',
+            icon: p.icon || '',
+            category: p.category || '',
+            official: !!p.official,
+            score: parseFloat(p.score) || 0,
+            downloads: parseInt(p.downloads) || 0,
+            created: p.created || '',
+            updated: p.updated || '',
             tags: Array.isArray(p.tags) ? p.tags : [],
             versions: Array.isArray(p.versions) ? p.versions.map(v => String(v)) : [],
             latest: Array.isArray(p.versions) && p.versions.length ? String(p.versions[0]) : '',
             dependencies: Array.isArray(p.dependencies) ? p.dependencies : []
         })).filter(p => p.name);
-        const data = { updated: j.updated || '', registry: cfg.registry, list: plugins };
+        const data = { updated: j.updated || '', registry: cfg.registry, categories: Array.isArray(j.categories) ? j.categories : [], list: plugins };
         marketCache = { at: now, data };
         res.json({ code: 0, data });
     } catch (e) {

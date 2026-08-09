@@ -638,6 +638,38 @@
         /* 主内容区背景装饰 */
         #mainPage { background-image:radial-gradient(ellipse at 85% 10%,rgba(124,92,252,.06),transparent 50%),radial-gradient(ellipse at 10% 90%,rgba(98,213,255,.05),transparent 50%); }
 
+        /* ===== 插件市场（Koishi 风格：侧栏 + 卡片网格） ===== */
+        .km-wrap { display: flex; gap: 18px; align-items: flex-start; }
+        .km-side { width: 168px; flex-shrink: 0; position: sticky; top: 16px; }
+        .km-side h4 { font-size: 11px; color: var(--text3); margin: 16px 0 8px; letter-spacing: 1px; }
+        .km-side h4:first-child { margin-top: 0; }
+        .km-item { display: block; width: 100%; text-align: left; padding: 7px 10px; border-radius: 8px; font-size: 12.5px; color: var(--text2); cursor: pointer; background: none; border: none; font-family: inherit; transition: background .15s, color .15s; }
+        .km-item:hover { background: rgba(255,255,255,.05); color: var(--text); }
+        .km-item.active { background: rgba(124,92,252,.14); color: var(--text); font-weight: 600; }
+        .km-item .cnt { float: right; font-size: 11px; color: var(--text3); }
+        .km-main { flex: 1; min-width: 0; }
+        .km-search { width: 100%; padding: 9px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 13px; outline: none; box-sizing: border-box; transition: border-color .2s; }
+        .km-search:focus { border-color: var(--primary); }
+        .km-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 12px; margin-top: 14px; }
+        .km-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px; background: rgba(255,255,255,.02); cursor: pointer; display: flex; flex-direction: column; gap: 8px; transition: border-color .2s, transform .15s, box-shadow .15s; }
+        .km-card:hover { border-color: rgba(124,92,252,.5); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+        .km-head { display: flex; align-items: center; gap: 10px; }
+        .km-logo { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: 16px; letter-spacing: 1px; }
+        .km-card .km-name { font-size: 13.5px; font-weight: 600; color: var(--text); word-break: break-all; }
+        .km-card .km-desc { font-size: 12px; color: var(--text2); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 38px; }
+        .km-card .km-meta { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--text3); margin-top: auto; flex-wrap: wrap; }
+        .km-meta .km-score { color: var(--warn); font-weight: 600; }
+        .km-meta .km-installed { color: var(--success); }
+        .km-empty { color: var(--text3); font-size: 13px; text-align: center; padding: 48px 0; }
+        .km-detail-head { display: flex; align-items: center; gap: 12px; }
+        .km-detail-head .km-logo { width: 48px; height: 48px; font-size: 20px; border-radius: 12px; }
+        .km-detail-name { font-size: 16px; font-weight: 700; color: var(--text); }
+        .km-detail-desc { font-size: 13px; color: var(--text2); line-height: 1.8; margin-top: 12px; }
+        .km-detail-meta { font-size: 12px; color: var(--text3); margin-top: 10px; line-height: 1.9; }
+        .km-detail-meta b { color: var(--text2); font-weight: 500; }
+        .km-detail-actions { display: flex; gap: 8px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+        @media (max-width: 860px) { .km-wrap { flex-direction: column; } .km-side { width: 100%; position: static; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; } .km-side h4 { margin: 8px 6px 4px 0; } .km-item { width: auto; } .km-item .cnt { float: none; margin-left: 4px; } }
+
 </style>
 </head>
 <body>
@@ -1013,23 +1045,49 @@
         <!-- Plugin Market -->
         <div class="panel" id="marketPanel">
             <div class="card">
-                <h3><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>插件市场
-                    <button class="btn btn-sm" style="margin-left:10px" onclick="loadMarket(true)">刷新</button>
-                    <span id="marketChecked" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:8px"></span>
-                </h3>
-                <div class="cfg-row" style="margin-top:10px">
-                    <span>市场源</span>
-                    <select id="mktSourceSel" onchange="onMarketSourceChange()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer">
-                        <option value="official">官方源</option>
-                        <option value="local">本地源（file://plugins/registry.json）</option>
-                        <option value="custom">自定义源</option>
-                    </select>
-                    <input type="text" id="mktSourceUrl" placeholder="https://... 或 file://plugins/registry.json" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
-                    <button class="btn btn-sm btn-primary" onclick="saveMarketSource()">保存并刷新</button>
-                    <span id="mktSrcMsg" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:6px"></span>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <h3 style="margin:0"><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>插件市场</h3>
+                    <button class="btn btn-sm" onclick="loadMarket(true)">刷新</button>
+                    <button class="btn btn-sm" id="mktSrcToggle" onclick="toggleMarketSource()">市场源</button>
+                    <span id="marketChecked" style="font-weight:400;font-size:11px;color:var(--text3)"></span>
                 </div>
-                <div class="cfg-hint">插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。</div>
-                <div id="marketList" class="empty-state" style="margin-top:6px">点击刷新加载官方插件市场</div>
+                <div id="mktSourceRow" style="display:none;margin-top:12px">
+                    <div class="cfg-row">
+                        <span>市场源</span>
+                        <select id="mktSourceSel" onchange="onMarketSourceChange()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer">
+                            <option value="official">官方源</option>
+                            <option value="local">本地源（file://plugins/registry.json）</option>
+                            <option value="custom">自定义源</option>
+                        </select>
+                        <input type="text" id="mktSourceUrl" placeholder="https://... 或 file://plugins/registry.json" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
+                        <button class="btn btn-sm btn-primary" onclick="saveMarketSource()">保存并刷新</button>
+                        <span id="mktSrcMsg" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:6px"></span>
+                    </div>
+                    <div class="cfg-hint">插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。</div>
+                </div>
+                <div class="km-wrap" style="margin-top:16px">
+                    <div class="km-side">
+                        <input class="km-search" id="kmSearch" placeholder="搜索插件..." oninput="renderMarketGrid()">
+                        <h4>排序</h4>
+                        <button class="km-item active" data-sort="default" onclick="setMarketSort('default')">综合</button>
+                        <button class="km-item" data-sort="score" onclick="setMarketSort('score')">按评分</button>
+                        <button class="km-item" data-sort="downloads" onclick="setMarketSort('downloads')">按下载量</button>
+                        <button class="km-item" data-sort="updated" onclick="setMarketSort('updated')">按更新时间</button>
+                        <h4>筛选</h4>
+                        <button class="km-item" data-filter="official" onclick="toggleMarketFilter('official')">官方</button>
+                        <button class="km-item" data-filter="new" onclick="toggleMarketFilter('new')">近期新增</button>
+                        <h4>分类</h4>
+                        <div id="kmCats"></div>
+                    </div>
+                    <div class="km-main">
+                        <div id="marketList" class="empty-state">点击刷新加载官方插件市场</div>
+                    </div>
+                </div>
+            </div>
+            <div id="mktDetailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;align-items:center;justify-content:center" onclick="if(event.target===this)closeMarketDetail()">
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:22px 24px;width:min(560px,92vw);max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.45)">
+                    <div id="mktDetailBody"></div>
+                </div>
             </div>
         </div>
 
@@ -2953,11 +3011,15 @@
                     loadMarket(true);
                 }).catch(() => toast('请求失败', false));
         }
+        function toggleMarketSource() {
+            const row = document.getElementById('mktSourceRow');
+            if (!row) return;
+            row.style.display = row.style.display === 'none' ? '' : 'none';
+        }
         function loadMarket(force) {
             fetch('/api/admin/plugins/market' + (force ? '?force=1' : ''), { headers: authHeaders() })
                 .then(r => r.json()).then(d => {
                     if (d.code !== 0) { document.getElementById('marketList').innerHTML = '<div class="empty-state">' + esc(d.msg || '插件市场获取失败') + '</div>'; return; }
-                    const list = d.data.list || [];
                     document.getElementById('marketChecked').textContent = d.data.updated ? '更新于 ' + d.data.updated : '';
                     /* 回显实际使用的市场源 */
                     const srcUrl = document.getElementById('mktSourceUrl');
@@ -2966,45 +3028,131 @@
                         if (srcSel.value === 'custom') srcUrl.value = d.data.registry;
                         else if (srcUrl.value !== d.data.registry && srcUrl.value !== MARKET_PRESETS[srcSel.value]) srcUrl.value = d.data.registry;
                     }
-                    const c = document.getElementById('marketList');
-                    if (!list.length) { c.innerHTML = '<div class="empty-state">暂无可用插件</div>'; return; }
-                    fetch('/api/admin/plugins', { headers: authHeaders() }).then(r2 => r2.json()).then(d2 => {
-                        const installed = {};
-                        (d2.data.list || []).forEach(p => { installed[p.name] = p; });
-                        c.innerHTML = list.map(m => {
-                            const isInstalled = !!installed[m.name];
-                            const verSel = (m.versions && m.versions.length)
-                                ? `<select id="mkt_${esc(m.name.replace(/[^\w-]/g, '_'))}" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;outline:none">${m.versions.map(v => `<option>${esc(v)}</option>`).join('')}</select>`
-                                : '';
-                            return `<div class="pl-card" style="border:1px solid var(--border);background:rgba(255,255,255,.02);border-radius:10px;padding:12px 14px;margin-bottom:10px">
-                                <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
-                                    <div style="flex:1;min-width:200px">
-                                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                                            <span style="font-weight:700;font-size:14px">${esc(m.name)}</span>
-                                            ${m.latest ? `<span class="pl-chip">v${esc(m.latest)}</span>` : ''}
-                                            ${(m.tags || []).map(x => `<span class="pl-chip">${esc(x)}</span>`).join('')}
-                                        </div>
-                                        <div style="font-size:12px;color:var(--text2);margin-top:4px">${esc(m.description || '')}</div>
-                                        <div style="font-size:11px;color:var(--text3);margin-top:4px">作者：${esc(m.author || '—')}${(m.dependencies && m.dependencies.length) ? ' · 依赖: ' + esc(m.dependencies.join(', ')) : ''}</div>
-                                    </div>
-                                    <div style="display:flex;gap:6px;align-items:center">
-                                        ${isInstalled
-                                            ? '<span style="font-size:11px;color:var(--success)">已安装</span>'
-                                            : `<span>${verSel}</span><button class="btn btn-sm btn-primary" onclick="installMarketPlugin('${esc(m.name)}')">安装</button>`}
-                                        ${m.homepage ? `<button class="btn btn-sm" onclick="window.open('${esc(m.homepage)}','_blank')">主页</button>` : ''}
-                                    </div>
-                                </div>
-                            </div>`;
-                        }).join('');
-                    }).catch(() => { c.innerHTML = '<div class="empty-state">列表加载失败</div>'; });
+                    marketState.all = d.data.list || [];
+                    marketState.categories = Array.isArray(d.data.categories) ? d.data.categories : [];
+                    marketInstalledMap(() => { renderMarketSide(); renderMarketGrid(); });
                 }).catch(() => { document.getElementById('marketList').innerHTML = '<div class="empty-state">插件市场获取失败（网络不可达）</div>'; });
         }
+
+        /* ===== Koishi 风格插件市场：侧栏（排序/筛选/分类）+ 搜索 + 卡片网格 ===== */
+        const marketState = { all: [], categories: [], sort: 'default', filterOfficial: false, filterNew: false, cat: '全部', installed: {} };
+        function marketInstalledMap(cb) {
+            fetch('/api/admin/plugins', { headers: authHeaders() }).then(r2 => r2.json()).then(d2 => {
+                const installed = {};
+                (d2.data.list || []).forEach(p => { installed[p.name] = p; });
+                marketState.installed = installed;
+                cb();
+            }).catch(() => cb());
+        }
+        function isMarketNew(p) {
+            const t = new Date(p.updated || p.created || 0).getTime();
+            if (t) return Date.now() - t < 30 * 24 * 3600 * 1000;
+            return true;
+        }
+        const KM_COLORS = ['linear-gradient(135deg,#7c5cfc,#4d9fff)', 'linear-gradient(135deg,#ff7eb3,#ff758c)', 'linear-gradient(135deg,#43e97b,#38f9d7)', 'linear-gradient(135deg,#fa709a,#fee140)', 'linear-gradient(135deg,#30cfd0,#330867)', 'linear-gradient(135deg,#a8edea,#fed6e3)', 'linear-gradient(135deg,#f6d365,#fda085)', 'linear-gradient(135deg,#84fab0,#8fd3f4)'];
+        function kmLogo(m) {
+            if (m.icon) return `<img class="km-logo" src="${esc(m.icon)}" onerror="this.style.display='none'" alt="">`;
+            const letter = (m.name || '?').replace(/^openvideo-plugin-?/i, '').replace(/^@[^/]+\//, '').charAt(0).toUpperCase() || '?';
+            let h = 0;
+            for (const ch of (m.name || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+            return `<span class="km-logo" style="background:${KM_COLORS[h % KM_COLORS.length]}">${esc(letter)}</span>`;
+        }
+        function kmInstalledCount() { return Object.keys(marketState.installed).length; }
+        function setMarketSort(s) {
+            marketState.sort = s;
+            document.querySelectorAll('#marketPanel .km-item[data-sort]').forEach(b => b.classList.toggle('active', b.dataset.sort === s));
+            renderMarketGrid();
+        }
+        function toggleMarketFilter(f) {
+            if (f === 'official') marketState.filterOfficial = !marketState.filterOfficial;
+            else marketState.filterNew = !marketState.filterNew;
+            document.querySelectorAll('#marketPanel .km-item[data-filter]').forEach(b => b.classList.toggle('active', (b.dataset.filter === 'official' ? marketState.filterOfficial : marketState.filterNew)));
+            renderMarketGrid();
+        }
+        function setMarketCat(c) {
+            marketState.cat = c;
+            document.querySelectorAll('#kmCats .km-item').forEach(b => b.classList.toggle('active', b.dataset.cat === c));
+            renderMarketGrid();
+        }
+        function renderMarketSide() {
+            const cats = [];
+            const seen = new Set();
+            marketState.categories.forEach(c => { if (c && !seen.has(c)) { seen.add(c); cats.push(c); } });
+            marketState.all.forEach(p => { const c = p.category; if (c && !seen.has(c)) { seen.add(c); cats.push(c); } });
+            const el = document.getElementById('kmCats');
+            if (!el) return;
+            el.innerHTML = `<button class="km-item ${marketState.cat === '全部' ? 'active' : ''}" data-cat="全部" onclick="setMarketCat('全部')">全部<span class="cnt">${marketState.all.length}</span></button>` +
+                cats.map(c => `<button class="km-item ${marketState.cat === c ? 'active' : ''}" data-cat="${esc(c)}" onclick="setMarketCat('${esc(c)}')">${esc(c)}<span class="cnt">${marketState.all.filter(p => p.category === c).length}</span></button>`).join('');
+        }
+        function renderMarketGrid() {
+            const c = document.getElementById('marketList');
+            if (!c) return;
+            const q = (document.getElementById('kmSearch').value || '').trim().toLowerCase();
+            let list = marketState.all.filter(p => {
+                if (marketState.cat !== '全部' && p.category !== marketState.cat) return false;
+                if (marketState.filterOfficial && !p.official) return false;
+                if (marketState.filterNew && !isMarketNew(p)) return false;
+                if (q && !(p.name.toLowerCase().includes(q) || String(p.description || '').toLowerCase().includes(q) || (p.tags || []).some(t => String(t).toLowerCase().includes(q)))) return false;
+                return true;
+            });
+            if (marketState.sort !== 'default') {
+                const keyOf = p => marketState.sort === 'score' ? (p.score || 0) : marketState.sort === 'downloads' ? (p.downloads || 0) : (new Date(p.updated || 0).getTime() || 0);
+                list = [...list].sort((a, b) => keyOf(b) - keyOf(a));
+            }
+            if (!list.length) { c.innerHTML = `<div class="km-empty">${q ? '暂无匹配插件' : '暂无可用插件'}</div>`; return; }
+            c.innerHTML = `<div class="km-grid">` + list.map(m => {
+                const isInstalled = !!marketState.installed[m.name];
+                const meta = [];
+                if (m.score) meta.push(`<span class="km-score">★ ${m.score}</span>`);
+                if (m.downloads) meta.push(`<span>${m.downloads >= 1000 ? (m.downloads / 1000).toFixed(1) + 'k' : m.downloads} 安装量</span>`);
+                if (m.latest) meta.push(`<span>v${esc(m.latest)}</span>`);
+                if (isInstalled) meta.push('<span class="km-installed">已安装</span>');
+                return `<div class="km-card" onclick="openMarketDetail('${esc(m.name)}')">
+                    <div class="km-head">${kmLogo(m)}<div style="min-width:0"><div class="km-name">${esc(m.name)}</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${(m.tags || []).slice(0, 3).map(x => `<span class="pl-chip">${esc(x)}</span>`).join('')}</div></div></div>
+                    <div class="km-desc">${esc(m.description || '')}</div>
+                    <div class="km-meta">${meta.join('')}</div>
+                </div>`;
+            }).join('') + `</div>`;
+        }
+        function openMarketDetail(name) {
+            const m = marketState.all.find(x => x.name === name);
+            if (!m) return;
+            const isInstalled = !!marketState.installed[m.name];
+            const body = document.getElementById('mktDetailBody');
+            body.innerHTML = `
+                <div class="km-detail-head">${kmLogo(m)}<div>
+                    <div class="km-detail-name">${esc(m.name)} ${m.latest ? `<span class="pl-chip">v${esc(m.latest)}</span>` : ''} ${m.official ? '<span class="pl-chip" style="color:var(--success)">官方</span>' : ''}</div>
+                    <div style="font-size:12px;color:var(--text3);margin-top:2px">作者：${esc(m.author || '—')}</div>
+                </div></div>
+                <div class="km-detail-desc">${esc(m.description || '')}</div>
+                <div class="km-detail-meta">
+                    ${m.score ? `<div>评分：<b style="color:var(--warn)">★ ${m.score}</b></div>` : ''}
+                    ${m.downloads ? `<div>安装量：<b>${m.downloads}</b></div>` : ''}
+                    ${m.category ? `<div>分类：<b>${esc(m.category)}</b></div>` : ''}
+                    ${m.updated ? `<div>更新于：<b>${esc(m.updated)}</b></div>` : ''}
+                    ${(m.dependencies || []).length ? `<div>依赖：<b>${esc(m.dependencies.join(', '))}</b></div>` : ''}
+                    ${m.homepage ? `<div>主页：<a href="${esc(m.homepage)}" target="_blank" style="color:var(--accent)">${esc(m.homepage)}</a></div>` : ''}
+                </div>
+                <div class="km-detail-actions">
+                    ${isInstalled ? '<span class="km-installed" style="font-size:12px">已安装</span>' : `
+                        ${(m.versions || []).length > 1 ? `<select id="mktDetailVer" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;outline:none">${m.versions.map(v => `<option>${esc(v)}</option>`).join('')}</select>` : ''}
+                        <button class="btn btn-sm btn-primary" onclick="installMarketPlugin('${esc(m.name)}')">安装</button>`}
+                    ${m.homepage ? `<button class="btn btn-sm" onclick="window.open('${esc(m.homepage)}','_blank')">主页</button>` : ''}
+                    <button class="btn btn-sm" onclick="closeMarketDetail()">关闭</button>
+                </div>`;
+            document.getElementById('mktDetailModal').style.display = 'flex';
+        }
+        function closeMarketDetail() { document.getElementById('mktDetailModal').style.display = 'none'; }
         function installMarketPlugin(name) {
-            const sel = document.querySelector(`#mkt_${CSS.escape ? CSS.escape(name.replace(/[^\w-]/g, '_')) : name.replace(/[^\w-]/g, '_')}`);
-            const version = sel && sel.value ? sel.value : '';
+            const verSel = document.getElementById('mktDetailVer');
+            const version = verSel && verSel.value ? verSel.value : '';
             toast('npm 安装中（可能需要几分钟）...', true);
             fetch('/api/admin/plugins/install', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ pkg: name, version }) })
-                .then(r => r.json()).then(d => { toast(d.msg, d.code === 0); loadPlugins(); });
+                .then(r => r.json()).then(d => {
+                    toast(d.msg, d.code === 0);
+                    if (d.code === 0) { closeMarketDetail(); marketInstalledMap(() => renderMarketGrid()); }
+                    loadPlugins();
+                });
         }
 
         /* ===== 依赖与更新 ===== */

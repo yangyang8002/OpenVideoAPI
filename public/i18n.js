@@ -321,6 +321,13 @@ var I18N = (function () {
         '保存并刷新': 'Save & reload', '无效的源地址': 'Invalid source URL',
         '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': 'The market source is the manifest URL (JSON with versions & dependencies). The official source points to this repo\'s registry; a custom source can point to your own manifest (GitHub raw / any HTTP / a local file:// file, e.g. plugins/registry.json in the dev environment).',
 
+        /* ===== 补齐：市场浏览（Koishi 风格） ===== */
+        '综合': 'Featured', '按评分': 'By rating', '按下载量': 'By downloads', '按更新时间': 'By update time',
+        '官方': 'Official', '近期新增': 'Recently added', '分类': 'Categories', '全部': 'All',
+        '搜索插件...': 'Search plugins...', '暂无匹配插件': 'No matching plugins', '安装量': 'Installs',
+        '评分：': 'Rating: ', '安装量：': 'Installs: ', '分类：': 'Category: ', '更新于：': 'Updated: ',
+        '依赖：': 'Dependencies: ', '主页：': 'Homepage: ', '安全': 'Security', '开发工具': 'Dev Tools',
+
         /* ===== 补齐：主题 ===== */
         'bilibili - 深蓝粉': 'bilibili - Deep blue & pink', 'sakura - 粉白樱': 'sakura - Cherry pink & white', 'ocean - 深海蓝': 'ocean - Deep sea blue', 'sunset - 日落橙': 'sunset - Sunset orange', 'forest - 森林绿': 'forest - Forest green', 'mono - 黑白极简': 'mono - Minimal black & white', 'cyber - 赛博霓虹': 'cyber - Neon cyberpunk', 'shoujo - 少女漫画': 'shoujo - Shojo manga', 'jrpg - 日式RPG': 'jrpg - JRPG', 'neon - 霓虹武士': 'neon - Neon samurai',
 
@@ -802,6 +809,13 @@ var ZH_HANT = {
     '保存并刷新': '保存並刷新', '无效的源地址': '無效的源地址',
     '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': '插件市場源為市場清單地址（JSON，含版本與依賴）。官方源指向本倉庫 registry；自定義源可指向你自己的清單（GitHub raw / 任意 HTTP / 本地 file:// 文件，如開發環境的 plugins/registry.json）。',
 
+    /* ===== 补齐：市场浏览（Koishi 风格） ===== */
+    '综合': '綜合', '按评分': '按評分', '按下载量': '按下載量', '按更新时间': '按更新時間',
+    '官方': '官方', '近期新增': '近期新增', '分类': '分類', '全部': '全部',
+    '搜索插件...': '搜索插件...', '暂无匹配插件': '暫無匹配插件', '安装量': '安裝量',
+    '评分：': '評分：', '安装量：': '安裝量：', '分类：': '分類：', '更新于：': '更新於：',
+    '依赖：': '依賴：', '主页：': '主頁：', '安全': '安全', '开发工具': '開發工具',
+
     /* ===== 补齐：主题 ===== */
     'bilibili - 深蓝粉': 'bilibili - 深藍粉', 'sakura - 粉白樱': 'sakura - 粉白櫻', 'ocean - 深海蓝': 'ocean - 深海藍', 'sunset - 日落橙': 'sunset - 日落橙', 'forest - 森林绿': 'forest - 森林綠', 'mono - 黑白极简': 'mono - 黑白極簡', 'cyber - 赛博霓虹': 'cyber - 賽博霓虹', 'shoujo - 少女漫画': 'shoujo - 少女漫畫', 'jrpg - 日式RPG': 'jrpg - 日式RPG', 'neon - 霓虹武士': 'neon - 霓虹武士',
 
@@ -1214,6 +1228,13 @@ var DICT_WYW = {
     '保存并刷新': '存之且新', '无效的源地址': '無效之源址',
     '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': '插件市源為市單之址（JSON，含本與賴）。官源指本庫 registry；自定源可指爾之單（GitHub raw / 任意 HTTP / 本地 file:// 文，如開發境之 plugins/registry.json）。',
 
+    /* ===== 补齐：市场浏览（Koishi 风格） ===== */
+    '综合': '綜', '按评分': '按評', '按下载量': '按取量', '按更新时间': '按新時',
+    '官方': '官', '近期新增': '近增', '分类': '類', '全部': '盡',
+    '搜索插件...': '索插件…', '暂无匹配插件': '無匹之插件', '安装量': '裝量',
+    '评分：': '評：', '安装量：': '裝量：', '分类：': '類：', '更新于：': '新於：',
+    '依赖：': '賴：', '主页：': '首頁：', '安全': '安', '开发工具': '開發之器',
+
     /* ===== 补齐：主题 ===== */
     'bilibili - 深蓝粉': 'bilibili - 深藍粉', 'sakura - 粉白樱': 'sakura - 粉白櫻', 'ocean - 深海蓝': 'ocean - 深海藍', 'sunset - 日落橙': 'sunset - 日落橙', 'forest - 森林绿': 'forest - 森林綠', 'mono - 黑白极简': 'mono - 黑白極簡', 'cyber - 赛博霓虹': 'cyber - 賽博霓虹', 'shoujo - 少女漫画': 'shoujo - 少女漫畫', 'jrpg - 日式RPG': 'jrpg - 日式RPG', 'neon - 霓虹武士': 'neon - 霓虹武士',
 
@@ -1513,6 +1534,13 @@ var DICT_JA = {
     '本地源（file://plugins/registry.json）': 'ローカルファイル（file://plugins/registry.json）',
     '保存并刷新': '保存して更新', '无效的源地址': '無効なソースURL',
     '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': 'プラグインマーケットのソースはマニフェストURL（バージョンと依存関係を含むJSON）。公式ソースはこのリポジトリのregistryを指します。カスタムソースは独自のマニフェストを指定できます（GitHub raw / 任意のHTTP / ローカルのfile://ファイル、例：開発環境の plugins/registry.json）。',
+
+    /* ===== 補完：マーケット閲覧（Koishi 風） ===== */
+    '综合': '総合', '按评分': '評価順', '按下载量': 'ダウンロード順', '按更新时间': '更新順',
+    '官方': '公式', '近期新增': '最近追加', '分类': 'カテゴリ', '全部': 'すべて',
+    '搜索插件...': 'プラグインを検索...', '暂无匹配插件': '一致するプラグインがありません', '安装量': 'インストール数',
+    '评分：': '評価：', '安装量：': 'インストール数：', '分类：': 'カテゴリ：', '更新于：': '更新：',
+    '依赖：': '依存：', '主页：': 'ホームページ：', '安全': 'セキュリティ', '开发工具': '開発ツール',
 
     /* ===== 補完：テーマ ===== */
     'bilibili - 深蓝粉': 'bilibili - 深青&ピンク', 'sakura - 粉白樱': 'sakura - 桜ピンク&白', 'ocean - 深海蓝': 'ocean - 深海ブルー', 'sunset - 日落橙': 'sunset - 夕日オレンジ', 'forest - 森林绿': 'forest - 森林グリーン', 'mono - 黑白极简': 'mono - モノクロミニマル', 'cyber - 赛博霓虹': 'cyber - サイバーネオン', 'shoujo - 少女漫画': 'shoujo - 少女マンガ', 'jrpg - 日式RPG': 'jrpg - JRPG', 'neon - 霓虹武士': 'neon - ネオン侍',
@@ -1818,6 +1846,13 @@ var DICT_FR = {
     '保存并刷新': 'Enregistrer et actualiser', '无效的源地址': 'URL de source invalide',
     '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': 'La source du marché est l\'URL du manifeste (JSON avec versions et dépendances). La source officielle pointe vers le registre de ce dépôt ; une source personnalisée peut pointer vers votre propre manifeste (GitHub raw / n\'importe quel HTTP / un fichier file:// local, ex. plugins/registry.json dans l\'environnement de dev).',
 
+    /* ===== Complément : navigation du marché (style Koishi) ===== */
+    '综合': 'Vedette', '按评分': 'Par note', '按下载量': 'Par téléchargements', '按更新时间': 'Par date de mise à jour',
+    '官方': 'Officiel', '近期新增': 'Récemment ajouté', '分类': 'Catégories', '全部': 'Tous',
+    '搜索插件...': 'Rechercher des plugins...', '暂无匹配插件': 'Aucun plugin correspondant', '安装量': 'Installations',
+    '评分：': 'Note : ', '安装量：': 'Installations : ', '分类：': 'Catégorie : ', '更新于：': 'Mis à jour : ',
+    '依赖：': 'Dépendances : ', '主页：': 'Page d\'accueil : ', '安全': 'Sécurité', '开发工具': 'Outils de dev',
+
     /* ===== Complément : thèmes ===== */
     'bilibili - 深蓝粉': 'bilibili - Bleu profond & rose', 'sakura - 粉白樱': 'sakura - Rose cerisier & blanc', 'ocean - 深海蓝': 'ocean - Bleu océan', 'sunset - 日落橙': 'sunset - Orange coucher de soleil', 'forest - 森林绿': 'forest - Vert forêt', 'mono - 黑白极简': 'mono - Noir et blanc minimaliste', 'cyber - 赛博霓虹': 'cyber - Néon cyberpunk', 'shoujo - 少女漫画': 'shoujo - Manga shojo', 'jrpg - 日式RPG': 'jrpg - JRPG', 'neon - 霓虹武士': 'neon - Samouraï néon',
 
@@ -2021,7 +2056,9 @@ var LANG_LABELS = { zh: '中文', zhHant: '繁體中文', wyw: '文言', en: 'En
             [/^依赖更新已在后台执行（(\d+) 个），完成后需重启服务生效$/, 'Dep update running in background ($1), restart needed after'],
             [/^(\d+) 条$/, '$1'],
             [/^(\d+) 项$/, '$1'],
-            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, 'Update started (source: $1); background task running, see data/update.log']
+            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, 'Update started (source: $1); background task running, see data/update.log'],
+            [/^(\d+) 安装量$/, '$1 installs'],
+            [/^更新于 (.+)$/, 'Updated $1']
         ],
         ja: [
             [/^已封禁 (.+)$/, 'BAN済み: $1'],
@@ -2096,7 +2133,9 @@ var LANG_LABELS = { zh: '中文', zhHant: '繁體中文', wyw: '文言', en: 'En
             [/^依赖更新已在后台执行（(\d+) 个），完成后需重启服务生效$/, '依存更新をバックグラウンドで実行中（$1 件）、完了後再起動で反映'],
             [/^(\d+) 条$/, '$1件'],
             [/^(\d+) 项$/, '$1件'],
-            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, '更新プロセスを開始（ソース: $1）、バックグラウンド実行、ログ: data/update.log']
+            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, '更新プロセスを開始（ソース: $1）、バックグラウンド実行、ログ: data/update.log'],
+            [/^(\d+) 安装量$/, '$1 インストール'],
+            [/^更新于 (.+)$/, '更新: $1']
         ],
         fr: [
             [/^已封禁 (.+)$/, 'Banni: $1'],
@@ -2171,7 +2210,9 @@ var LANG_LABELS = { zh: '中文', zhHant: '繁體中文', wyw: '文言', en: 'En
             [/^依赖更新已在后台执行（(\d+) 个），完成后需重启服务生效$/, 'Mise à jour des dépendances en arrière-plan ($1), redémarrage requis ensuite'],
             [/^(\d+) 条$/, '$1'],
             [/^(\d+) 项$/, '$1'],
-            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, 'Mise à jour lancée (source : $1) ; tâche en arrière-plan, voir data/update.log']
+            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, 'Mise à jour lancée (source : $1) ; tâche en arrière-plan, voir data/update.log'],
+            [/^(\d+) 安装量$/, '$1 installations'],
+            [/^更新于 (.+)$/, 'Mis à jour : $1']
         ],
         wyw: [
             [/^已封禁 (.+)$/, '已禁 $1'],
@@ -2246,7 +2287,9 @@ var LANG_LABELS = { zh: '中文', zhHant: '繁體中文', wyw: '文言', en: 'En
             [/^依赖更新已在后台执行（(\d+) 个），完成后需重启服务生效$/, '賴之新已在後臺行（$1 個），成後須重啟而效'],
             [/^(\d+) 条$/, '$1 条'],
             [/^(\d+) 项$/, '$1 项'],
-            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, '新之程已啟（源: $1），後臺行之，誌見 data/update.log']
+            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, '新之程已啟（源: $1），後臺行之，誌見 data/update.log'],
+            [/^(\d+) 安装量$/, '$1 裝量'],
+            [/^更新于 (.+)$/, '新於 $1']
         ],
         zhHant: [
             [/^已封禁 (.+)$/, '已封禁 $1'],
@@ -2321,7 +2364,9 @@ var LANG_LABELS = { zh: '中文', zhHant: '繁體中文', wyw: '文言', en: 'En
             [/^依赖更新已在后台执行（(\d+) 个），完成后需重启服务生效$/, '依賴更新已在後臺執行（$1 個），完成後需重啟服務生效'],
             [/^(\d+) 条$/, '$1 條'],
             [/^(\d+) 项$/, '$1 項'],
-            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, '更新進程已啟動（來源: $1）後臺執行；日誌見 data/update.log']
+            [/^更新进程已启动（来源: (.+)）后台执行：.+；日志见 data\/update\.log$/, '更新進程已啟動（來源: $1）後臺執行；日誌見 data/update.log'],
+            [/^(\d+) 安装量$/, '$1 安裝量'],
+            [/^更新于 (.+)$/, '更新於 $1']
         ]
     };
 
