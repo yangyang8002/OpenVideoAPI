@@ -93,6 +93,10 @@ npm start
 - **依赖与更新**：程序版本一键更新（自动备份 + 重启）、npm 依赖逐个更新、插件更新
 - **多数据库存储**：JSON 文件（默认）/ SQLite / MySQL / MariaDB / PostgreSQL，任意互转、热切换自动迁移（弹幕、视频映射、屏蔽词、账号、IP 封禁白名单、登录记录、统计）
 
+## Development
+
+- 🛠 [OpenVideoAPI-Dev](https://github.com/yangyang8002/OpenVideoAPI-Dev) — 插件开发环境（热重载 / 脚手架 / 本地市场）
+
 ## Documentation
 
 - 🌐 [**Online Docs Site**](https://doc.mbps.top/) — VitePress 官方文档（中英双语）：指南 / 管理后台 / API 参考 / 插件开发

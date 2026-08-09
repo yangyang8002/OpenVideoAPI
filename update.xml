@@ -2,8 +2,8 @@
 <!-- 版本清单：更新进程依据此文件校验与执行更新（data/ 目录不参与更新） -->
 <update>
   <version>26.8.11</version>
-  <date>2026-08-08</date>
-  <message>v26.8.11: dev environment support - OPENVIDEO_PLUGIN_DIR/DATA_DIR env, --dev hot reload watcher, local plugin auto-discovery, file:// plugin registry, dev-mode crash restart</message>
+  <date>2026-08-09</date>
+  <message>v26.8.11: link OpenVideoAPI-Dev plugin dev environment in READMEs</message>
   <files>
   <file path=".dockerignore" sha256="92b725988b57a03160cb825d470f929fbecbf4ee25b4dbc28a7fdb3a8c41a781" size="78"/>
   <file path=".github/social-preview.png" sha256="0949997a033350b2096a95f68c4a3eaabe2e3952913e91a0bec59807bbfdb246" size="21642"/>
@@ -14,7 +14,7 @@
   <file path="DOCKER.md" sha256="99fa28499ce640dafd68e7f56c8bcc896cde267dda8804ee7441f333f997a0a7" size="3507"/>
   <file path="Dockerfile" sha256="c844310f89d85988e9d6073f5a205015a486e8f632ef91fb7fbef3a7248f02a6" size="439"/>
   <file path="LICENSE" sha256="d5f812f2f7d23c443ffaff5391be83cd3fcca32c68b8f792cb03937d5a1fc027" size="1090"/>
-  <file path="README.md" sha256="285d74f79cf783bb285b7658c7903347282fe6beefa2670553a88996297211fd" size="5123"/>
+  <file path="README.md" sha256="19d8b60f5f98d3bd0290bcb7ae10522540840aa51e471f16a95435245e68fbfb" size="5281"/>
   <file path="README_CN.md" sha256="49057a663937c606688e470df285d8afb546b4ac7ea7862d5581aa17bdfb1b9e" size="26601"/>
   <file path="README_EN.md" sha256="3a4c28a48a851189f3885e5e86f3cc95db173caf1d14b8ff6908134f79376567" size="24582"/>
   <file path="docker-compose.yml" sha256="bea2a4570ceedeab63ba86f85c879f804b8b08f9b60400c07893f339e8493be6" size="422"/>
