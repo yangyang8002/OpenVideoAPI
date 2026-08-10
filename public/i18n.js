@@ -318,6 +318,7 @@ var I18N = (function () {
         /* ===== 补齐：插件市场 ===== */
         '市场源': 'Market source', '官方源': 'Official', '自定义源': 'Custom',
         '本地源（file://plugins/registry.json）': 'Local file (file://plugins/registry.json)',
+        'https://... 或 file://plugins/registry.json': 'https://... or file://plugins/registry.json',
         '保存并刷新': 'Save & reload', '无效的源地址': 'Invalid source URL',
         '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': 'The market source is the manifest URL (JSON with versions & dependencies). The official source points to this repo\'s registry; a custom source can point to your own manifest (GitHub raw / any HTTP / a local file:// file, e.g. plugins/registry.json in the dev environment).',
 
@@ -806,6 +807,7 @@ var ZH_HANT = {
     /* ===== 补齐：插件市场 ===== */
     '市场源': '市場源', '官方源': '官方源', '自定义源': '自定義源',
     '本地源（file://plugins/registry.json）': '本地源（file://plugins/registry.json）',
+    'https://... 或 file://plugins/registry.json': 'https://... 或 file://plugins/registry.json',
     '保存并刷新': '保存並刷新', '无效的源地址': '無效的源地址',
     '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': '插件市場源為市場清單地址（JSON，含版本與依賴）。官方源指向本倉庫 registry；自定義源可指向你自己的清單（GitHub raw / 任意 HTTP / 本地 file:// 文件，如開發環境的 plugins/registry.json）。',
 
@@ -1225,6 +1227,7 @@ var DICT_WYW = {
     /* ===== 补齐：插件市场 ===== */
     '市场源': '市之源', '官方源': '官源', '自定义源': '自定源',
     '本地源（file://plugins/registry.json）': '本地源（file://plugins/registry.json）',
+    'https://... 或 file://plugins/registry.json': 'https://... 或 file://plugins/registry.json',
     '保存并刷新': '存之且新', '无效的源地址': '無效之源址',
     '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': '插件市源為市單之址（JSON，含本與賴）。官源指本庫 registry；自定源可指爾之單（GitHub raw / 任意 HTTP / 本地 file:// 文，如開發境之 plugins/registry.json）。',
 
@@ -1532,6 +1535,7 @@ var DICT_JA = {
     /* ===== 補完：プラグインマーケット ===== */
     '市场源': 'マーケットソース', '官方源': '公式', '自定义源': 'カスタム',
     '本地源（file://plugins/registry.json）': 'ローカルファイル（file://plugins/registry.json）',
+    'https://... 或 file://plugins/registry.json': 'https://... または file://plugins/registry.json',
     '保存并刷新': '保存して更新', '无效的源地址': '無効なソースURL',
     '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': 'プラグインマーケットのソースはマニフェストURL（バージョンと依存関係を含むJSON）。公式ソースはこのリポジトリのregistryを指します。カスタムソースは独自のマニフェストを指定できます（GitHub raw / 任意のHTTP / ローカルのfile://ファイル、例：開発環境の plugins/registry.json）。',
 
@@ -1843,6 +1847,7 @@ var DICT_FR = {
     /* ===== Complément : marché de plugins ===== */
     '市场源': 'Source du marché', '官方源': 'Officielle', '自定义源': 'Personnalisée',
     '本地源（file://plugins/registry.json）': 'Fichier local (file://plugins/registry.json)',
+    'https://... 或 file://plugins/registry.json': 'https://... ou file://plugins/registry.json',
     '保存并刷新': 'Enregistrer et actualiser', '无效的源地址': 'URL de source invalide',
     '插件市场源为市场清单地址（JSON，含版本与依赖）。官方源指向本仓库 registry；自定义源可指向你自己的清单（GitHub raw / 任意 HTTP / 本地 file:// 文件，如开发环境的 plugins/registry.json）。': 'La source du marché est l\'URL du manifeste (JSON avec versions et dépendances). La source officielle pointe vers le registre de ce dépôt ; une source personnalisée peut pointer vers votre propre manifeste (GitHub raw / n\'importe quel HTTP / un fichier file:// local, ex. plugins/registry.json dans l\'environnement de dev).',
 
