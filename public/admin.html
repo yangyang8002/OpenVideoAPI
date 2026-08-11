@@ -1159,7 +1159,7 @@
                     <span id="navCfgMsg" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:8px"></span>
                 </h3>
                 <div id="navCardBody" style="display:none">
-                    <div class="cfg-hint">侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，并为每组设置默认折叠状态。插件扩展 tab 固定归入「扩展」组。</div>
+                    <div class="cfg-hint">侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，并为每组设置默认折叠状态。保存后立即按默认折叠生效，手动点击组头可临时覆盖。插件扩展 tab 固定归入「扩展」组。</div>
                     <div id="navEditor"><div class="empty-state">点击「读取当前」加载导航配置</div></div>
                 </div>
             </div>
@@ -1875,7 +1875,13 @@
             fetch('/api/admin/config', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ ui: { nav: navConfig } }) })
                 .then(r => r.json()).then(d => {
                     toast(d.msg, d.code === 0);
-                    if (d.code === 0) { renderNav(); loadNavEditor(); }
+                    if (d.code === 0) {
+                        /* 保存后立即按新默认折叠生效（同步更新记忆，避免“改了没反应”） */
+                        const ids = (navConfig.groups || []).filter(g => g.collapsed).map(g => g.id);
+                        try { localStorage.setItem('ap_nav_collapsed', JSON.stringify(ids)); localStorage.setItem('ap_nav_init', '1'); } catch (e) {}
+                        renderNav();
+                        loadNavEditor();
+                    }
                 });
         }
         function resetNav() {
