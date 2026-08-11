@@ -1,6 +1,6 @@
 {
-  "updated": "2026-08-09",
-  "categories": ["安全", "开发工具"],
+  "updated": "2026-08-11",
+  "categories": ["安全", "开发工具", "工具"],
   "plugins": [
     {
       "name": "openvideo-plugin-demo",
@@ -31,6 +31,22 @@
       "created": "2026-08-09",
       "updated": "2026-08-09",
       "tags": ["官方", "安全", "2FA", "OTP", "登录"],
+      "versions": ["1.0.0"],
+      "dependencies": []
+    },
+    {
+      "name": "openvideo-plugin-embed-subtitle",
+      "description": "内封字幕采集：ffprobe 检测视频内嵌字幕轨道（多轨/多语言），ffmpeg 提取到字幕库，可关联视频",
+      "author": "yangyang8002",
+      "homepage": "https://github.com/yangyang8002/openvideo-plugin-embed-subtitle",
+      "icon": "",
+      "category": "工具",
+      "official": true,
+      "score": 4.7,
+      "downloads": 42,
+      "created": "2026-08-11",
+      "updated": "2026-08-11",
+      "tags": ["官方", "字幕", "ffmpeg", "采集"],
       "versions": ["1.0.0"],
       "dependencies": []
     }
