@@ -251,6 +251,8 @@ var I18N = (function () {
         ' 分钟后再试': ' minutes', '登录失败次数过多，已锁定': 'Too many failures, locked for ',
         '登录尝试过于频繁，请1分钟后再试': 'Too many login attempts, retry in 1 minute',
         '请输入账号和密码': 'Enter username and password', '登录成功': 'Logged in',
+        '记住密码（加密保存，自动登录）': 'Remember password (encrypted, auto-login)',
+        '安全保存不可用（需 HTTPS / localhost）': 'Secure save unavailable (HTTPS / localhost required)',
 
         /* ===== 后台：关于 ===== */
         '功能一览': 'Features',
@@ -786,6 +788,8 @@ var ZH_HANT = {
     '已添加屏蔽词': '已添加屏蔽詞',
     '已删除屏蔽词': '已刪除屏蔽詞',
     '登录成功': '登錄成功',
+    '记住密码（加密保存，自动登录）': '記住密碼（加密保存，自動登錄）',
+    '安全保存不可用（需 HTTPS / localhost）': '安全保存不可用（需 HTTPS / localhost）',
     '验证失败': '驗證失敗',
     '会话已过期': '會話已過期',
     '权限不足': '權限不足',
@@ -1220,6 +1224,8 @@ var DICT_WYW = {
     '订阅已添加': '訂已增', '订阅已删除': '訂已刪', '词库已更新': '詞庫已新',
     '视频映射已保存': '視頻之映已存', '视频映射已删除': '視頻之映已刪',
     '已添加屏蔽词': '屏蔽詞已增', '已删除屏蔽词': '屏蔽詞已刪', '登录成功': '登之成',
+    '记住密码（加密保存，自动登录）': '記密（加密存，自登）',
+    '安全保存不可用（需 HTTPS / localhost）': '安存不可用（須 HTTPS / localhost）',
     '验证失败': '驗之未成', '会话已过期': '會已過', '权限不足': '權之不足',
 
     /* ===== 补齐：初始化向导 ===== */
@@ -1539,7 +1545,9 @@ var DICT_JA = {
     '路径不存在': 'パスが存在しません', '订阅已添加': '購読を追加しました', '订阅已删除': '購読を削除しました',
     '词库已更新': '辞書を更新しました', '视频映射已保存': '動画マッピングを保存しました',
     '视频映射已删除': '動画マッピングを削除しました', '已添加屏蔽词': 'NG ワードを追加しました',
-    '已删除屏蔽词': 'NG ワードを削除しました', '登录成功': 'ログインしました',     '验证失败': '検証に失敗しました',
+    '已删除屏蔽词': 'NG ワードを削除しました', '登录成功': 'ログインしました',
+    '记住密码（加密保存，自动登录）': 'パスワードを記憶（暗号化保存、自動ログイン）',
+    '安全保存不可用（需 HTTPS / localhost）': '安全な保存は利用できません（HTTPS / localhost が必要）',     '验证失败': '検証に失敗しました',
     '会话已过期': 'セッションが切れました', '权限不足': '権限がありません',
 
     /* ===== 補完：初期設定ウィザード ===== */
@@ -1864,6 +1872,8 @@ var DICT_FR = {
     '订阅已添加': 'Abonnement ajouté', '订阅已删除': 'Abonnement supprimé', '词库已更新': 'Lexique mis à jour',
     '视频映射已保存': 'Mappage vidéo enregistré', '视频映射已删除': 'Mappage vidéo supprimé',
     '已添加屏蔽词': 'Mot bloqué ajouté', '已删除屏蔽词': 'Mot bloqué supprimé', '登录成功': 'Connecté',
+    '记住密码（加密保存，自动登录）': 'Mémoriser le mot de passe (chiffré, connexion auto)',
+    '安全保存不可用（需 HTTPS / localhost）': 'Enregistrement sécurisé indisponible (HTTPS / localhost requis)',
     '验证失败': 'Échec de la vérification', '会话已过期': 'Session expirée', '权限不足': 'Accès refusé',
 
     /* ===== Complément : assistant de première configuration ===== */

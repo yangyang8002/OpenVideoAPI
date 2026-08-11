@@ -692,6 +692,9 @@
             <p class="sub">弹幕管理 · 服务器配置</p>
             <input type="text" id="usernameInput" placeholder="账号" autofocus>
             <input type="password" id="passwordInput" placeholder="密码">
+            <label id="rememberWrap" style="display:flex;align-items:center;gap:6px;margin-top:12px;font-size:12.5px;color:var(--text2);cursor:pointer;user-select:none">
+                <input type="checkbox" id="rememberCb" style="width:auto;height:auto;margin:0;accent-color:var(--accent)"> 记住密码（加密保存，自动登录）
+            </label>
             <button onclick="login()">登 录</button>
         </div>
     </div>
@@ -2091,21 +2094,97 @@
                             initStep(0);
                             return;
                         }
-                        document.getElementById('loginPage').style.display = 'none';
-                        document.getElementById('mainPage').style.display = 'block';
-                        document.getElementById('sideUser').textContent = adminUser;
-                        loadBannedWords(); loadDanmu(); loadVids(); loadVideos(); loadSubscriptions(); loadConfig(); populateThemeSelects(); loadFiles(); loadLogs();
-                        startDashPanel();
-                        loadDashboard(true);
-                        checkUpdate(false);
-                        loadAboutVersion();
-                        loadAdminPlugins();
+                        /* 记住密码（可选）：WebCrypto AES-GCM 加密 + 持久化登录令牌（仅安全上下文） */
+                        const cb = document.getElementById('rememberCb');
+                        if (cb && cb.checked) {
+                            if (window.isSecureContext) {
+                                rememberSave(u, p).then(ok => {
+                                    if (ok) { try { localStorage.setItem('ap_token', adminToken); } catch (e) {} }
+                                    else { rememberClear(); try { localStorage.removeItem('ap_token'); } catch (e) {} toast('安全保存不可用（需 HTTPS / localhost）', false); }
+                                });
+                            } else {
+                                rememberClear(); try { localStorage.removeItem('ap_token'); } catch (e) {}
+                                toast('安全保存不可用（需 HTTPS / localhost）', false);
+                            }
+                        } else {
+                            rememberClear(); try { localStorage.removeItem('ap_token'); } catch (e) {}
+                        }
+                        enterAdmin();
                     } else toast(d.code === 429 ? '登录过频' : (d.msg || '失败'), false);
                 }).catch(() => toast('连接失败', false));
         }
 
+        /* ---- 记住密码（WebCrypto AES-GCM 加密，仅安全上下文可用） ---- */
+        function b64u(u8) { let s = ''; u8.forEach(b => { s += String.fromCharCode(b); }); return btoa(s); }
+        function unb64u(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+        async function rememberSave(u, p) {
+            try {
+                const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+                const rawKey = await crypto.subtle.exportKey('raw', key);
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(p));
+                localStorage.setItem('ap_remember', JSON.stringify({ u, iv: b64u(iv), ct: b64u(new Uint8Array(ct)), key: b64u(new Uint8Array(rawKey)) }));
+                return true;
+            } catch (e) { return false; }
+        }
+        async function rememberLoad() {
+            try {
+                const raw = localStorage.getItem('ap_remember');
+                if (!raw) return null;
+                const d = JSON.parse(raw);
+                const key = await crypto.subtle.importKey('raw', unb64u(d.key), { name: 'AES-GCM' }, false, ['decrypt']);
+                const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64u(d.iv) }, key, unb64u(d.ct));
+                return { u: d.u, p: new TextDecoder().decode(pt) };
+            } catch (e) { return null; }
+        }
+        function rememberClear() { try { localStorage.removeItem('ap_remember'); } catch (e) {} }
+        function tokenUser(t) { try { return JSON.parse(atob(t.split('.')[0])).u || 'admin'; } catch (e) { return 'admin'; } }
+
+        /* 登录成功后的公共进入流程（登录 / 记住登录恢复共用） */
+        function enterAdmin() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'block';
+            document.getElementById('sideUser').textContent = adminUser;
+            loadBannedWords(); loadDanmu(); loadVids(); loadVideos(); loadSubscriptions(); loadConfig(); populateThemeSelects(); loadFiles(); loadLogs();
+            startDashPanel();
+            loadDashboard(true);
+            checkUpdate(false);
+            loadAboutVersion();
+            loadAdminPlugins();
+        }
+
+        /* 页面加载：恢复记住的登录会话（刷新直达控制台）或填充记住的账号密码 */
+        async function restoreSession() {
+            const token = window.isSecureContext ? (localStorage.getItem('ap_token') || '') : '';
+            if (token) {
+                try {
+                    const r = await fetch('/api/admin/config', { headers: { 'Authorization': 'Bearer ' + token } });
+                    const d = await r.json();
+                    if (d.code === 0) {
+                        adminToken = token;
+                        adminUser = tokenUser(token);
+                        enterAdmin();
+                        return;
+                    }
+                } catch (e) {}
+                try { localStorage.removeItem('ap_token'); } catch (e) {}
+            }
+            if (window.isSecureContext) {
+                const rem = await rememberLoad();
+                if (rem) {
+                    document.getElementById('usernameInput').value = rem.u;
+                    document.getElementById('passwordInput').value = rem.p;
+                    const cb = document.getElementById('rememberCb');
+                    if (cb) cb.checked = true;
+                }
+            } else {
+                document.getElementById('rememberWrap').style.display = 'none';
+            }
+        }
+
         function logout() {
             adminToken = ''; adminUser = '';
+            try { localStorage.removeItem('ap_token'); } catch (e) {}
             stopDashPanel();
             /* 清理插件扩展 tab */
             window.OpenVideoAdmin.tabs = [];
@@ -2117,6 +2196,17 @@
             document.getElementById('usernameInput').value = '';
             document.getElementById('passwordInput').value = '';
             document.getElementById('sideUser').textContent = '未登录';
+            /* 记住密码时登出后自动填充（方便快速登录；仅在安全上下文） */
+            if (window.isSecureContext) {
+                rememberLoad().then(function (rem) {
+                    if (rem) {
+                        document.getElementById('usernameInput').value = rem.u;
+                        document.getElementById('passwordInput').value = rem.p;
+                        var cb = document.getElementById('rememberCb');
+                        if (cb) cb.checked = true;
+                    }
+                });
+            }
         }
         /* 关于页版本号（从服务端动态获取） */
         function loadAboutVersion() {
@@ -4120,6 +4210,7 @@
         loadAdminTheme();
         initNav();
         loadLoginPlugins();
+        restoreSession();
     </script>
 </body>
 </html>
