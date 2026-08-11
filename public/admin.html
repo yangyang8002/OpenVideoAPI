@@ -3226,9 +3226,10 @@
                     if (!deps.length) { tb.innerHTML = '<tr><td colspan="5"><div class="empty-state">暂无依赖</div></td></tr>'; }
                     else {
                         tb.innerHTML = deps.map(x => {
-                            const outdated = x.latest && x.current !== x.latest;
+                            const outdated = x.latest && (x.current !== x.latest || x.current === 'latest');
+                            const tag = x.type === 'frontend' ? '<span class="pl-chip" style="margin-right:6px">前端 CDN</span>' : '';
                             return `<tr>
-                                <td style="font-family:monospace;font-size:12px">${esc(x.name)}</td>
+                                <td style="font-family:monospace;font-size:12px">${tag}${esc(x.name)}</td>
                                 <td>${esc(x.current)}</td>
                                 <td style="color:${outdated ? 'var(--success)' : 'var(--text3)'}">${esc(x.latest || '—')}</td>
                                 <td>${outdated ? '<span style="color:var(--warn)">可更新</span>' : '<span style="color:var(--success)">最新</span>'}</td>
@@ -3253,7 +3254,7 @@
         }
         function updateDep(name) {
             fetch('/api/admin/deps/update', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ names: [name] }) })
-                .then(r => r.json()).then(d => toast(d.msg, d.code === 0));
+                .then(r => r.json()).then(d => { toast(d.msg, d.code === 0); if (d.code === 0 && d.msg.indexOf('前端') === 0) loadDeps(true); });
         }
         function updateAllDeps() {
             if (!confirm('确认更新全部依赖？更新在后台执行，完成后需重启服务生效')) return;

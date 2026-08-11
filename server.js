@@ -3260,14 +3260,36 @@ app.get('/api/admin/dashboard', checkAdmin, async (req, res) => {
 // ==================== 依赖管理 ====================
 
 let depsCache = null;
+
+/* 前端 CDN 依赖（player.html 经 jsdelivr 引入）：纳入依赖检查与一键更新。
+   find 为版本占位正则（捕获 $1 前缀 / $2 后缀），replace 用 @版本 模板。 */
+const FRONTEND_DEPS = [
+    { name: 'artplayer', page: 'player.html', find: /(npm\/)artplayer(?:@[0-9.]+)?(\/dist\/artplayer\.js)/, replace: (v) => '$1artplayer@' + v + '$2' },
+    { name: 'hls.js', page: 'player.html', find: /(npm\/)hls\.js@[0-9.]+(\/dist\/hls\.min\.js)/, replace: (v) => '$1hls.js@' + v + '$2' },
+    { name: 'flv.js', page: 'player.html', find: /(npm\/)flv\.js@[0-9.]+(\/dist\/flv\.min\.js)/, replace: (v) => '$1flv.js@' + v + '$2' },
+    { name: 'misans', page: 'player.html', find: /(npm\/)misans@[0-9.]+(\/lib\/Normal\/MiSans-(?:Regular|Medium|Semibold|Bold)\.min\.css)/, replace: (v) => '$1misans@' + v + '$2' }
+];
+function readFrontendDeps() {
+    return FRONTEND_DEPS.map(d => {
+        let ver = '?';
+        try {
+            const html = fs.readFileSync(path.join(__dirname, 'public', d.page), 'utf8');
+            const m = html.match(d.find);
+            if (m) ver = (m[0].match(/@([0-9.]+)/) || [])[1] || 'latest';
+        } catch (e) {}
+        return { name: d.name, current: ver, type: 'frontend', page: d.page };
+    });
+}
 async function getDeps(force) {
     const now = Date.now();
     if (!force && depsCache && now - depsCache.at < 1800000) return depsCache.data;
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
     const deps = Object.entries(pkg.dependencies || {}).map(([name, cur]) => ({ name, current: cur.replace(/^[\^~]/, ''), type: 'dependency' }));
+    /* 合并前端 CDN 依赖（artplayer / hls.js / flv.js / misans 等） */
+    deps.push(...readFrontendDeps());
     /* 查询最新版本 */
     const latest = {};
-    await Promise.all(deps.slice(0, 30).map(async (d) => {
+    await Promise.all(deps.slice(0, 40).map(async (d) => {
         try {
             const r = await fetch('https://registry.npmjs.org/' + encodeURIComponent(d.name) + '/latest', { signal: AbortSignal.timeout(8000) });
             if (r.ok) { const j = await r.json(); latest[d.name] = j.version || ''; }
@@ -3312,19 +3334,50 @@ app.get('/api/admin/deps', checkAdmin, async (req, res) => {
     }
 });
 
-/* 更新依赖（独立进程执行 npm install，避免占用服务） */
-app.post('/api/admin/deps/update', checkAdmin, (req, res) => {
+/* 更新依赖：前端 CDN 依赖直接改写页面版本号（立即生效）；服务端依赖后台 npm install */
+app.post('/api/admin/deps/update', checkAdmin, async (req, res) => {
     const { names } = req.body || {};
+    const want = names && names.length ? names : null;
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
-    const deps = names && names.length ? names : Object.keys(pkg.dependencies || {});
-    const child = require('child_process').spawn('npm', ['install', '--no-audit', '--no-fund', '--package-lock=false', ...deps.map(n => n + '@latest'), ...(npmRegistryArg() ? [npmRegistryArg()] : [])], {
-        cwd: __dirname,
-        detached: true,
-        stdio: 'ignore'
-    });
-    child.unref();
-    console.log('[依赖] 更新进程已启动: ' + deps.join(', '));
-    res.json({ code: 0, msg: '依赖更新已在后台执行（' + deps.length + ' 个），完成后需重启服务生效' });
+    const frontNames = want ? want.filter(n => FRONTEND_DEPS.some(d => d.name === n)) : FRONTEND_DEPS.map(d => d.name);
+    const backNames = want ? want.filter(n => !FRONTEND_DEPS.some(d => d.name === n)) : Object.keys(pkg.dependencies || {});
+    /* 前端依赖：改写 public/<page> 中的 CDN 版本（无需重启，刷新页面生效） */
+    const updated = [];
+    for (const n of frontNames) {
+        try {
+            const d = FRONTEND_DEPS.find(x => x.name === n);
+            const r = await fetch('https://registry.npmjs.org/' + encodeURIComponent(n) + '/latest', { signal: AbortSignal.timeout(8000) });
+            if (!r.ok) continue;
+            const j = await r.json();
+            const ver = j.version || '';
+            if (!ver) continue;
+            const file = path.join(__dirname, 'public', d.page);
+            let html = fs.readFileSync(file, 'utf8');
+            const re = new RegExp(d.find.source, 'g');
+            const before = html;
+            html = html.replace(re, d.replace(ver));
+            if (html !== before) {
+                fs.writeFileSync(file, html);
+                updated.push(n + '@' + ver);
+            }
+        } catch (e) {}
+    }
+    /* 服务端依赖：后台 npm install */
+    let bgMsg = '';
+    if (backNames.length) {
+        const child = require('child_process').spawn('npm', ['install', '--no-audit', '--no-fund', '--package-lock=false', ...backNames.map(n => n + '@latest'), ...(npmRegistryArg() ? [npmRegistryArg()] : [])], {
+            cwd: __dirname,
+            detached: true,
+            stdio: 'ignore'
+        });
+        child.unref();
+        console.log('[依赖] 更新进程已启动: ' + backNames.join(', '));
+        bgMsg = '服务端依赖更新已在后台执行（' + backNames.length + ' 个），完成后需重启服务生效';
+    }
+    const parts = [];
+    if (updated.length) parts.push('前端依赖已更新: ' + updated.join(', ') + '（刷新页面生效）');
+    if (bgMsg) parts.push(bgMsg);
+    res.json({ code: 0, msg: parts.join('；') || '没有需要更新的依赖' });
 });
 
 // ==================== 插件管理（npm 包 + 服务层 + 前端扩展） ====================
