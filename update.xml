@@ -15,8 +15,8 @@
   <file path="Dockerfile" sha256="c844310f89d85988e9d6073f5a205015a486e8f632ef91fb7fbef3a7248f02a6" size="439"/>
   <file path="LICENSE" sha256="be32bbf292492d6e69d71085c6c9311517c8152df5d003cbebd57ea0bdfb0ba3" size="1069"/>
   <file path="README.md" sha256="e89e758367c5b2ce4d74ba9ad8de7c2fcb7d497b09a6f632b23d8d404c5e0149" size="5156"/>
-  <file path="README_CN.md" sha256="83fe3634735b126236f35f160bee7428cad42bfd5460ad51aa5714cbf2c435f0" size="26783"/>
-  <file path="README_EN.md" sha256="6eefbf09d29be4381b2d24c180ca3c1d32cd473036ecf49a44222cc55b4b631e" size="24744"/>
+  <file path="README_CN.md" sha256="9d86dfe0367f23307b95f4030c0d99ecfb01ec8f7391a74654933abe7e81808f" size="26860"/>
+  <file path="README_EN.md" sha256="7ba7d5615a5388fc8dab6b1c8b746a55608257d1d9802bcf94344d8a49a834d9" size="24834"/>
   <file path="docker-compose.yml" sha256="bea2a4570ceedeab63ba86f85c879f804b8b08f9b60400c07893f339e8493be6" size="422"/>
   <file path="gen_perf_danmu.js" sha256="3902ae3de3e80c90089ee646a273922da4447dfdd9b86dab15d9c4ecba126b3e" size="2249"/>
   <file path="lib/backends/mongodb.js" sha256="81ba976701b40992c09f14c12c88c404372f93b8c01cc8774093619008ee4bc4" size="10709"/>
@@ -46,7 +46,7 @@
   <file path="public/favicon-128.png" sha256="de8371137f6c9648f8728550e71de67fb5460771062ec1b45970909a1e5dd3dc" size="2034"/>
   <file path="public/favicon.svg" sha256="ca0f3061d459fc5636914978579613a6a8b626dc69123909eceee07d2f3c8d9f" size="555"/>
   <file path="public/i18n.js" sha256="7b91ea8376c525d8e198bb55327a3d3e390d09f83fec4767359be85f05b099ff" size="234745"/>
-  <file path="public/player.html" sha256="e894a53374e662e8612cb34cfeb41dc14b8bef8fd143a0c9b3a5fea3282500fa" size="76268"/>
+  <file path="public/player.html" sha256="079d997e371333a9122e7f76e9c064422ba30db0cc4a75b297a4d371a68943f0" size="76382"/>
   <file path="public/test_video1.en.vtt" sha256="2854f0cb4a81a3f7c02842ab8a6fac8fabe7d33384182be3653c663e131c4a1d" size="182"/>
   <file path="public/test_video1.mp4" sha256="0d55da42748dca33b1e175f0ad6855c060d4587dfc0a6b525c2c731a64e94f9f" size="6962589"/>
   <file path="public/test_video1.sc.vtt" sha256="ac7927afad7ac27fb5ae515526afc07ef6436bc0d98c8941c095838fcbff798f" size="175"/>
@@ -54,7 +54,7 @@
   <file path="public/test_video1.vtt" sha256="65bf5090bbb808e9825b4205eff66e8f3799b9ef482070ae54a460b6ac18eb0d" size="115"/>
   <file path="public/test_video2.mp4" sha256="f192304389dbc213c8dde5dc6f6b77cdd09f1785dbef6255a9857b108757eb8e" size="330061"/>
   <file path="public/test_video3.mp4" sha256="5520e9715ab6371aaf5532877a3dff6010ce57793cd6cc89752aa4116d4b9d50" size="108190"/>
-  <file path="server.js" sha256="cf476225cb56a4cc75457c716018b793d4288265ed9e98f34adf83dacc40f534" size="185611"/>
+  <file path="server.js" sha256="cffb9e36460e51c0cae7369acefb1a8ad0d09e65efe3196b36f6f27e66912825" size="186335"/>
   <file path="theme/README.md" sha256="d3f4cc2fbc639f7eb6cbd98b210dd6642a840ecbbbda1b86944d574ec348746e" size="4676"/>
   <file path="theme/admin.css" sha256="2748ab4434965280b2993b3e9c565c2684bd389414fa873459c630060bd825f7" size="10177"/>
   <file path="theme/admin/bilibili/style.css" sha256="1bf60cf612a5a20cecf5f0bf8676c9831af78b54d30314bf5d27e3cc3bdec703" size="132"/>

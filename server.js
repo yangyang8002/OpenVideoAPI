@@ -1248,7 +1248,7 @@ app.post('/api/video/map', writeRateLimit(30, 60000), async (req, res) => {
     const { vid, url } = req.body || {};
     if (!isValidVid(vid) || !isValidVideoUrl(url)) return res.status(400).json({ code: 1, msg: '参数不合法' });
     try {
-        await store.videoSet(vid, url);
+        await store.videoSet(vid, normalizeOpenlistUrl(url));
         res.json({ code: 0, msg: '已记录' });
     } catch (e) {
         res.status(e.code || 500).json({ code: 1, msg: e.code === 507 ? '映射表已满' : '保存失败' });
@@ -1281,23 +1281,25 @@ async function genVideoId() {
 app.get('/api/video/resolve', writeRateLimit(60, 60000), async (req, res) => {
     const url = (req.query.url || '').trim();
     if (!url || !isValidVideoUrl(url)) return res.status(400).json({ code: 1, msg: '缺少或非法的 url 参数' });
+    /* OpenList 签名链接归一化：vid 基于剥掉签名参数的规范链接，签名变化不产生新 vid */
+    const key = normalizeOpenlistUrl(url);
     const videos = await store.videosAll();
     let existing = null;
     for (const [vid, u] of Object.entries(videos)) {
-        if (u === url) { existing = vid; break; }
+        if (u === key) { existing = vid; break; }
     }
     if (existing) return res.json({ code: 0, data: { vid: existing, source: 'map' } });
     // 旧散列算法兼容：该 URL 已有历史弹幕 → 继承旧 ID，弹幕不丢
-    const legacyId = legacyVideoId(url);
+    const legacyId = legacyVideoId(key);
     if (await hasDanmuForVid(legacyId)) {
         try {
-            await store.videoSet(legacyId, url);
+            await store.videoSet(legacyId, key);
             return res.json({ code: 0, data: { vid: legacyId, source: 'legacy' } });
         } catch (e) { return res.status(507).json({ code: 1, msg: '映射表已满' }); }
     }
     const vid = await genVideoId();
     try {
-        await store.videoSet(vid, url);
+        await store.videoSet(vid, key);
         res.json({ code: 0, data: { vid, source: 'new' } });
     } catch (e) {
         res.status(507).json({ code: 1, msg: '映射表已满' });
@@ -2829,7 +2831,8 @@ async function subtitleContent(sub) {
     return null;
 }
 
-/* 匹配 OpenList/AList 实例：仅对已启用且同源的 openlist 云端配置生效（避免凭据被外部触发利用） */
+/* 匹配 OpenList/AList 实例：仅对已启用且同源的 openlist 云端配置生效（避免凭据被外部触发利用）
+   支持带签名参数的链接（/d/xxx.mp4?sign=...）：剥离 query/hash 后再取云盘路径 */
 function matchOpenlistCfg(videoUrl) {
     const url = String(videoUrl || '');
     if (!url) return null;
@@ -2838,13 +2841,20 @@ function matchOpenlistCfg(videoUrl) {
         if (!cfg.enabled || cfg.type !== 'openlist' || !cfg.baseUrl || !cfg.user) continue;
         const base = String(cfg.baseUrl).replace(/\/+$/, '');
         if (!url.startsWith(base)) continue;
-        /* /d/xxx/yyy.mp4 → 云盘路径 /xxx/yyy.mp4 */
-        const m = url.match(/\/d\/(.+)$/);
+        /* 剥离签名等 query 参数：/d/xxx/yyy.mp4?sign=... → 云盘路径 /xxx/yyy.mp4 */
+        const clean = url.split('?')[0].split('#')[0];
+        const m = clean.match(/\/d\/(.+)$/);
         if (!m) continue;
         const rel = decodeURIComponent(m[1]);
-        return { cfg, rel, base };
+        return { cfg, rel, base, cleanUrl: clean };
     }
     return null;
+}
+
+/* OpenList 链接归一化：匹配实例的链接剥掉签名参数（vid 键 / 映射键 / 字幕检测统一用它，签名变化不影响弹幕与字幕） */
+function normalizeOpenlistUrl(url) {
+    const hit = matchOpenlistCfg(url);
+    return hit ? hit.cleanUrl : url;
 }
 
 /* OpenList/AList 同目录字幕检测 */
@@ -2867,7 +2877,7 @@ async function detectOpenlistSubs(videoUrl) {
     return [];
 }
 
-/* 解析 OpenList 视频的云盘直链（二次地址）：播放器播放直链，弹幕/字幕仍以原 OpenList 链接为准 */
+/* 解析 OpenList 视频的云盘直链（签名链接 → 二次直链）：播放器播放直链，弹幕/字幕仍以归一化后的原链接为准 */
 app.get('/api/video/resolve-link', writeRateLimit(60, 60000), async (req, res) => {
     const url = (req.query.url || '').trim();
     if (!url || !isValidVideoUrl(url)) return res.status(400).json({ code: 1, msg: '缺少或非法的 url 参数' });
@@ -2877,7 +2887,7 @@ app.get('/api/video/resolve-link', writeRateLimit(60, 60000), async (req, res) =
         const cloud = createCloud({ ...hit.cfg, path: '/' + hit.rel.split('/').slice(0, -1).join('/') });
         const raw = await cloud.resolve('/' + hit.rel);
         if (!raw) return res.json({ code: 0, data: { url, matched: false } });
-        res.json({ code: 0, data: { url: raw, matched: true, original: url } });
+        res.json({ code: 0, data: { url: raw, matched: true, original: url, cleanUrl: hit.cleanUrl } });
     } catch (e) {
         res.status(502).json({ code: 1, msg: '直链解析失败: ' + safeErrMsg(e) });
     }

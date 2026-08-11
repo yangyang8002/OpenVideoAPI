@@ -693,6 +693,15 @@
             }
         }catch(e){}
 
+        /* OpenList/AList 云盘：立即将签名链接转换为云盘直链用于播放（服务器解析，不经过 OpenList API 列目录）
+           vid / 字幕检测仍以归一化后的原链接为准：签名变化不影响弹幕与字幕关联 */
+        var playUrl=decoded;
+        try{
+            var lr=await fetch('/api/video/resolve-link?url='+encodeURIComponent(decoded));
+            var ld=await lr.json();
+            if(ld.code===0&&ld.data&&ld.data.matched&&ld.data.url)playUrl=ld.data.url;
+        }catch(e){}
+
         var subtitleUrl=qs('subtitle')||'';
         if(!subtitleUrl){
             try{
@@ -719,14 +728,6 @@
             }catch(e){}
         }
         if(!vid)vid=getVideoId(decoded);
-
-        /* OpenList/AList 云盘：服务端解析二次直链用于播放（弹幕/字幕仍以原链接为准，直链变化不影响 vid） */
-        var playUrl=decoded;
-        try{
-            var lr=await fetch('/api/video/resolve-link?url='+encodeURIComponent(decoded));
-            var ld=await lr.json();
-            if(ld.code===0&&ld.data&&ld.data.matched&&ld.data.url)playUrl=ld.data.url;
-        }catch(e){}
 
         /* 通知插件：新视频加载（vid 已确定） */
         window.OpenVideoPlayer._fire('video:load',{url:decoded,vid:vid});
