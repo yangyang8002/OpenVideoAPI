@@ -2829,34 +2829,59 @@ async function subtitleContent(sub) {
     return null;
 }
 
-/* OpenList/AList 同目录字幕检测：仅对已启用且同源的 openlist 云端配置生效，避免凭据被外部触发利用 */
-async function detectOpenlistSubs(videoUrl) {
+/* 匹配 OpenList/AList 实例：仅对已启用且同源的 openlist 云端配置生效（避免凭据被外部触发利用） */
+function matchOpenlistCfg(videoUrl) {
     const url = String(videoUrl || '');
-    if (!url) return [];
+    if (!url) return null;
     const cfgs = getAllCloudCfgs();
     for (const cfg of cfgs) {
         if (!cfg.enabled || cfg.type !== 'openlist' || !cfg.baseUrl || !cfg.user) continue;
         const base = String(cfg.baseUrl).replace(/\/+$/, '');
         if (!url.startsWith(base)) continue;
-        /* /d/xxx/yyy.mp4 → path /xxx/yyy.mp4；再取目录 */
+        /* /d/xxx/yyy.mp4 → 云盘路径 /xxx/yyy.mp4 */
         const m = url.match(/\/d\/(.+)$/);
         if (!m) continue;
         const rel = decodeURIComponent(m[1]);
-        const dirPath = '/' + rel.split('/').slice(0, -1).join('/');
-        const baseName = rel.split('/').pop().replace(/\.[^.]+$/, '');
-        try {
-            const cfg2 = { ...cfg, path: dirPath };
-            const cloud2 = createCloud(cfg2);
-            const items = await cloud2.list();
-            const subs = items.filter(it => SUB_EXT_RE.test(it.name) && (it.name === baseName + '.srt' || it.name.startsWith(baseName + '.')));
-            return subs.map(it => {
-                const langPart = it.name.slice(baseName.length + 1).replace(/\.[^.]+$/, '');
-                return { title: subLangName(langPart), lang: langPart.toLowerCase(), url: base + '/d/' + encodeURIComponent((dirPath + '/' + it.name).replace(/^\//, '')) };
-            });
-        } catch (e) { /* 检测失败忽略 */ }
+        return { cfg, rel, base };
     }
+    return null;
+}
+
+/* OpenList/AList 同目录字幕检测 */
+async function detectOpenlistSubs(videoUrl) {
+    const hit = matchOpenlistCfg(videoUrl);
+    if (!hit) return [];
+    const { cfg, rel, base } = hit;
+    const dirPath = '/' + rel.split('/').slice(0, -1).join('/');
+    const baseName = rel.split('/').pop().replace(/\.[^.]+$/, '');
+    try {
+        const cfg2 = { ...cfg, path: dirPath };
+        const cloud2 = createCloud(cfg2);
+        const items = await cloud2.list();
+        const subs = items.filter(it => SUB_EXT_RE.test(it.name) && (it.name === baseName + '.srt' || it.name.startsWith(baseName + '.')));
+        return subs.map(it => {
+            const langPart = it.name.slice(baseName.length + 1).replace(/\.[^.]+$/, '');
+            return { title: subLangName(langPart), lang: langPart.toLowerCase(), url: base + '/d/' + encodeURIComponent((dirPath + '/' + it.name).replace(/^\//, '')) };
+        });
+    } catch (e) { /* 检测失败忽略 */ }
     return [];
 }
+
+/* 解析 OpenList 视频的云盘直链（二次地址）：播放器播放直链，弹幕/字幕仍以原 OpenList 链接为准 */
+app.get('/api/video/resolve-link', writeRateLimit(60, 60000), async (req, res) => {
+    const url = (req.query.url || '').trim();
+    if (!url || !isValidVideoUrl(url)) return res.status(400).json({ code: 1, msg: '缺少或非法的 url 参数' });
+    const hit = matchOpenlistCfg(url);
+    if (!hit) return res.json({ code: 0, data: { url, matched: false } });
+    try {
+        const cloud = createCloud({ ...hit.cfg, path: '/' + hit.rel.split('/').slice(0, -1).join('/') });
+        const raw = await cloud.resolve('/' + hit.rel);
+        if (!raw) return res.json({ code: 0, data: { url, matched: false } });
+        res.json({ code: 0, data: { url: raw, matched: true, original: url } });
+    } catch (e) {
+        res.status(502).json({ code: 1, msg: '直链解析失败: ' + safeErrMsg(e) });
+    }
+});
 
 app.get('/api/admin/subtitles', checkAdmin, async (req, res) => {
     const search = (req.query.search || '').toLowerCase();

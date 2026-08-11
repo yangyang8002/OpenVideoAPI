@@ -720,6 +720,14 @@
         }
         if(!vid)vid=getVideoId(decoded);
 
+        /* OpenList/AList 云盘：服务端解析二次直链用于播放（弹幕/字幕仍以原链接为准，直链变化不影响 vid） */
+        var playUrl=decoded;
+        try{
+            var lr=await fetch('/api/video/resolve-link?url='+encodeURIComponent(decoded));
+            var ld=await lr.json();
+            if(ld.code===0&&ld.data&&ld.data.matched&&ld.data.url)playUrl=ld.data.url;
+        }catch(e){}
+
         /* 通知插件：新视频加载（vid 已确定） */
         window.OpenVideoPlayer._fire('video:load',{url:decoded,vid:vid});
         try{fetch('/api/video/map',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vid:vid,url:decoded})}).catch(function(){})}catch(e){}
@@ -754,7 +762,7 @@
         var artLang=artLangs[I18N.lang]||'zh-cn';
 
         var options={
-            container:'#artplayer',url:decoded,
+            container:'#artplayer',url:playUrl,
             lang:artLang,
             autoplay:true,autoSize:true,autoMini:true,
             volume:parseFloat(localStorage.getItem('ap_volume'))||0.7,
