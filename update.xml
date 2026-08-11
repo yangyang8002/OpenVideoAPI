@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 版本清单：更新进程依据此文件校验与执行更新（data/ 目录不参与更新） -->
 <update>
-  <version>26.8.14</version>
+  <version>26.8.15</version>
   <date>2026-08-11</date>
-  <message>v26.8.14: embed-subtitle 1.0.5 - install no longer hangs (optional binary deps + npmmirror lazy download)</message>
+  <message>v26.8.15: fix first-run wizard (db test 403 before init, password validation timing, wizard button layout)</message>
   <files>
   <file path=".dockerignore" sha256="92b725988b57a03160cb825d470f929fbecbf4ee25b4dbc28a7fdb3a8c41a781" size="78"/>
   <file path=".github/social-preview.png" sha256="0949997a033350b2096a95f68c4a3eaabe2e3952913e91a0bec59807bbfdb246" size="21642"/>
@@ -11,12 +11,12 @@
   <file path=".github/workflows/npm-publish-github-packages.yml" sha256="e7b7ac761eaa5af1c6b59f2f79bdbf1c48a32cd8db949b7bf3fc3e92f72f7286" size="570"/>
   <file path=".gitignore" sha256="6fbfa90f846df5513d652e6d9d9d58c54088835494d61fdd2bb9a34c32d5d3f8" size="90"/>
   <file path=".npmignore" sha256="408a2ab327b75ed60f56173f106c02754a75a569a02648a633c243c34cd935e8" size="130"/>
-  <file path="DOCKER.md" sha256="3467e0d75959b1c13aae3a4cb57573158fac18ca9b6f7a1dc27e6071dd234182" size="3388"/>
+  <file path="DOCKER.md" sha256="c42f27eb3f9f8084ad664091b490e3f54f32abe1594b8fa16728a79d29a47702" size="3388"/>
   <file path="Dockerfile" sha256="399f597c91d113a6bc18afeafdbb6e4965e4073f408b6dd90754599aa92cbae2" size="446"/>
   <file path="LICENSE" sha256="be32bbf292492d6e69d71085c6c9311517c8152df5d003cbebd57ea0bdfb0ba3" size="1069"/>
-  <file path="README.md" sha256="ecd71d3f2183864fcb551fee7f99887dc780318a1e8b67eb881779674da91818" size="5156"/>
-  <file path="README_CN.md" sha256="4a56659698d64dd11b90f22e4bd71bb84b152363b6b4f2d4fe3f4daf3a2e1f68" size="26860"/>
-  <file path="README_EN.md" sha256="c25c1ae8dda89ad758138dda870d92f95bb395931ee705e0d1fe82e5f2ff9bae" size="24834"/>
+  <file path="README.md" sha256="b9658552a9df75eb36761611a39c8b2ac523982b2ee437d7394be45ea6835eed" size="5156"/>
+  <file path="README_CN.md" sha256="afce8ab19a31658447d105e40d6ca9bf2a0f1a30d5a0293cd2d45cda2a31d435" size="26860"/>
+  <file path="README_EN.md" sha256="fecb8fb61cd97b95b60a0989a2da8cd1d93e45917b8683ca2053037e90712dd5" size="24834"/>
   <file path="docker-compose.yml" sha256="bea2a4570ceedeab63ba86f85c879f804b8b08f9b60400c07893f339e8493be6" size="422"/>
   <file path="gen_perf_danmu.js" sha256="3902ae3de3e80c90089ee646a273922da4447dfdd9b86dab15d9c4ecba126b3e" size="2249"/>
   <file path="lib/backends/mongodb.js" sha256="81ba976701b40992c09f14c12c88c404372f93b8c01cc8774093619008ee4bc4" size="10709"/>
@@ -29,8 +29,8 @@
   <file path="lib/proxy.js" sha256="52a453c81a8c6c7acfd4a625baba397feddd9ba46e635a558840647b5f893ebe" size="5032"/>
   <file path="lib/store.js" sha256="7b3d44de4d2e432acfa8913e49f2ced618d433dd221ae28a97356e1748e680b7" size="29717"/>
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
-  <file path="package-lock.json" sha256="f708fbfa08ab0f9d61957c08b601b3a7799def43168c65bb3092369e2596556e" size="86521"/>
-  <file path="package.json" sha256="2e01817fc1caf51a06bb3261a2d6f027f6768e597f6b714b87bc43d6d344c1b7" size="1565"/>
+  <file path="package-lock.json" sha256="4d09dbb2bd4e165d6ccb31cd9406306521352992d58e89a2310e1c0a75c29138" size="86521"/>
+  <file path="package.json" sha256="52d74bf32c0033070eec01b0a195e63a7cc0f2652f1ad78495a40f6fea6eb3f5" size="1565"/>
   <file path="plugin-registry.json" sha256="a0bdb80f5b87876634ddc55d5b3dfca5a7790e9c6384ab7b45ac4b765786401a" size="2995"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/admin/debug.js" sha256="3464753a927d51247d75172d3bd06fdb8c8a3391b9b39e6d4837b01de4e877fc" size="6036"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/player/overlay.js" sha256="3fec13a81e5d8d4af2b8e7e2b37b97e0723265f5c5e25fc5a3e41e7be9f5324e" size="1503"/>
@@ -51,7 +51,7 @@
   <file path="plugins/openvideo-plugin-otp/lib/index.js" sha256="a199c3d55ead7cc498601f2765ad9857c32c2009039645d95ceba60730dd47f2" size="14297"/>
   <file path="plugins/openvideo-plugin-otp/package.json" sha256="2d662fa47f2a254bb869cb4b1fcc8f4e374b02b754b9eff736d706e59ad44a74" size="1722"/>
   <file path="public/CUSTOM_THEME.md" sha256="a4394eb9fd4e0d7b68d0273fd957ec17cadfa2a0481aa28f5f55298c006008c0" size="3271"/>
-  <file path="public/admin.html" sha256="d9585187ee4fbd652516adeb15326a476e66947a6b27800de804fb28161f3f73" size="307170"/>
+  <file path="public/admin.html" sha256="a7daa53307905166a69eeaf5286f4b55beb22b84f483a1e0aca1dd3d07cc109e" size="307429"/>
   <file path="public/favicon-128.png" sha256="de8371137f6c9648f8728550e71de67fb5460771062ec1b45970909a1e5dd3dc" size="2034"/>
   <file path="public/favicon.svg" sha256="ca0f3061d459fc5636914978579613a6a8b626dc69123909eceee07d2f3c8d9f" size="555"/>
   <file path="public/i18n.js" sha256="f93d997b27b61ce1254b6ee4e77ea8d91db8ff599548a41c65ae791b596620fb" size="249838"/>
@@ -63,7 +63,7 @@
   <file path="public/test_video1.vtt" sha256="65bf5090bbb808e9825b4205eff66e8f3799b9ef482070ae54a460b6ac18eb0d" size="115"/>
   <file path="public/test_video2.mp4" sha256="f192304389dbc213c8dde5dc6f6b77cdd09f1785dbef6255a9857b108757eb8e" size="330061"/>
   <file path="public/test_video3.mp4" sha256="5520e9715ab6371aaf5532877a3dff6010ce57793cd6cc89752aa4116d4b9d50" size="108190"/>
-  <file path="server.js" sha256="974e5e1909d6381abaaec3fb7bbec5a56994e0aea3dfcd8b0d2d4442de5c02e1" size="192999"/>
+  <file path="server.js" sha256="7d105342f98b363be3cc67d379eb3f528e237467568574c675390a7483b054c9" size="193095"/>
   <file path="theme/README.md" sha256="d3f4cc2fbc639f7eb6cbd98b210dd6642a840ecbbbda1b86944d574ec348746e" size="4676"/>
   <file path="theme/admin.css" sha256="2748ab4434965280b2993b3e9c565c2684bd389414fa873459c630060bd825f7" size="10177"/>
   <file path="theme/admin/bilibili/style.css" sha256="1bf60cf612a5a20cecf5f0bf8676c9831af78b54d30314bf5d27e3cc3bdec703" size="132"/>
