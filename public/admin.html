@@ -1908,7 +1908,7 @@
             try { localStorage.removeItem('ap_nav_collapsed'); localStorage.removeItem('ap_nav_init'); } catch (e) {}
             loadNavEditor();
         }
-        /* 导航设置卡片折叠（默认收起，点击标题展开） */
+        /* 导航设置卡片折叠（默认始终折叠，点击标题展开） */
         function toggleNavCard() {
             const body = document.getElementById('navCardBody');
             const caret = document.getElementById('navCardCaret');
@@ -1917,17 +1917,14 @@
             body.style.display = open ? 'none' : '';
             if (caret) caret.innerHTML = open ? '&#9654;' : '&#9660;';
             if (!open) loadNavEditor();
-            try { localStorage.setItem('ap_nav_card', open ? '0' : '1'); } catch (e) {}
         }
         function initNavCard() {
             const body = document.getElementById('navCardBody');
             const caret = document.getElementById('navCardCaret');
             if (!body) return;
-            let open = false;
-            try { open = localStorage.getItem('ap_nav_card') === '1'; } catch (e) {}
-            body.style.display = open ? '' : 'none';
-            if (caret) caret.innerHTML = open ? '&#9660;' : '&#9654;';
-            if (open) loadNavEditor();
+            /* 默认折叠 */
+            body.style.display = 'none';
+            if (caret) caret.innerHTML = '&#9654;';
         }
         function populateThemeSelects() {
             fetch('/api/theme/player/list').then(r => r.json()).then(d => {
