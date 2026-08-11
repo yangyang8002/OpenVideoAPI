@@ -13,10 +13,12 @@
  *   POST /api/plugin/embed-sub/detect      { file }
  *   POST /api/plugin/embed-sub/extract     { file, index, lang?, name?, vid? }
  *   POST /api/plugin/embed-sub/extract-all { file, indexes: [], vid? }
- *   file 为服务器本地路径（相对项目根，如 public/videos/demo.mkv，或绝对路径）
+ *   file 为服务器本地路径（相对项目根，如 public/videos/demo.mkv，或绝对路径），
+ *   或 http(s) 视频链接（自动扫描链接视频的内封字幕；拒绝内网/保留地址，防 SSRF）。
  *
  * 前置：服务器需安装 ffmpeg（含 ffprobe），可在插件配置中指定路径。
- * 安全：文件路径仅允许项目根目录内；ffprobe/ffmpeg 子进程带超时与强制终止。
+ * 安全：本地路径仅允许项目根目录内；URL 拒绝内网/保留/元数据地址（DNS 解析后二次校验）；
+ *       ffprobe/ffmpeg 子进程带超时与强制终止。
  * ========================================================================== */
 const fs = require('fs');
 const path = require('path');
@@ -31,7 +33,7 @@ function findRoot() {
         if (next === dir) break;
         dir = next;
     }
-    return path.resolve(__dirname, '..', '..');
+    return path.resolve(__dirname, '..');
 }
 const ROOT = findRoot();
 const SUB_DIR = path.join(ROOT, 'data', 'subtitles');
@@ -45,6 +47,58 @@ function resolveFile(file) {
     if (p !== ROOT && !p.startsWith(ROOT + path.sep)) return null;
     if (!fs.existsSync(p) || !fs.statSync(p).isFile()) return null;
     return p;
+}
+
+/* ---------- 输入源解析：本地文件路径 或 http(s) 视频链接 ---------- */
+function parseSource(input) {
+    if (typeof input !== 'string' || !input) return null;
+    const t = input.trim();
+    if (/^https?:\/\//i.test(t)) {
+        try { new URL(t); } catch (e) { return null; }
+        return { type: 'url', url: t };
+    }
+    const p = resolveFile(t);
+    if (!p) return null;
+    return { type: 'file', path: p };
+}
+
+/* ---------- SSRF 防护：内网/保留/元数据 IP 段（与主项目同策略） ---------- */
+function isPrivateIp(ip) {
+    const s = String(ip || '');
+    if (s.includes(':')) {
+        const lower = s.toLowerCase();
+        if (lower === '::1' || lower === '::' || lower === '[::1]' || lower === '[::]') return true;
+        if (lower.startsWith('fe80') || lower.startsWith('fc') || lower.startsWith('fd') || lower.startsWith('ff') || lower.startsWith('fe')) return true;
+        return false;
+    }
+    const parts = s.split('.');
+    if (parts.length !== 4) return true;
+    const n = parts.map(Number);
+    if (n.some(x => isNaN(x) || x < 0 || x > 255)) return true;
+    const a = n[0], b = n[1];
+    return a === 0 || a === 10 || a === 127 || a === 169 && b === 254 || a === 192 && b === 168 ||
+        a === 172 && b >= 16 && b <= 31 || a >= 224;
+}
+
+/* 链接安全校验：拒绝内网/保留/元数据地址（DNS 解析后再次校验，防 DNS rebinding） */
+async function isSafeUrl(url) {
+    let parsed;
+    try { parsed = new URL(url); } catch (e) { return false; }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+    const host = parsed.hostname;
+    if (/^\[|:/.test(host)) {
+        if (host === '[::1]' || host === '::1' || host === '[::]' || host === '::') return false;
+        return true;
+    }
+    const looksIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(host);
+    if (looksIp) return !isPrivateIp(host);
+    if (host === 'localhost') return false;
+    try {
+        const dns = require('dns');
+        const addrs = await new Promise((resolve) => dns.lookup(host, { all: true }, (err, a) => err ? resolve([]) : resolve(a || [])));
+        if (!addrs.length) return true;
+        return addrs.every(a => !isPrivateIp(a.address.replace(/^::ffff:/, '')));
+    } catch (e) { return true; }
 }
 
 /* ---------- 子进程执行（超时强制终止） ---------- */
@@ -79,10 +133,13 @@ function codecIsText(codec) { return TEXT_CODECS.includes(String(codec || '').to
 function codecIsImage(codec) { return IMAGE_CODECS.includes(String(codec || '').toLowerCase()); }
 
 /* ---------- 检测 ---------- */
-async function detectStreams(ffprobe, filePath) {
-    const r = await run(ffprobe, ['-v', 'error', '-select_streams', 's', '-show_entries',
+async function detectStreams(ffprobe, source) {
+    const args = ['-v', 'error', '-select_streams', 's', '-show_entries',
         'stream=index,codec_name,codec_type:stream_tags=language,title:stream_disposition=default,forced',
-        '-of', 'json', filePath], 20000);
+        '-of', 'json'];
+    if (source.type === 'url') args.push('-rw_timeout', '30000000');
+    args.push(source.type === 'url' ? source.url : source.path);
+    const r = await run(ffprobe, args, 30000);
     if (!r.ok) throw new Error('ffprobe 执行失败: ' + (r.err || r.out || 'code ' + r.code).slice(-300));
     let j;
     try { j = JSON.parse(r.out); } catch (e) { throw new Error('ffprobe 输出解析失败'); }
@@ -118,11 +175,23 @@ function genSubId() {
 
 const VID_CHARS = '23456789abcdefghijkmnpqrstuvwxyz'; /* 与 server.js 同字符集 */
 
-/* 由文件路径推导播放 URL：public/ 下的文件可直接播放（如 public/test_embed/a.mkv → /test_embed/a.mkv） */
-function playUrlOf(filePath) {
-    const rel = path.relative(ROOT, filePath).replace(/\\/g, '/');
+/* 由输入源推导播放 URL：本地 public/ 下的文件可直接播放；URL 源直接返回自身 */
+function playUrlOf(source) {
+    if (source.type === 'url') return source.url;
+    const rel = path.relative(ROOT, source.path).replace(/\\/g, '/');
     if (rel.startsWith('public/')) return '/' + rel.slice('public/'.length);
     return null;
+}
+
+/* 输入源显示名（URL 取路径最后一段并解码） */
+function baseNameOf(source) {
+    if (source.type === 'url') {
+        try {
+            const p = new URL(source.url).pathname.split('/').filter(Boolean).pop() || 'video';
+            return path.basename(decodeURIComponent(p), path.extname(p));
+        } catch (e) { return 'video'; }
+    }
+    return path.basename(source.path, path.extname(source.path));
 }
 
 /* 自动关联：查已有映射，否则分配 8 位 vid 并写入（提取后播放器立即可见字幕） */
@@ -179,56 +248,62 @@ module.exports = {
             }
         };
 
-        /* 检测：列出文件内封字幕轨道 */
+        /* 检测：列出文件内封字幕轨道（支持本地路径或 http(s) 链接） */
         ctx.router.post('/api/plugin/embed-sub/detect', wrap(async (req, res) => {
             const file = String((req.body || {}).file || '');
-            const filePath = resolveFile(file);
-            if (!filePath) { const e = new Error('文件不存在或路径非法'); e.status = 400; throw e; }
-            const streams = await detectStreams(ffprobe, filePath);
+            const source = parseSource(file);
+            if (!source) { const e = new Error('文件不存在或路径非法'); e.status = 400; throw e; }
+            if (source.type === 'url' && !(await isSafeUrl(source.url))) { const e = new Error('链接无效或指向内网/保留地址，已拒绝'); e.status = 400; throw e; }
+            const streams = await detectStreams(ffprobe, source);
             res.json({ code: 0, data: { file, streams, ffprobe } });
         }));
 
         /* 提取单条轨道到字幕库 */
         ctx.router.post('/api/plugin/embed-sub/extract', wrap(async (req, res) => {
             const { file, index, lang, name, vid } = req.body || {};
-            const filePath = resolveFile(file);
-            if (!filePath) { const e = new Error('文件不存在或路径非法'); e.status = 400; throw e; }
-            const streams = await detectStreams(ffprobe, filePath);
+            const source = parseSource(file);
+            if (!source) { const e = new Error('文件不存在或路径非法'); e.status = 400; throw e; }
+            if (source.type === 'url' && !(await isSafeUrl(source.url))) { const e = new Error('链接无效或指向内网/保留地址，已拒绝'); e.status = 400; throw e; }
+            const streams = await detectStreams(ffprobe, source);
             const st = streams.find(s => s.index === parseInt(index));
             if (!st) { const e = new Error('字幕轨道不存在: ' + index); e.status = 400; throw e; }
             if (!st.text) { const e = new Error('轨道 ' + index + ' 为图形字幕（' + (st.codec || '?') + '），无法提取为文本'); e.status = 400; throw e; }
-            const item = await extractOne(filePath, st, lang, name, vid);
+            const item = await extractOne(source, st, lang, name, vid);
             res.json({ code: 0, msg: '已提取并加入字幕库', data: item });
         }));
 
         /* 批量提取多条轨道 */
         ctx.router.post('/api/plugin/embed-sub/extract-all', wrap(async (req, res) => {
             const { file, indexes, vid } = req.body || {};
-            const filePath = resolveFile(file);
-            if (!filePath) { const e = new Error('文件不存在或路径非法'); e.status = 400; throw e; }
-            const streams = await detectStreams(ffprobe, filePath);
+            const source = parseSource(file);
+            if (!source) { const e = new Error('文件不存在或路径非法'); e.status = 400; throw e; }
+            if (source.type === 'url' && !(await isSafeUrl(source.url))) { const e = new Error('链接无效或指向内网/保留地址，已拒绝'); e.status = 400; throw e; }
+            const streams = await detectStreams(ffprobe, source);
             const want = Array.isArray(indexes) ? indexes.map(i => parseInt(i)) : [];
             const picked = streams.filter(s => want.includes(s.index) && s.text);
             if (!picked.length) { const e = new Error('未选择可提取的文本字幕轨道'); e.status = 400; throw e; }
             const items = [];
-            for (const st of picked) items.push(await extractOne(filePath, st, '', '', vid));
-            ctx.logger.info('embed-sub', '从 ' + path.basename(filePath) + ' 提取 ' + items.length + ' 条字幕');
+            for (const st of picked) items.push(await extractOne(source, st, '', '', vid));
+            ctx.logger.info('embed-sub', '从 ' + baseNameOf(source) + ' 提取 ' + items.length + ' 条字幕');
             res.json({ code: 0, msg: '已提取 ' + items.length + ' 条字幕并加入字幕库', data: { items } });
         }));
 
-        async function extractOne(filePath, st, langOverride, nameOverride, vid) {
+        async function extractOne(source, st, langOverride, nameOverride, vid) {
             if (!fs.existsSync(SUB_DIR)) fs.mkdirSync(SUB_DIR, { recursive: true });
             /* 自动关联：未指定 vid 时推导播放 URL 并分配/复用映射，提取后播放器立即可见字幕 */
             if (!vid) {
-                const pUrl = playUrlOf(filePath);
+                const pUrl = playUrlOf(source);
                 if (pUrl) vid = await autoVid(ctx, pUrl);
             }
-            const base = path.basename(filePath, path.extname(filePath));
+            const base = baseNameOf(source);
             const lang = langOverride || st.language || String(st.index);
             const ext = extFor(st.codec);
             const saveName = Date.now().toString(36) + '-' + base + '.' + lang + '.' + ext;
             const outPath = path.join(SUB_DIR, saveName);
-            const r = await run(ffmpeg, ['-v', 'error', '-i', filePath, '-map', '0:' + st.index, '-c:s', outCodec(ext), '-y', outPath], timeoutMs);
+            const args = ['-v', 'error'];
+            if (source.type === 'url') args.push('-rw_timeout', '30000000');
+            args.push('-i', source.type === 'url' ? source.url : source.path, '-map', '0:' + st.index, '-c:s', outCodec(ext), '-y', outPath);
+            const r = await run(ffmpeg, args, timeoutMs);
             if (!r.ok || !fs.existsSync(outPath) || fs.statSync(outPath).size === 0) {
                 try { fs.unlinkSync(outPath); } catch (e) {}
                 throw new Error('ffmpeg 提取失败: ' + (r.err || r.out || 'code ' + r.code).slice(-300));
@@ -254,7 +329,7 @@ module.exports = {
                 if (!subsMap[vid].includes(item.id)) subsMap[vid].push(item.id);
                 await ctx.store.videoSubsWrite(subsMap);
                 item.vid = vid;
-                item.playUrl = playUrlOf(filePath);
+                item.playUrl = playUrlOf(source);
             }
             return item;
         }

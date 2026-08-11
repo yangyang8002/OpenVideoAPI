@@ -5,8 +5,8 @@
     'use strict';
     var D = {
         zh: {
-            title: '内封字幕采集', tip: '输入服务器本地视频文件路径（相对项目根，如 public/videos/demo.mkv，或绝对路径），检测其内嵌字幕轨道并用 ffmpeg 提取到字幕库。',
-            file: '视频文件路径', detect: '检测内封字幕', detecting: '检测中...', none: '未检测到文本字幕轨道',
+            title: '内封字幕采集', tip: '输入服务器本地视频文件路径（相对项目根，如 public/videos/demo.mkv，或绝对路径），或直接粘贴 http(s) 视频链接，检测其内嵌字幕轨道并用 ffmpeg 提取到字幕库。',
+            file: '视频文件路径 / 链接', detect: '检测内封字幕', detecting: '检测中...', none: '未检测到文本字幕轨道',
             image: '图形字幕', text: '文本', lang: '语言', codec: '编码', def: '默认', forced: '强制',
             extractSel: '提取所选轨道到字幕库', extracting: '提取中...', done: '已提取 N 条字幕并加入字幕库',
             vid: '关联视频码（可选）', needFile: '请输入视频文件路径', needTrack: '请勾选至少一条文本字幕轨道',
@@ -14,8 +14,8 @@
             empty: '暂无'
         },
         en: {
-            title: 'Embedded Subtitles', tip: 'Enter a local video file path on the server (relative to the project root, e.g. public/videos/demo.mkv, or absolute), detect its embedded subtitle tracks and extract them into the subtitle library with ffmpeg.',
-            file: 'Video file path', detect: 'Detect embedded subtitles', detecting: 'Detecting...', none: 'No text subtitle tracks found',
+            title: 'Embedded Subtitles', tip: 'Enter a local video file path on the server (relative to the project root, e.g. public/videos/demo.mkv, or absolute) or paste an http(s) video link directly, detect its embedded subtitle tracks and extract them into the subtitle library with ffmpeg.',
+            file: 'Video file path / URL', detect: 'Detect embedded subtitles', detecting: 'Detecting...', none: 'No text subtitle tracks found',
             image: 'image', text: 'text', lang: 'Lang', codec: 'Codec', def: 'default', forced: 'forced',
             extractSel: 'Extract selected tracks to library', extracting: 'Extracting...', done: 'N subtitles extracted and added to the library',
             vid: 'Video ID to link (optional)', needFile: 'Enter the video file path', needTrack: 'Select at least one text subtitle track',
@@ -23,8 +23,8 @@
             empty: 'none'
         },
         zhHant: {
-            title: '內封字幕採集', tip: '輸入服務器本地視頻文件路徑（相對項目根，如 public/videos/demo.mkv，或絕對路徑），檢測其內嵌字幕軌道並用 ffmpeg 提取到字幕庫。',
-            file: '視頻文件路徑', detect: '檢測內封字幕', detecting: '檢測中...', none: '未檢測到文本字幕軌道',
+            title: '內封字幕採集', tip: '輸入服務器本地視頻文件路徑（相對項目根，如 public/videos/demo.mkv，或絕對路徑），或直接粘貼 http(s) 視頻鏈接，檢測其內嵌字幕軌道並用 ffmpeg 提取到字幕庫。',
+            file: '視頻文件路徑 / 鏈接', detect: '檢測內封字幕', detecting: '檢測中...', none: '未檢測到文本字幕軌道',
             image: '圖形字幕', text: '文本', lang: '語言', codec: '編碼', def: '默認', forced: '強制',
             extractSel: '提取所選軌道到字幕庫', extracting: '提取中...', done: '已提取 N 條字幕並加入字幕庫',
             vid: '關聯視頻碼（可選）', needFile: '請輸入視頻文件路徑', needTrack: '請勾選至少一條文本字幕軌道',
@@ -32,8 +32,8 @@
             empty: '暫無'
         },
         wyw: {
-            title: '內封字幕之採', tip: '入伺服本視頻文徑（對項目根，如 public/videos/demo.mkv，或絕徑），察其內嵌字幕軌並以 ffmpeg 取入字幕庫。',
-            file: '視頻文徑', detect: '察內封字幕', detecting: '察中...', none: '未察得文字幕軌',
+            title: '內封字幕之採', tip: '入伺服本視頻文徑（對項目根，如 public/videos/demo.mkv，或絕徑），或直粘 http(s) 視頻鏈，察其內嵌字幕軌並以 ffmpeg 取入字幕庫。',
+            file: '視頻文徑 / 鏈', detect: '察內封字幕', detecting: '察中...', none: '未察得文字幕軌',
             image: '圖幕', text: '文', lang: '語', codec: '碼', def: '常', forced: '強',
             extractSel: '取所選軌入字幕庫', extracting: '取中...', done: '已取 N 條字幕入字幕庫',
             vid: '關聯視頻碼（可選）', needFile: '請入視頻文徑', needTrack: '請勾至少一文字幕軌',
@@ -41,8 +41,8 @@
             empty: '暫無'
         },
         ja: {
-            title: '埋め込み字幕の抽出', tip: 'サーバー上の動画ファイルのパスを入力（プロジェクトルート相対、例 public/videos/demo.mkv、または絶対パス）。埋め込み字幕トラックを検出し、ffmpeg で字幕ライブラリに抽出します。',
-            file: '動画ファイルパス', detect: '埋め込み字幕を検出', detecting: '検出中...', none: 'テキスト字幕トラックが見つかりません',
+            title: '埋め込み字幕の抽出', tip: 'サーバー上の動画ファイルのパスを入力（プロジェクトルート相対、例 public/videos/demo.mkv、または絶対パス）、または http(s) 動画リンクを直接貼り付けます。埋め込み字幕トラックを検出し、ffmpeg で字幕ライブラリに抽出します。',
+            file: '動画ファイルパス / URL', detect: '埋め込み字幕を検出', detecting: '検出中...', none: 'テキスト字幕トラックが見つかりません',
             image: '画像字幕', text: 'テキスト', lang: '言語', codec: 'コーデック', def: 'デフォルト', forced: '強制',
             extractSel: '選択したトラックをライブラリに抽出', extracting: '抽出中...', done: 'N 件の字幕を抽出してライブラリに追加しました',
             vid: '関連付ける動画ID（任意）', needFile: '動画ファイルパスを入力してください', needTrack: 'テキスト字幕トラックを1つ以上選択してください',
@@ -50,8 +50,8 @@
             empty: 'なし'
         },
         fr: {
-            title: 'Extraction des sous-titres incrustés', tip: 'Saisissez le chemin d\'un fichier vidéo local (relatif à la racine du projet, ex. public/videos/demo.mkv, ou absolu) pour détecter ses pistes de sous-titres incrustés et les extraire dans la bibliothèque avec ffmpeg.',
-            file: 'Chemin du fichier vidéo', detect: 'Détecter les sous-titres incrustés', detecting: 'Détection...', none: 'Aucune piste de sous-titres texte trouvée',
+            title: 'Extraction des sous-titres incrustés', tip: 'Saisissez le chemin d\'un fichier vidéo local (relatif à la racine du projet, ex. public/videos/demo.mkv, ou absolu) ou collez directement un lien vidéo http(s) pour détecter ses pistes de sous-titres incrustés et les extraire dans la bibliothèque avec ffmpeg.',
+            file: 'Chemin du fichier / URL', detect: 'Détecter les sous-titres incrustés', detecting: 'Détection...', none: 'Aucune piste de sous-titres texte trouvée',
             image: 'image', text: 'texte', lang: 'Langue', codec: 'Codec', def: 'défaut', forced: 'forcé',
             extractSel: 'Extraire les pistes sélectionnées', extracting: 'Extraction...', done: 'N sous-titres extraits et ajoutés à la bibliothèque',
             vid: 'ID vidéo à lier (optionnel)', needFile: 'Saisissez le chemin du fichier vidéo', needTrack: 'Sélectionnez au moins une piste de sous-titres texte',
@@ -75,7 +75,7 @@
                     <h3><span class="dot" style="background:var(--primary);box-shadow:0 0 6px var(--primary)"></span>${esc2(T('title'))}</h3>
                     <div class="cfg-hint" style="margin-bottom:10px">${esc2(T('tip'))}</div>
                     <div class="cfg-row"><span>${esc2(T('file'))}</span>
-                        <input type="text" id="esFile" placeholder="public/videos/demo.mkv" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
+                        <input type="text" id="esFile" placeholder="public/videos/demo.mkv 或 https://..." style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
                     </div>
                     <div class="cfg-row"><span>${esc2(T('vid'))}</span>
                         <input type="text" id="esVid" placeholder="" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">

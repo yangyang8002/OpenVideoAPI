@@ -55,7 +55,7 @@
     },
     {
       "name": "openvideo-plugin-embed-subtitle",
-      "description": "内封字幕采集：ffprobe 检测视频内嵌字幕轨道（多轨/多语言），ffmpeg 提取到字幕库，可关联视频",
+      "description": "内封字幕采集：ffprobe/ffmpeg 检测并提取视频内嵌字幕轨道（支持服务器本地文件与 http(s) 链接），多轨批量提取、自动关联视频",
       "author": "yangyang8002",
       "homepage": "https://github.com/yangyang8002/openvideo-plugin-embed-subtitle",
       "icon": "",
@@ -72,6 +72,7 @@
         "采集"
       ],
       "versions": [
+        "1.0.4",
         "1.0.3",
         "1.0.2",
         "1.0.1",
