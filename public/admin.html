@@ -152,14 +152,15 @@
         }
         .login-card input:focus { border-color: var(--primary2); box-shadow: 0 0 16px rgba(120,100,240,.12); }
         .login-card input::placeholder { color: var(--text3); letter-spacing: 0; }
-        .login-card button {
+        /* 仅登录按钮（.login-card 直接子级）用大按钮样式；初始化向导内的 .btn 按钮保持原有样式 */
+        .login-card > button {
             width: 100%; padding: 12px; border: none; border-radius: var(--radius);
             background: linear-gradient(135deg, var(--accent), var(--primary2));
             color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
             margin-top: 8px; transition: transform .15s, box-shadow .15s;
         }
-        .login-card button:hover { transform: translateY(-1px); box-shadow: 0 4px 24px rgba(120,100,240,.3); }
-        .login-card button:active { transform: scale(.98); }
+        .login-card > button:hover { transform: translateY(-1px); box-shadow: 0 4px 24px rgba(120,100,240,.3); }
+        .login-card > button:active { transform: scale(.98); }
 
         /* Sidebar */
         #sidebar {
@@ -4153,19 +4154,19 @@
         }
         function initStep(delta) {
             const next = initCur + delta;
+            /* 离开密码步骤（点「完成初始化」）时才校验密码，进入该步骤时不校验（此时密码尚未填写） */
+            if (delta > 0 && initCur === 4) {
+                const n1 = document.getElementById('initNewPwd').value;
+                const n2 = document.getElementById('initNewPwd2').value;
+                if (n1 !== n2) { document.getElementById('initMsg').textContent = '两次输入的密码不一致'; return; }
+                if (n1.length < 4) { document.getElementById('initMsg').textContent = '新密码至少4位'; return; }
+            }
             if (delta > 0 && next === 2) {
                 document.getElementById('initTzPreview').textContent = '当前时间: ' + new Date().toLocaleString('zh-CN', { timeZone: document.getElementById('initTz').value });
             }
             if (next < 1 || next > 4) {
                 if (next > 4) initFinish();
                 return;
-            }
-            if (next === 4) {
-                const db = initDbBody();
-                const n1 = document.getElementById('initNewPwd').value;
-                const n2 = document.getElementById('initNewPwd2').value;
-                if (n1 !== n2) { document.getElementById('initMsg').textContent = '两次输入的密码不一致'; return; }
-                if (n1.length < 4) { document.getElementById('initMsg').textContent = '密码至少 4 位'; return; }
             }
             initCur = next;
             document.getElementById('initMsg').textContent = '';

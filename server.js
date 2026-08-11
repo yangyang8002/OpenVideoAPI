@@ -232,11 +232,11 @@ app.use((req, res, next) => {
     next();
 });
 
-/* 首次初始化拦截：未完成「修改密码 + 设置安全入口」前，仅允许登录与初始化接口 */
+/* 首次初始化拦截：未完成「修改密码 + 设置安全入口」前，仅允许登录、初始化与数据库连接测试接口（初始化向导「测试连接」需要） */
 app.use('/api/admin', (req, res, next) => {
     const sec = readConfig().security || {};
     if (!sec.firstRun) return next();
-    if (req.path === '/login' || req.path === '/init') return next();
+    if (req.path === '/login' || req.path === '/init' || req.path === '/db/test') return next();
     return res.status(403).json({ code: 403, msg: '请先完成初始化（修改密码与安全入口）' });
 });
 
