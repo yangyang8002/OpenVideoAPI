@@ -1495,13 +1495,13 @@ app.post('/api/admin/change-username', checkAdmin, async (req, res) => {
     res.json({ code: 0, msg: '用户名已更换，请使用新用户名重新登录', data: { token, username: newUsername } });
 });
 
-/* 侧边导航默认分组（后台 tab 分类；可在服务器配置中调整顺序/分组） */
+/* 侧边导航默认分组（后台 tab 分类；可在服务器配置中调整顺序/分组/默认折叠） */
 const DEFAULT_NAV = {
     groups: [
-        { id: 'content', name: '内容管理', items: ['words', 'danmu', 'videos', 'subs'] },
-        { id: 'system', name: '系统', items: ['config', 'security', 'db', 'backup', 'files'] },
-        { id: 'ext', name: '扩展', items: ['plugins', 'market', 'deps'] },
-        { id: 'monitor', name: '监控', items: ['logs', 'api'] }
+        { id: 'content', name: '内容管理', items: ['words', 'danmu', 'videos', 'subs'], collapsed: true },
+        { id: 'system', name: '系统', items: ['config', 'security', 'db', 'backup', 'files'], collapsed: false },
+        { id: 'ext', name: '扩展', items: ['plugins', 'market', 'deps'], collapsed: true },
+        { id: 'monitor', name: '监控', items: ['logs', 'api'], collapsed: true }
     ],
     pinnedTop: ['console'],
     pinnedBottom: ['about']
@@ -1510,12 +1510,15 @@ function getNavConfig() {
     const c = readConfig();
     const nav = c.ui && c.ui.nav;
     if (!nav || typeof nav !== 'object') return DEFAULT_NAV;
-    /* 容错：缺失字段回退默认（防止部分更新破坏结构） */
+    /* 容错：缺失字段回退默认（防止部分更新破坏结构）；每组默认折叠回退对应默认组 */
     const out = { ...DEFAULT_NAV, ...nav };
     if (!Array.isArray(out.groups)) out.groups = DEFAULT_NAV.groups;
+    else out.groups = out.groups.map(g => {
+        const def = DEFAULT_NAV.groups.find(d => d.id === g.id) || {};
+        return { ...def, ...g, collapsed: g.collapsed == null ? (def.collapsed == null ? true : def.collapsed) : !!g.collapsed };
+    });
     if (!Array.isArray(out.pinnedTop)) out.pinnedTop = DEFAULT_NAV.pinnedTop;
     if (!Array.isArray(out.pinnedBottom)) out.pinnedBottom = DEFAULT_NAV.pinnedBottom;
-    if (!out.defaultCollapse) out.defaultCollapse = DEFAULT_NAV.defaultCollapse || 'system';
     return out;
 }
 
@@ -1812,14 +1815,13 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
     if (adminTheme) config.adminTheme = adminTheme;
     if (cdn) config.cdn = { ...config.cdn, ...cdn };
     if (ui) {
-        /* nav 部分更新时合并缺失字段（只改 defaultCollapse 不会丢失分组配置） */
+        /* nav 部分更新时合并缺失字段（只改单项不会丢失分组配置） */
         if (ui.nav && typeof ui.nav === 'object') {
             const base = ((config.ui && config.ui.nav) || {});
             ui.nav = {
                 groups: Array.isArray(ui.nav.groups) ? ui.nav.groups : (Array.isArray(base.groups) ? base.groups : DEFAULT_NAV.groups),
                 pinnedTop: Array.isArray(ui.nav.pinnedTop) ? ui.nav.pinnedTop : (Array.isArray(base.pinnedTop) ? base.pinnedTop : DEFAULT_NAV.pinnedTop),
-                pinnedBottom: Array.isArray(ui.nav.pinnedBottom) ? ui.nav.pinnedBottom : (Array.isArray(base.pinnedBottom) ? base.pinnedBottom : DEFAULT_NAV.pinnedBottom),
-                defaultCollapse: ui.nav.defaultCollapse || base.defaultCollapse || DEFAULT_NAV.defaultCollapse || 'system'
+                pinnedBottom: Array.isArray(ui.nav.pinnedBottom) ? ui.nav.pinnedBottom : (Array.isArray(base.pinnedBottom) ? base.pinnedBottom : DEFAULT_NAV.pinnedBottom)
             };
         }
         config.ui = { ...config.ui, ...ui };

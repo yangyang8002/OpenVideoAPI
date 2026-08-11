@@ -1151,14 +1151,17 @@
         <!-- Config -->        <!-- Config -->
         <div class="panel" id="configPanel">
             <div class="card">
-                <h3><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>导航栏设置
-                    <button class="btn btn-sm" style="margin-left:10px" onclick="loadNavEditor()">读取当前</button>
-                    <button class="btn btn-sm" style="margin-left:6px" onclick="resetNav()">重置默认</button>
-                    <button class="btn btn-sm btn-primary" style="margin-left:6px" onclick="saveNav()">保存</button>
+                <h3 style="cursor:pointer" onclick="toggleNavCard()"><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>导航栏设置
+                    <span id="navCardCaret" style="font-size:12px;opacity:.7;margin-left:4px">&#9654;</span>
+                    <button class="btn btn-sm" style="margin-left:10px" onclick="event.stopPropagation();loadNavEditor()">读取当前</button>
+                    <button class="btn btn-sm" style="margin-left:6px" onclick="event.stopPropagation();resetNav()">重置默认</button>
+                    <button class="btn btn-sm btn-primary" style="margin-left:6px" onclick="event.stopPropagation();saveNav()">保存</button>
                     <span id="navCfgMsg" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:8px"></span>
                 </h3>
-                <div class="cfg-hint">侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，保存后立即生效。插件扩展 tab 固定归入「扩展」组。</div>
-                <div id="navEditor"><div class="empty-state">点击「读取当前」加载导航配置</div></div>
+                <div id="navCardBody" style="display:none">
+                    <div class="cfg-hint">侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，并为每组设置默认折叠状态。插件扩展 tab 固定归入「扩展」组。</div>
+                    <div id="navEditor"><div class="empty-state">点击「读取当前」加载导航配置</div></div>
+                </div>
             </div>
             <div class="cfg-grid">
                 <div class="cfg-card">
@@ -1731,14 +1734,13 @@
         /* ===== 侧边导航分组（次级 tab）+ 自定义位置 ===== */
         const NAV_DEFAULT = {
             groups: [
-                { id: 'content', name: '内容管理', items: ['words', 'danmu', 'videos', 'subs'] },
-                { id: 'system', name: '系统', items: ['config', 'security', 'db', 'backup', 'files'] },
-                { id: 'ext', name: '扩展', items: ['plugins', 'market', 'deps'] },
-                { id: 'monitor', name: '监控', items: ['logs', 'api'] }
+                { id: 'content', name: '内容管理', items: ['words', 'danmu', 'videos', 'subs'], collapsed: true },
+                { id: 'system', name: '系统', items: ['config', 'security', 'db', 'backup', 'files'], collapsed: false },
+                { id: 'ext', name: '扩展', items: ['plugins', 'market', 'deps'], collapsed: true },
+                { id: 'monitor', name: '监控', items: ['logs', 'api'], collapsed: true }
             ],
             pinnedTop: ['console'],
-            pinnedBottom: ['about'],
-            defaultCollapse: 'system' /* 首次打开默认：none=全部展开 / system=仅系统展开 / all=全部折叠 */
+            pinnedBottom: ['about']
         };
         let navConfig = null;
         const NAV_ITEM_LABELS = {};
@@ -1765,13 +1767,11 @@
             const btns = {};
             nav.querySelectorAll('.nav-item[data-tab]').forEach(b => { btns[b.dataset.tab] = b; });
             const anchor = pinnedBottom.map(id => btns[id]).filter(Boolean)[0] || null;
-            /* 折叠状态：有记忆用记忆；首次打开按 defaultCollapse（默认仅系统展开） */
+            /* 折叠状态：有记忆用记忆；首次打开按各组 collapsed 独立默认 */
             let collapsedIds;
             try { if (localStorage.getItem('ap_nav_init') === '1') collapsedIds = navCollapsed(); } catch (e) {}
             if (!collapsedIds) {
-                const mode = (navConfig && navConfig.defaultCollapse) || 'system';
-                collapsedIds = mode === 'all' ? groups.map(g => g.id)
-                    : mode === 'system' ? groups.filter(g => g.id !== 'system').map(g => g.id) : [];
+                collapsedIds = groups.filter(g => g.collapsed).map(g => g.id);
                 try { localStorage.setItem('ap_nav_init', '1'); localStorage.setItem('ap_nav_collapsed', JSON.stringify(collapsedIds)); } catch (e) {}
             }
             groups.forEach(g => {
@@ -1831,24 +1831,15 @@
             if (!wrap) return;
             if (!navConfig) navConfig = JSON.parse(JSON.stringify(NAV_DEFAULT));
             const groups = navConfig.groups;
-            const dc = navConfig.defaultCollapse || 'system';
-            wrap.innerHTML = `
-                <div class="cfg-row" style="margin-bottom:10px">
-                    <span>默认折叠</span>
-                    <select id="navDefaultCollapse" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer">
-                        <option value="system" ${dc === 'system' ? 'selected' : ''}>仅系统展开</option>
-                        <option value="none" ${dc === 'none' ? 'selected' : ''}>全部展开</option>
-                        <option value="all" ${dc === 'all' ? 'selected' : ''}>全部折叠</option>
-                    </select>
-                    <span style="font-size:11px;color:var(--text3)">首次打开或清除折叠记忆时的默认状态</span>
-                </div>` +
-                groups.map((g, gi) => `
+            wrap.innerHTML = groups.map((g, gi) => `
                 <div class="nav-edit-group" data-gid="${esc(g.id)}" style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px">
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
                         <span style="font-size:11px;color:var(--text3)">分组</span>
-                        <input class="nav-edit-gname" value="${esc(g.name)}" style="flex:1;min-width:120px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
+                        <input class="nav-edit-gname" value="${esc(g.name)}" style="flex:1;min-width:100px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
+                        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);cursor:pointer"><input type="checkbox" class="nav-edit-gcollapse" ${g.collapsed ? 'checked' : ''} style="accent-color:var(--primary)"> 默认折叠</label>
                         <button class="btn btn-sm" onclick="navMoveGroup(${gi},-1)">上移</button>
                         <button class="btn btn-sm" onclick="navMoveGroup(${gi},1)">下移</button>
+                        ${g.id.startsWith('custom') ? `<button class="btn btn-sm" style="border-color:var(--danger);color:var(--danger)" onclick="navRemoveGroup('${esc(g.id)}')">删除</button>` : ''}
                     </div>
                     <div style="display:flex;flex-direction:column;gap:4px">${(g.items || []).map(id => `
                         <div class="nav-edit-item" data-tab="${esc(id)}" style="display:flex;align-items:center;gap:6px;padding:4px 8px;background:rgba(255,255,255,.03);border-radius:6px;font-size:12px">
@@ -1858,8 +1849,19 @@
                             </select>
                             <button class="btn btn-sm" onclick="navReorderItem('${esc(g.id)}','${esc(id)}',-1)">&uarr;</button>
                             <button class="btn btn-sm" onclick="navReorderItem('${esc(g.id)}','${esc(id)}',1)">&darr;</button>
-                        </div>`).join('')}</div>
-                </div>`).join('');
+                        </div>`).join('') || '<div style="font-size:11px;color:var(--text3);padding:4px 8px">空分组，可把其他分组中的项目移动到这里</div>'}</div>
+                </div>`).join('') +
+                '<div style="margin-top:10px"><button class="btn btn-sm" onclick="navAddGroup()">+ 添加分组</button></div>';
+        }
+        function navAddGroup() {
+            if (!navConfig) navConfig = JSON.parse(JSON.stringify(NAV_DEFAULT));
+            navConfig.groups.push({ id: 'custom' + Date.now().toString(36), name: '新分组', items: [], collapsed: false });
+            loadNavEditor();
+        }
+        function navRemoveGroup(gid) {
+            if (!confirm('确认删除该分组？组内项目将保留在页面但不再显示。')) return;
+            navConfig.groups = navConfig.groups.filter(g => g.id !== gid);
+            loadNavEditor();
         }
         function saveNav() {
             if (!navConfig) return toast('请先读取当前配置', false);
@@ -1867,9 +1869,9 @@
                 const g = navFindGroup(ge.dataset.gid);
                 if (!g) return;
                 g.name = ge.querySelector('.nav-edit-gname').value.trim() || g.name;
+                const cb = ge.querySelector('.nav-edit-gcollapse');
+                if (cb) g.collapsed = cb.checked;
             });
-            const sel = document.getElementById('navDefaultCollapse');
-            if (sel) navConfig.defaultCollapse = sel.value;
             fetch('/api/admin/config', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ ui: { nav: navConfig } }) })
                 .then(r => r.json()).then(d => {
                     toast(d.msg, d.code === 0);
@@ -1881,6 +1883,27 @@
             navConfig = JSON.parse(JSON.stringify(NAV_DEFAULT));
             try { localStorage.removeItem('ap_nav_collapsed'); localStorage.removeItem('ap_nav_init'); } catch (e) {}
             loadNavEditor();
+        }
+        /* 导航设置卡片折叠（默认收起，点击标题展开） */
+        function toggleNavCard() {
+            const body = document.getElementById('navCardBody');
+            const caret = document.getElementById('navCardCaret');
+            if (!body) return;
+            const open = body.style.display !== 'none';
+            body.style.display = open ? 'none' : '';
+            if (caret) caret.innerHTML = open ? '&#9654;' : '&#9660;';
+            if (!open) loadNavEditor();
+            try { localStorage.setItem('ap_nav_card', open ? '0' : '1'); } catch (e) {}
+        }
+        function initNavCard() {
+            const body = document.getElementById('navCardBody');
+            const caret = document.getElementById('navCardCaret');
+            if (!body) return;
+            let open = false;
+            try { open = localStorage.getItem('ap_nav_card') === '1'; } catch (e) {}
+            body.style.display = open ? '' : 'none';
+            if (caret) caret.innerHTML = open ? '&#9660;' : '&#9654;';
+            if (open) loadNavEditor();
         }
         function populateThemeSelects() {
             fetch('/api/theme/player/list').then(r => r.json()).then(d => {
@@ -2097,7 +2120,7 @@
             else stopDashPanel();
             if (name === 'plugins' && !window._plLoaded) { window._plLoaded = true; loadPlugins(); }
             if (name === 'market' && !window._marketLoaded) { window._marketLoaded = true; loadMarket(false); loadMarketSrc(); }
-            if (name === 'config' && !window._navEditorLoaded) { window._navEditorLoaded = true; loadNavEditor(); }
+            if (name === 'config' && !window._navEditorLoaded) { window._navEditorLoaded = true; initNavCard(); }
             if (name === 'deps' && !window._depsLoaded) { window._depsLoaded = true; loadDeps(false); }
             if (name === 'db' && !window._dbLoaded) { window._dbLoaded = true; loadDbInfo(); loadDbBrowse(); }
             if (name === 'backup' && !window._bkLoaded) { window._bkLoaded = true; loadBackups(); loadCloudList(); }
