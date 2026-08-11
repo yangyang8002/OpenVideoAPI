@@ -1782,6 +1782,26 @@
             }
             I18N.apply && I18N.apply(p);
         }
+        /* 加载后台插件扩展（样式 + 脚本）。
+           脚本/样式经 fetch 携带鉴权头后用 Blob URL 注入 —— <script src> 无法携带
+           Authorization 头，直接引用会因服务端 401 而全部加载失败（tab 不渲染） */
+        function loadAdminAsset(url, auth) {
+            return fetch(url, { headers: auth ? authHeaders() : {} })
+                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+                .then(b => {
+                    const clean = url.split('?')[0];
+                    if (/\.css$/i.test(clean)) {
+                        const el = document.createElement('link');
+                        el.rel = 'stylesheet';
+                        el.href = URL.createObjectURL(b);
+                        document.head.appendChild(el);
+                    } else {
+                        const el = document.createElement('script');
+                        el.src = URL.createObjectURL(b);
+                        document.body.appendChild(el);
+                    }
+                });
+        }
         /* 加载后台插件扩展（样式 + 脚本） */
         function loadAdminPlugins() {
             return fetch('/api/plugins/manifest?scope=admin', { headers: authHeaders() })
@@ -1790,18 +1810,8 @@
                     const list = d.data.plugins || [];
                     const chain = [];
                     list.forEach(p => {
-                        (p.styles || []).forEach(s => chain.push(() => {
-                            const el = document.createElement('link');
-                            el.rel = 'stylesheet'; el.href = s;
-                            document.head.appendChild(el);
-                            return Promise.resolve();
-                        }));
-                        (p.scripts || []).forEach(s => chain.push(() => new Promise(resolve => {
-                            const el = document.createElement('script');
-                            el.src = s;
-                            el.onload = resolve; el.onerror = resolve;
-                            document.body.appendChild(el);
-                        })));
+                        (p.styles || []).forEach(s => chain.push(() => loadAdminAsset(s, true)));
+                        (p.scripts || []).forEach(s => chain.push(() => loadAdminAsset(s, true)));
                     });
                     let i = 0;
                     const next = () => { if (i >= chain.length) { window.OpenVideoAdmin._ready = true; renderExtTabs(); return; } chain[i++]().then(next); };
