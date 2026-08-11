@@ -2799,19 +2799,33 @@ function langsName(langs) {
 }
 
 /* 字幕内容获取：url 类型可远程拉取（限 5MB + 内网防护），file 类型读本地，text 类型直接返回 */
+/* ASS/SSA → SRT 转换（ArtPlayer 仅支持 vtt/srt；提取的 ass 字幕经此统一为 srt 输出）
+   Dialogue: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text */
+function assToSrt(content) {
+    const out = [];
+    const re = /Dialogue:\s*(\d+),\s*(\d+):(\d+):(\d+)[.,](\d+),\s*(\d+):(\d+):(\d+)[.,](\d+),\s*[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,(.*)/g;
+    const fmt = (h, mi, s, ms) => String(h).padStart(2, '0') + ':' + String(mi).padStart(2, '0') + ':' + String(s).padStart(2, '0') + ',' + String(ms).padStart(3, '0');
+    let m, n = 0;
+    while ((m = re.exec(content))) {
+        const text = String(m[10] || '').replace(/\{[^}]*\}/g, '').replace(/\\N/gi, '\n').replace(/\n+$/, '').trim();
+        if (!text) continue;
+        n++;
+        out.push(n + '\n' + fmt(m[2], m[3], m[4], m[5]) + ' --> ' + fmt(m[6], m[7], m[8], m[9]) + '\n' + text + '\n');
+    }
+    return out.length ? out.join('\n') : content;
+}
 async function subtitleContent(sub) {
     if (!sub) return null;
-    if (sub.type === 'text') return sub.content || null;
-    if (sub.type === 'local' || sub.file) {
+    let content = null;
+    if (sub.type === 'text') content = sub.content || null;
+    else if (sub.type === 'local' || sub.file) {
         const file = path.isAbsolute(sub.file) ? sub.file : path.join(SUB_DIR, sub.file);
         if (fs.existsSync(file)) {
             const st = fs.statSync(file);
             if (st.size > SUB_FETCH_LIMIT) return null;
-            return fs.readFileSync(file, 'utf8');
+            content = fs.readFileSync(file, 'utf8');
         }
-        return null;
-    }
-    if (sub.type === 'url' && sub.url) {
+    } else if (sub.type === 'url' && sub.url) {
         if (!(await isSafeSubtitleUrl(sub.url))) return null;
         try {
             const resp = await fetch(sub.url, { signal: AbortSignal.timeout(20000) });
@@ -2825,10 +2839,14 @@ async function subtitleContent(sub) {
                 if (total > SUB_FETCH_LIMIT) { await reader.cancel(); return null; }
                 chunks.push(value);
             }
-            return Buffer.concat(chunks).toString('utf8');
+            content = Buffer.concat(chunks).toString('utf8');
         } catch { return null; }
     }
-    return null;
+    if (content == null) return null;
+    /* ass/ssa 内容转 srt，保证播放器可播 */
+    const fileExt = String(sub.file || sub.url || '').toLowerCase();
+    if (/\.(ass|ssa)$/.test(fileExt)) content = assToSrt(content);
+    return content;
 }
 
 /* 匹配 OpenList/AList 实例：仅对已启用且同源的 openlist 云端配置生效（避免凭据被外部触发利用）
@@ -3155,7 +3173,7 @@ app.get('/api/subtitle/detect', async (req, res) => {
                     if (seen.has(id)) continue;
                     seen.add(id);
                     const s = all.find(x => x.id === id);
-                    if (s) applied.push({ id: s.id, title: s.langName || s.name, lang: (s.langs && s.langs[0]) || s.lang || '', langs: s.langs || [], url: 'subtitle:' + s.id, library: true });
+                    if (s) applied.push({ id: s.id, title: s.langName || s.name, lang: (s.langs && s.langs[0]) || s.lang || '', langs: s.langs || [], url: 'subtitle:' + s.id, type: /\.(ass|ssa)$/i.test(s.file) ? 'ass' : (/\.(vtt|webvtt)$/i.test(s.file) ? 'vtt' : 'srt'), library: true });
                 }
             }
         }

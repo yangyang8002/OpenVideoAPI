@@ -714,6 +714,13 @@
                 }
             }catch(e){}
         }
+        /* 字幕库字幕（subtitle:xxx / id:xxx 形式）→ 统一转为 /api/subtitle/by-id 内容地址 */
+        function resolveSubUrl(u){
+            if(!u)return u;
+            if(u.indexOf('subtitle:')===0)return '/api/subtitle/by-id?id='+encodeURIComponent(u.slice(9));
+            if(u.indexOf('id:')===0)return '/api/subtitle/by-id?id='+encodeURIComponent(u.slice(3));
+            return u;
+        }
 
         var videoType=getVideoType(decoded);
         var title=qs('title')||decoded.split('/').pop()||decoded;
@@ -735,8 +742,9 @@
 
         var subOption={};
         if(subtitleUrl){
-            var subType=subtitleUrl.endsWith('.vtt')||subtitleUrl.endsWith('.webvtt')?'vtt':'srt';
-            subOption={url:subtitleUrl,type:subType,encoding:'utf-8',style:{color:'#fff',fontSize:'20px'}};
+            var resolvedUrl=resolveSubUrl(subtitleUrl);
+            var subType=resolvedUrl.endsWith('.vtt')||resolvedUrl.endsWith('.webvtt')?'vtt':'srt';
+            subOption={url:resolvedUrl,type:subType,encoding:'utf-8',style:{color:'#fff',fontSize:'20px'}};
         }
 
         var customType={
@@ -795,7 +803,7 @@
                         {html:t('字幕开关'),width:170,switch:true,onSwitch:function(item){subtitleVisible=!item.switch;var el=document.querySelector('.art-subtitle');if(el)el.style.display=subtitleVisible?'':'none';return!item.switch}},
                         {html:t('字幕大小'),width:170,range:[subtitleSize,14,32,1],onRange:function(item){subtitleSize=item.range[0];localStorage.setItem('ap_sub_fs',String(item.range[0]));if(art)art.subtitle.style({fontSize:item.range[0]+'px'});return item.range[0]+'px'}},
                         {html:t('字幕底距'),width:170,range:[subtitleBottom,5,80,1],onRange:function(item){subtitleBottom=item.range[0];localStorage.setItem('ap_sub_bottom',String(item.range[0]));var p=document.querySelector('.art-video-player');if(p)p.style.setProperty('--art-subtitle-bottom',item.range[0]+'px');return item.range[0]+'px'}},
-                        {html:t('字幕选择'),width:170,selector:subtitleList.map(function(s,i){return{html:s.title,value:i,default:i===currentSub}}),onSelect:function(item){if(art&&subtitleList[item.value]){art.subtitle.switch(subtitleList[item.value].url,{name:subtitleList[item.value].title});currentSub=item.value}return item.html}}
+                        {html:t('字幕选择'),width:170,selector:subtitleList.map(function(s,i){return{html:s.title,value:i,default:i===currentSub}}),onSelect:function(item){if(art&&subtitleList[item.value]){art.subtitle.switch(resolveSubUrl(subtitleList[item.value].url),{name:subtitleList[item.value].title,type:subtitleList[item.value].url.endsWith('.vtt')?'vtt':'srt'});currentSub=item.value}return item.html}}
                     ]
                 },
                 {html:t('统计信息'),onClick:function(){var p=document.querySelector('.ap-stats-panel');if(p){p.classList.toggle('open');buildStats()}return t('统计信息')}},
