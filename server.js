@@ -1495,6 +1495,24 @@ app.post('/api/admin/change-username', checkAdmin, async (req, res) => {
     res.json({ code: 0, msg: '用户名已更换，请使用新用户名重新登录', data: { token, username: newUsername } });
 });
 
+/* 侧边导航默认分组（后台 tab 分类；可在服务器配置中调整顺序/分组） */
+const DEFAULT_NAV = {
+    groups: [
+        { id: 'content', name: '内容管理', items: ['words', 'danmu', 'videos', 'subs'] },
+        { id: 'system', name: '系统', items: ['config', 'security', 'db', 'backup', 'files'] },
+        { id: 'ext', name: '扩展', items: ['plugins', 'market', 'deps'] },
+        { id: 'monitor', name: '监控', items: ['logs', 'api'] }
+    ],
+    pinnedTop: ['console'],
+    pinnedBottom: ['about']
+};
+function getNavConfig() {
+    const c = readConfig();
+    const nav = c.ui && c.ui.nav;
+    if (!nav || !Array.isArray(nav.groups)) return DEFAULT_NAV;
+    return nav;
+}
+
 app.get('/api/admin/config', checkAdmin, (req, res) => {
     const config = readConfig();
     res.json({ code: 0, data: config });
@@ -1774,7 +1792,7 @@ app.post('/api/admin/banned-words/refresh', checkAdmin, async (req, res) => {
 
 app.post('/api/admin/config', checkAdmin, (req, res) => {
     const config = readConfig();
-    const { pow, rateLimit: rl, danmakuLimit: dl, danmaku, upload: up, render, bannedWords, api, security: sec, theme, adminTheme, cdn } = req.body;
+    const { pow, rateLimit: rl, danmakuLimit: dl, danmaku, upload: up, render, bannedWords, api, security: sec, theme, adminTheme, cdn, ui } = req.body;
     if (pow) config.pow = { ...config.pow, ...pow };
     if (rl) config.rateLimit = { ...config.rateLimit, ...rl };
     if (dl) config.danmakuLimit = { ...config.danmakuLimit, ...dl };
@@ -1787,6 +1805,7 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
     if (theme) config.theme = theme;
     if (adminTheme) config.adminTheme = adminTheme;
     if (cdn) config.cdn = { ...config.cdn, ...cdn };
+    if (ui) config.ui = { ...config.ui, ...ui };
     writeConfig(config);
     applyTrustProxy(config);
     res.json({ code: 0, msg: '配置已更新', data: config });
@@ -1794,7 +1813,7 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
 
 app.get('/api/config/public', (req, res) => {
     const config = readConfig();
-    res.json({ code: 0, data: { cdn: config.cdn, theme: config.theme || 'bilibili', render: config.render, timezone: config.timezone || 'Asia/Shanghai', language: config.language || 'zh' } });
+    res.json({ code: 0, data: { cdn: config.cdn, theme: config.theme || 'bilibili', render: config.render, timezone: config.timezone || 'Asia/Shanghai', language: config.language || 'zh', nav: getNavConfig() } });
 });
 
 app.get('/api/admin/banned-words', checkAdmin, async (req, res) => {

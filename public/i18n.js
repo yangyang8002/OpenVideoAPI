@@ -176,6 +176,11 @@ var I18N = (function () {
         '自定义管理入口，如填 "secret" 则入口变为 /secret/；反代部署需开启信任代理头，否则限流/日志取不到真实 IP': 'Custom admin entry, e.g. "secret" makes the entry /secret/; enable trust proxy for reverse proxy deployments',
         '信任反向代理头（X-Forwarded-For）': 'Trust reverse proxy headers (X-Forwarded-For)',
         '保存配置': 'Save config', '已保存，重启生效': 'Saved, applies after restart',
+
+        /* ===== 补齐：导航栏设置 ===== */
+        '导航栏设置': 'Navigation Settings', '分组': 'Group', '上移': 'Up', '下移': 'Down', '重置默认': 'Reset defaults', '扩展': 'Extensions',
+        '侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，保存后立即生效。插件扩展 tab 固定归入「扩展」组。': 'Sidebar navigation is grouped (sub-tabs); group headers are collapsible. Adjust group order, item order and membership here — takes effect immediately. Plugin extension tabs always go to the "Extensions" group.',
+        '点击「读取当前」加载导航配置': 'Click "Load" to read the current nav config',
         '添加 / 更新视频映射': 'Add / update video mapping',
         '统计保留': 'Retention', '天（1-90）': 'days (1-90)', 'API 配置': 'API config',
         'API 路径': 'API path', '带宽上限(KB/s)': 'Bandwidth limit (KB/s)',
@@ -587,6 +592,11 @@ var ZH_HANT = {
     '信任反向代理头（X-Forwarded-For）': '信任反向代理頭（X-Forwarded-For）',
     '保存配置': '保存配置',
     '已保存，重启生效': '已保存，重啟生效',
+
+    /* ===== 补齐：导航栏设置 ===== */
+    '导航栏设置': '導航欄設置', '分组': '分組', '上移': '上移', '下移': '下移', '重置默认': '重置默認', '扩展': '擴展',
+    '侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，保存后立即生效。插件扩展 tab 固定归入「扩展」组。': '側邊導航按分組（次級 tab）展示，組頭可點擊折疊；此處可調整分組順序、組內項目順序與所屬分組，保存後立即生效。插件擴展 tab 固定歸入「擴展」組。',
+    '点击「读取当前」加载导航配置': '點擊「讀取當前」加載導航配置',
     '添加 / 更新视频映射': '添加 / 更新視頻映射',
     '统计保留': '統計保留',
     '天（1-90）': '天（1-90）',
@@ -1128,6 +1138,11 @@ var DICT_WYW = {
     '自定义管理入口，如填 "secret" 则入口变为 /secret/；反代部署需开启信任代理头，否则限流/日志取不到真实 IP': '自定治事之門，若填 "secret" 則門為 /secret/；反代部署須開信代理之頭，否則限流/誌不得實 IP',
     '信任反向代理头（X-Forwarded-For）': '信反代頭（X-Forwarded-For）', '保存配置': '存之設',
     '已保存，重启生效': '已存，重啟而效', '统计保留': '統計之存', '天（1-90）': '日（1-90）',
+
+    /* ===== 补齐：导航栏设置 ===== */
+    '导航栏设置': '導航欄之設', '分组': '組', '上移': '上之', '下移': '下之', '重置默认': '復常', '扩展': '展',
+    '侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，保存后立即生效。插件扩展 tab 固定归入「扩展」组。': '側導航分組（次級 tab）而列，組首可擊而疊；此處可易組序、組內之次與所屬，存而即效。插件之展 tab 恒入「展」組。',
+    '点击「读取当前」加载导航配置': '擊「讀今」以載導航之設',
     'API 配置': 'API 之設', 'API 路径': 'API 之徑', '带宽上限(KB/s)': '帶寬上限(KB/s)',
     '实时调用曲线': '實時調用之曲', '统计': '統計', '站点总开放时间': '站之總開時',
     'API 总调用次数': 'API 總調之次', '总带宽': '總帶寬', '总流量': '總流',
@@ -1430,6 +1445,11 @@ var DICT_JA = {
     '自定义管理入口，如填 "secret" 则入口变为 /secret/；反代部署需开启信任代理头，否则限流/日志取不到真实 IP': '管理入口をカスタマイズ、"secret" なら /secret/ に；リバースプロキシでは X-Forwarded-For の信頼を有効にしてください',
     '信任反向代理头（X-Forwarded-For）': 'リバースプロキシヘッダーを信頼（X-Forwarded-For）',
     '保存配置': '設定を保存', '已保存，重启生效': '保存しました、再起動後に反映',
+
+    /* ===== 補完：ナビゲーション設定 ===== */
+    '导航栏设置': 'ナビゲーション設定', '分组': 'グループ', '上移': '上へ', '下移': '下へ', '重置默认': 'デフォルトに戻す', '扩展': '拡張',
+    '侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，保存后立即生效。插件扩展 tab 固定归入「扩展」组。': 'サイドナビはグループ（サブタブ）で表示され、グループ見出しは折りたためます。グループ順・項目順・所属グループを調整でき、保存後すぐ反映。プラグイン拡張タブは常に「拡張」グループへ。',
+    '点击「读取当前」加载导航配置': '「読み込む」をクリックして現在のナビ設定を読み込み',
     '统计保留': '統計保持', '天（1-90）': '日（1-90）', 'API 配置': 'API 設定', 'API 路径': 'API パス',
     '带宽上限(KB/s)': '帯域制限(KB/s)', '实时调用曲线': 'リアルタイム呼び出しチャート', '统计': '統計',
     '站点总开放时间': '稼働時間', 'API 总调用次数': 'API 総呼び出し数', '总带宽': '総帯域',
@@ -1742,6 +1762,11 @@ var DICT_FR = {
     '自定义管理入口，如填 "secret" 则入口变为 /secret/；反代部署需开启信任代理头，否则限流/日志取不到真实 IP': 'Entrée personnalisée, "secret" donne /secret/ ; activez la confiance du proxy inverse pour obtenir la vraie IP',
     '信任反向代理头（X-Forwarded-For）': 'Faire confiance aux en-têtes proxy inverse (X-Forwarded-For)',
     '保存配置': 'Enregistrer', '已保存，重启生效': 'Enregistré, appliqué après redémarrage',
+
+    /* ===== Complément : réglages de navigation ===== */
+    '导航栏设置': 'Réglages de navigation', '分组': 'Groupe', '上移': 'Monter', '下移': 'Descendre', '重置默认': 'Rétablir les défauts', '扩展': 'Extensions',
+    '侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，保存后立即生效。插件扩展 tab 固定归入「扩展」组。': 'La navigation latérale est regroupée (sous-onglets) ; les en-têtes de groupe sont repliables. Ajustez ici l\'ordre des groupes, des éléments et leur appartenance — effet immédiat. Les onglets d\'extension de plugins vont toujours dans le groupe « Extensions ».',
+    '点击「读取当前」加载导航配置': 'Cliquez sur « Charger » pour lire la configuration actuelle',
     '统计保留': 'Rétention', '天（1-90）': 'jours (1-90)', 'API 配置': 'Configuration API', 'API 路径': 'Chemin API',
     '带宽上限(KB/s)': 'Limite de bande passante (KB/s)', '实时调用曲线': 'Courbe d\'appels en direct', '统计': 'Stats',
     '站点总开放时间': 'Temps de fonctionnement', 'API 总调用次数': 'Total des appels API', '总带宽': 'Bande passante totale',

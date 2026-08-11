@@ -181,6 +181,14 @@
         .side-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 3px; }
         .side-nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.28); }
         .side-nav::-webkit-scrollbar-track { background: transparent; }
+        /* 导航分组（次级 tab） */
+        .nav-group { display: flex; flex-direction: column; gap: 2px; }
+        .nav-group-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 9px 14px 5px; font-size: 11px; font-weight: 600; color: var(--text3); cursor: pointer; border: none; background: none; font-family: inherit; letter-spacing: 1.5px; user-select: none; }
+        .nav-group-head:hover { color: var(--text2); }
+        .nav-group-head .caret { font-size: 10px; transition: transform .2s; opacity: .8; }
+        .nav-group.collapsed .nav-group-head .caret { transform: rotate(-90deg); }
+        .nav-group-body { display: flex; flex-direction: column; gap: 2px; }
+        .nav-group.collapsed .nav-group-body { display: none; }
         .side-nav .nav-item {
             display: flex; align-items: center; gap: 10px;
             padding: 11px 14px; border-radius: var(--radius);
@@ -1142,6 +1150,16 @@
 
         <!-- Config -->        <!-- Config -->
         <div class="panel" id="configPanel">
+            <div class="card">
+                <h3><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>导航栏设置
+                    <button class="btn btn-sm" style="margin-left:10px" onclick="loadNavEditor()">读取当前</button>
+                    <button class="btn btn-sm" style="margin-left:6px" onclick="resetNav()">重置默认</button>
+                    <button class="btn btn-sm btn-primary" style="margin-left:6px" onclick="saveNav()">保存</button>
+                    <span id="navCfgMsg" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:8px"></span>
+                </h3>
+                <div class="cfg-hint">侧边导航按分组（次级 tab）展示，组头可点击折叠；此处可调整分组顺序、组内项目顺序与所属分组，保存后立即生效。插件扩展 tab 固定归入「扩展」组。</div>
+                <div id="navEditor"><div class="empty-state">点击「读取当前」加载导航配置</div></div>
+            </div>
             <div class="cfg-grid">
                 <div class="cfg-card">
                     <h4><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>PoW 工作量证明</h4>
@@ -1710,6 +1728,137 @@
             var t = localStorage.getItem('ap_admin_theme') || 'bilibili';
             setAdminTheme(t);
         }
+        /* ===== 侧边导航分组（次级 tab）+ 自定义位置 ===== */
+        const NAV_DEFAULT = {
+            groups: [
+                { id: 'content', name: '内容管理', items: ['words', 'danmu', 'videos', 'subs'] },
+                { id: 'system', name: '系统', items: ['config', 'security', 'db', 'backup', 'files'] },
+                { id: 'ext', name: '扩展', items: ['plugins', 'market', 'deps'] },
+                { id: 'monitor', name: '监控', items: ['logs', 'api'] }
+            ],
+            pinnedTop: ['console'],
+            pinnedBottom: ['about']
+        };
+        let navConfig = null;
+        const NAV_ITEM_LABELS = {};
+        function navLabel(id) {
+            if (NAV_ITEM_LABELS[id]) return NAV_ITEM_LABELS[id];
+            const b = document.querySelector('.nav-item[data-tab="' + id + '"]');
+            const lbl = b ? ((b.querySelector('span:last-child') || b).textContent || '').trim() : id;
+            NAV_ITEM_LABELS[id] = lbl;
+            return lbl;
+        }
+        function navCollapsed() { try { return JSON.parse(localStorage.getItem('ap_nav_collapsed') || '[]'); } catch (e) { return []; } }
+        function toggleNavGroup(id, grp) {
+            let c = navCollapsed();
+            if (grp.classList.contains('collapsed')) { grp.classList.remove('collapsed'); c = c.filter(x => x !== id); }
+            else { grp.classList.add('collapsed'); c.push(id); }
+            try { localStorage.setItem('ap_nav_collapsed', JSON.stringify(c)); } catch (e) {}
+        }
+        function renderNav() {
+            const nav = document.querySelector('.side-nav');
+            if (!nav) return;
+            nav.querySelectorAll('.nav-group').forEach(g => g.remove());
+            const groups = (navConfig && navConfig.groups) || [];
+            const pinnedBottom = (navConfig && navConfig.pinnedBottom) || ['about'];
+            const btns = {};
+            nav.querySelectorAll('.nav-item[data-tab]').forEach(b => { btns[b.dataset.tab] = b; });
+            const anchor = pinnedBottom.map(id => btns[id]).filter(Boolean)[0] || null;
+            const collapsed = navCollapsed();
+            groups.forEach(g => {
+                const head = document.createElement('button');
+                head.type = 'button';
+                head.className = 'nav-group-head';
+                head.innerHTML = '<span>' + esc(g.name) + '</span><span class="caret">&#9662;</span>';
+                const body = document.createElement('div');
+                body.className = 'nav-group-body';
+                const grp = document.createElement('div');
+                grp.className = 'nav-group';
+                grp.dataset.gid = g.id;
+                grp.appendChild(head);
+                grp.appendChild(body);
+                if (anchor && anchor.parentNode) nav.insertBefore(grp, anchor);
+                else nav.appendChild(grp);
+                head.addEventListener('click', function () { toggleNavGroup(g.id, grp); });
+                (g.items || []).forEach(id => { if (btns[id]) body.appendChild(btns[id]); });
+                if (collapsed.includes(g.id)) grp.classList.add('collapsed');
+            });
+        }
+        function initNav() {
+            fetch('/api/config/public').then(r => r.json()).then(d => {
+                navConfig = (d.data && d.data.nav) || null;
+                renderNav();
+            }).catch(function () { navConfig = null; renderNav(); });
+        }
+        /* ---- 导航栏设置（服务器配置卡片） ---- */
+        function navFindGroup(gid) { return (navConfig && navConfig.groups || []).find(g => g.id === gid); }
+        function navMoveGroup(gi, dir) {
+            const groups = navConfig.groups;
+            const j = gi + dir;
+            if (j < 0 || j >= groups.length) return;
+            [groups[gi], groups[j]] = [groups[j], groups[gi]];
+            loadNavEditor();
+        }
+        function navMoveItem(fromGid, id, toGid) {
+            if (fromGid === toGid) return;
+            const from = navFindGroup(fromGid);
+            if (!from) return;
+            from.items = from.items.filter(x => x !== id);
+            const to = navFindGroup(toGid);
+            if (to) to.items.push(id);
+            loadNavEditor();
+        }
+        function navReorderItem(gid, id, dir) {
+            const g = navFindGroup(gid);
+            if (!g) return;
+            const i = g.items.indexOf(id);
+            const j = i + dir;
+            if (i < 0 || j < 0 || j >= g.items.length) return;
+            [g.items[i], g.items[j]] = [g.items[j], g.items[i]];
+            loadNavEditor();
+        }
+        function loadNavEditor() {
+            const wrap = document.getElementById('navEditor');
+            if (!wrap) return;
+            if (!navConfig) navConfig = JSON.parse(JSON.stringify(NAV_DEFAULT));
+            const groups = navConfig.groups;
+            wrap.innerHTML = groups.map((g, gi) => `
+                <div class="nav-edit-group" data-gid="${esc(g.id)}" style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                        <span style="font-size:11px;color:var(--text3)">分组</span>
+                        <input class="nav-edit-gname" value="${esc(g.name)}" style="flex:1;min-width:120px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
+                        <button class="btn btn-sm" onclick="navMoveGroup(${gi},-1)">上移</button>
+                        <button class="btn btn-sm" onclick="navMoveGroup(${gi},1)">下移</button>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px">${(g.items || []).map(id => `
+                        <div class="nav-edit-item" data-tab="${esc(id)}" style="display:flex;align-items:center;gap:6px;padding:4px 8px;background:rgba(255,255,255,.03);border-radius:6px;font-size:12px">
+                            <span style="flex:1;color:var(--text)">${esc(navLabel(id))}</span>
+                            <select class="nav-edit-gsel" onchange="navMoveItem('${esc(g.id)}','${esc(id)}',this.value)" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-size:11px;outline:none">
+                                ${groups.map(og => `<option value="${esc(og.id)}" ${og.id === g.id ? 'selected' : ''}>${esc(og.name)}</option>`).join('')}
+                            </select>
+                            <button class="btn btn-sm" onclick="navReorderItem('${esc(g.id)}','${esc(id)}',-1)">&uarr;</button>
+                            <button class="btn btn-sm" onclick="navReorderItem('${esc(g.id)}','${esc(id)}',1)">&darr;</button>
+                        </div>`).join('')}</div>
+                </div>`).join('');
+        }
+        function saveNav() {
+            if (!navConfig) return toast('请先读取当前配置', false);
+            document.querySelectorAll('#navEditor .nav-edit-group').forEach(ge => {
+                const g = navFindGroup(ge.dataset.gid);
+                if (!g) return;
+                g.name = ge.querySelector('.nav-edit-gname').value.trim() || g.name;
+            });
+            fetch('/api/admin/config', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ ui: { nav: navConfig } }) })
+                .then(r => r.json()).then(d => {
+                    toast(d.msg, d.code === 0);
+                    if (d.code === 0) { renderNav(); loadNavEditor(); }
+                });
+        }
+        function resetNav() {
+            if (!confirm('确认恢复默认导航分组与顺序？')) return;
+            navConfig = JSON.parse(JSON.stringify(NAV_DEFAULT));
+            loadNavEditor();
+        }
         function populateThemeSelects() {
             fetch('/api/theme/player/list').then(r => r.json()).then(d => {
                 if (d.code !== 0 || !d.data.length) return;
@@ -1758,8 +1907,20 @@
                 btn.dataset.tab = 'ext-' + tab.id;
                 btn.innerHTML = '<span class="icon">&#128295;</span><span>' + esc(tab.title) + '</span>';
                 btn.onclick = () => switchExtTab(tab.id);
-                const about = nav.querySelector('[data-tab="about"]');
-                nav.insertBefore(btn, about);
+                /* 插件扩展 tab 归入「扩展」组（次级 tab），无则自动创建 */
+                let extTarget = nav.querySelector('.nav-group[data-gid="ext"] .nav-group-body');
+                if (!extTarget) {
+                    const grp = document.createElement('div');
+                    grp.className = 'nav-group';
+                    grp.dataset.gid = 'ext';
+                    grp.innerHTML = '<button type="button" class="nav-group-head"><span>扩展</span><span class="caret">&#9662;</span></button><div class="nav-group-body"></div>';
+                    const about = nav.querySelector('[data-tab="about"]');
+                    if (about && about.parentNode) nav.insertBefore(grp, about);
+                    else nav.appendChild(grp);
+                    grp.querySelector('.nav-group-head').addEventListener('click', function () { toggleNavGroup('ext', grp); });
+                    extTarget = grp.querySelector('.nav-group-body');
+                }
+                extTarget.appendChild(btn);
                 const panel = document.createElement('div');
                 panel.className = 'panel';
                 panel.id = 'extPanel-' + tab.id;
@@ -3889,6 +4050,7 @@
         document.getElementById('passwordInput').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
         document.getElementById('newWordInput').addEventListener('keypress', e => { if (e.key === 'Enter') addBannedWord(); });
         loadAdminTheme();
+        initNav();
         loadLoginPlugins();
     </script>
 </body>
