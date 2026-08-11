@@ -171,7 +171,7 @@ function npmUpdate() {
         }
         if (!fs.existsSync(pkgDir)) throw new Error('npm 包结构异常（无 package/ 目录）');
         /* 覆盖项目文件（先清空会随版本变化的目录，再复制；包中不存在的目录跳过） */
-        const dirs = ['lib', 'public', 'theme'];
+        const dirs = ['lib', 'public', 'theme', 'plugins'];
         for (const d of dirs) {
             const srcDir = path.join(pkgDir, d);
             if (!fs.existsSync(srcDir)) { log('跳过（npm 包中不存在）: ' + d); continue; }
@@ -179,7 +179,7 @@ function npmUpdate() {
             if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true });
             fs.cpSync(srcDir, dest, { recursive: true });
         }
-        const files = ['server.js', 'package.json', 'package-lock.json', 'nginx.conf.example', 'gen_perf_danmu.js', 'README.md', 'README_CN.md', 'README_EN.md', 'DOCKER.md', 'LICENSE'];
+        const files = ['server.js', 'package.json', 'package-lock.json', 'update.js', 'update.xml', 'plugin-registry.json', 'nginx.conf.example', 'gen_perf_danmu.js', 'README.md', 'README_CN.md', 'README_EN.md', 'DOCKER.md', 'LICENSE'];
         for (const f of files) {
             const src2 = path.join(pkgDir, f);
             if (fs.existsSync(src2)) fs.copyFileSync(src2, path.join(ROOT, f));
