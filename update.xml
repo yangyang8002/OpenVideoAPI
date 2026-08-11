@@ -11,12 +11,12 @@
   <file path=".github/workflows/npm-publish-github-packages.yml" sha256="e7b7ac761eaa5af1c6b59f2f79bdbf1c48a32cd8db949b7bf3fc3e92f72f7286" size="570"/>
   <file path=".gitignore" sha256="6fbfa90f846df5513d652e6d9d9d58c54088835494d61fdd2bb9a34c32d5d3f8" size="90"/>
   <file path=".npmignore" sha256="408a2ab327b75ed60f56173f106c02754a75a569a02648a633c243c34cd935e8" size="130"/>
-  <file path="DOCKER.md" sha256="5435ba3a8a6bab4a2a9515d4b96fff72c8ec43f4398cd1569bc13dcdb0b4a27e" size="3388"/>
+  <file path="DOCKER.md" sha256="3467e0d75959b1c13aae3a4cb57573158fac18ca9b6f7a1dc27e6071dd234182" size="3388"/>
   <file path="Dockerfile" sha256="399f597c91d113a6bc18afeafdbb6e4965e4073f408b6dd90754599aa92cbae2" size="446"/>
   <file path="LICENSE" sha256="be32bbf292492d6e69d71085c6c9311517c8152df5d003cbebd57ea0bdfb0ba3" size="1069"/>
-  <file path="README.md" sha256="e89e758367c5b2ce4d74ba9ad8de7c2fcb7d497b09a6f632b23d8d404c5e0149" size="5156"/>
-  <file path="README_CN.md" sha256="9d86dfe0367f23307b95f4030c0d99ecfb01ec8f7391a74654933abe7e81808f" size="26860"/>
-  <file path="README_EN.md" sha256="7ba7d5615a5388fc8dab6b1c8b746a55608257d1d9802bcf94344d8a49a834d9" size="24834"/>
+  <file path="README.md" sha256="ecd71d3f2183864fcb551fee7f99887dc780318a1e8b67eb881779674da91818" size="5156"/>
+  <file path="README_CN.md" sha256="4a56659698d64dd11b90f22e4bd71bb84b152363b6b4f2d4fe3f4daf3a2e1f68" size="26860"/>
+  <file path="README_EN.md" sha256="c25c1ae8dda89ad758138dda870d92f95bb395931ee705e0d1fe82e5f2ff9bae" size="24834"/>
   <file path="docker-compose.yml" sha256="bea2a4570ceedeab63ba86f85c879f804b8b08f9b60400c07893f339e8493be6" size="422"/>
   <file path="gen_perf_danmu.js" sha256="3902ae3de3e80c90089ee646a273922da4447dfdd9b86dab15d9c4ecba126b3e" size="2249"/>
   <file path="lib/backends/mongodb.js" sha256="81ba976701b40992c09f14c12c88c404372f93b8c01cc8774093619008ee4bc4" size="10709"/>
@@ -29,7 +29,7 @@
   <file path="lib/proxy.js" sha256="52a453c81a8c6c7acfd4a625baba397feddd9ba46e635a558840647b5f893ebe" size="5032"/>
   <file path="lib/store.js" sha256="7b3d44de4d2e432acfa8913e49f2ced618d433dd221ae28a97356e1748e680b7" size="29717"/>
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
-  <file path="package-lock.json" sha256="3b99c310a8bf59b2b4bd9dc4ab11337bc02486464f9c659e45a0b5df19774ddb" size="88919"/>
+  <file path="package-lock.json" sha256="f708fbfa08ab0f9d61957c08b601b3a7799def43168c65bb3092369e2596556e" size="86521"/>
   <file path="package.json" sha256="2e01817fc1caf51a06bb3261a2d6f027f6768e597f6b714b87bc43d6d344c1b7" size="1565"/>
   <file path="plugin-registry.json" sha256="c0bd4d41f39e9425f994f488bc85e3fd9314395419c64a8c0b4311608b6921f8" size="2920"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/admin/debug.js" sha256="3464753a927d51247d75172d3bd06fdb8c8a3391b9b39e6d4837b01de4e877fc" size="6036"/>
@@ -51,7 +51,7 @@
   <file path="plugins/openvideo-plugin-otp/lib/index.js" sha256="a199c3d55ead7cc498601f2765ad9857c32c2009039645d95ceba60730dd47f2" size="14297"/>
   <file path="plugins/openvideo-plugin-otp/package.json" sha256="2d662fa47f2a254bb869cb4b1fcc8f4e374b02b754b9eff736d706e59ad44a74" size="1722"/>
   <file path="public/CUSTOM_THEME.md" sha256="a4394eb9fd4e0d7b68d0273fd957ec17cadfa2a0481aa28f5f55298c006008c0" size="3271"/>
-  <file path="public/admin.html" sha256="4a90586eebdeaf4ecc02a68eb0ac9f8749c155cfb9c5dc43ba5f729fdefdd0fa" size="307170"/>
+  <file path="public/admin.html" sha256="d9585187ee4fbd652516adeb15326a476e66947a6b27800de804fb28161f3f73" size="307170"/>
   <file path="public/favicon-128.png" sha256="de8371137f6c9648f8728550e71de67fb5460771062ec1b45970909a1e5dd3dc" size="2034"/>
   <file path="public/favicon.svg" sha256="ca0f3061d459fc5636914978579613a6a8b626dc69123909eceee07d2f3c8d9f" size="555"/>
   <file path="public/i18n.js" sha256="f93d997b27b61ce1254b6ee4e77ea8d91db8ff599548a41c65ae791b596620fb" size="249838"/>
