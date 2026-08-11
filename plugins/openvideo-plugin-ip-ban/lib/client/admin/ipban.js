@@ -17,6 +17,34 @@
             thresholds: 'Thresholds', reqMin: 'req/min', reqHour: 'req/hour', mbMin: 'MB/min', mbHour: 'MB/hour', banMin: 'Ban duration', region: 'Region block', bypass: 'Whitelist exempt',
             scanNow: 'Scan now', manualBan: 'Manually ban IP', unban: 'Unban', unbanAll: 'Unban all (plugin)', recent: 'Recent bans',
             ipPh: 'e.g. 1.2.3.4', empty: 'No records', reason: 'Reason', time: 'Time', minute: 'min', permanent: 'permanent', on: 'on', off: 'off'
+        },
+        zhHant: {
+            tip: '按請求數 / 流量超限自動封禁 IP（閾值在插件配置中可調），安全中心白名單 IP 除外，支持按地區（國家）屏蔽。封禁寫入安全中心並即時生效。',
+            status: '掃描狀態', scanning: '掃描中...', last: '上次掃描', checked: '檢查 IP', banned: '本次封禁', total: '累計封禁', active: '當前插件封禁',
+            thresholds: '當前閾值', reqMin: '請求/分', reqHour: '請求/時', mbMin: 'MB/分', mbHour: 'MB/時', banMin: '封禁時長', region: '地區屏蔽', bypass: '白名單除外',
+            scanNow: '立即掃描', manualBan: '手動封禁 IP', unban: '解封', unbanAll: '解封全部（本插件）', recent: '最近封禁記錄',
+            ipPh: '如 1.2.3.4', empty: '暫無記錄', reason: '原因', time: '時間', minute: '分鐘', permanent: '永久', on: '開啟', off: '關閉'
+        },
+        wyw: {
+            tip: '按求數 / 流超限自動禁 IP（限在插件之設可調），安防白籍 IP 除外，可按域（國）屏之。禁入安防而即效。',
+            status: '察狀', scanning: '察中...', last: '昨察', checked: '察 IP', banned: '此禁', total: '累禁', active: '今插件之禁',
+            thresholds: '今限', reqMin: '求/分', reqHour: '求/時', mbMin: 'MB/分', mbHour: 'MB/時', banMin: '禁時', region: '域屏', bypass: '白籍免',
+            scanNow: '即察', manualBan: '手禁 IP', unban: '解禁', unbanAll: '盡解（本插件）', recent: '近禁之錄',
+            ipPh: '如 1.2.3.4', empty: '無錄', reason: '故', time: '時', minute: '分', permanent: '永', on: '啟', off: '閉'
+        },
+        ja: {
+            tip: 'リクエスト数 / トラフィック超過の IP を自動 BAN（しきい値はプラグイン設定で調整可）。セキュリティのホワイトリスト IP は除外され、地域（国）によるブロックも可能。BAN はセキュリティセンターに書き込まれ即時反映。',
+            status: 'スキャン状態', scanning: 'スキャン中...', last: '最終スキャン', checked: '確認IP', banned: '今回BAN', total: '累計BAN', active: '現在のプラグインBAN',
+            thresholds: '現在のしきい値', reqMin: 'リクエスト/分', reqHour: 'リクエスト/時', mbMin: 'MB/分', mbHour: 'MB/時', banMin: 'BAN時間', region: '地域ブロック', bypass: 'ホワイトリスト除外',
+            scanNow: '今すぐスキャン', manualBan: '手動でBAN', unban: '解除', unbanAll: 'すべて解除（本プラグイン）', recent: '最近のBAN記録',
+            ipPh: '例 1.2.3.4', empty: '記録なし', reason: '理由', time: '時間', minute: '分', permanent: '永久', on: '有効', off: '無効'
+        },
+        fr: {
+            tip: 'Bannit automatiquement les IP qui dépassent les seuils de requêtes / trafic (seuils réglables dans la configuration du plugin) ; les IP de la liste blanche de Sécurité sont exemptées ; blocage par région (pays) possible. Les bannissements sont écrits dans Sécurité et appliqués immédiatement.',
+            status: 'État du scan', scanning: 'Scan...', last: 'Dernier scan', checked: 'IP vérifiées', banned: 'Bannis cette passe', total: 'Bannis au total', active: 'Bannis actifs (plugin)',
+            thresholds: 'Seuils actuels', reqMin: 'req/min', reqHour: 'req/h', mbMin: 'MB/min', mbHour: 'MB/h', banMin: 'Durée de ban', region: 'Blocage régional', bypass: 'Liste blanche exempte',
+            scanNow: 'Scanner maintenant', manualBan: 'Bannir manuellement', unban: 'Débannir', unbanAll: 'Tout débannir (plugin)', recent: 'Bannissements récents',
+            ipPh: 'ex. 1.2.3.4', empty: 'Aucun enregistrement', reason: 'Raison', time: 'Heure', minute: 'min', permanent: 'permanent', on: 'activé', off: 'désactivé'
         }
     };
     function T(k) {

@@ -21,6 +21,42 @@
             vid: 'Video ID to link (optional)', needFile: 'Enter the video file path', needTrack: 'Select at least one text subtitle track',
             notFound: 'ffprobe failed: make sure ffmpeg is installed on the server, or set ffprobePath / ffmpegPath in the plugin config',
             empty: 'none'
+        },
+        zhHant: {
+            title: '內封字幕採集', tip: '輸入服務器本地視頻文件路徑（相對項目根，如 public/videos/demo.mkv，或絕對路徑），檢測其內嵌字幕軌道並用 ffmpeg 提取到字幕庫。',
+            file: '視頻文件路徑', detect: '檢測內封字幕', detecting: '檢測中...', none: '未檢測到文本字幕軌道',
+            image: '圖形字幕', text: '文本', lang: '語言', codec: '編碼', def: '默認', forced: '強制',
+            extractSel: '提取所選軌道到字幕庫', extracting: '提取中...', done: '已提取 N 條字幕並加入字幕庫',
+            vid: '關聯視頻碼（可選）', needFile: '請輸入視頻文件路徑', needTrack: '請勾選至少一條文本字幕軌道',
+            notFound: 'ffprobe 執行失敗：請確認服務器已安裝 ffmpeg，或在插件配置中指定 ffprobePath / ffmpegPath',
+            empty: '暫無'
+        },
+        wyw: {
+            title: '內封字幕之採', tip: '入伺服本視頻文徑（對項目根，如 public/videos/demo.mkv，或絕徑），察其內嵌字幕軌並以 ffmpeg 取入字幕庫。',
+            file: '視頻文徑', detect: '察內封字幕', detecting: '察中...', none: '未察得文字幕軌',
+            image: '圖幕', text: '文', lang: '語', codec: '碼', def: '常', forced: '強',
+            extractSel: '取所選軌入字幕庫', extracting: '取中...', done: '已取 N 條字幕入字幕庫',
+            vid: '關聯視頻碼（可選）', needFile: '請入視頻文徑', needTrack: '請勾至少一文字幕軌',
+            notFound: 'ffprobe 行未成：請察伺服已裝 ffmpeg，或於插件之設指 ffprobePath / ffmpegPath',
+            empty: '暫無'
+        },
+        ja: {
+            title: '埋め込み字幕の抽出', tip: 'サーバー上の動画ファイルのパスを入力（プロジェクトルート相対、例 public/videos/demo.mkv、または絶対パス）。埋め込み字幕トラックを検出し、ffmpeg で字幕ライブラリに抽出します。',
+            file: '動画ファイルパス', detect: '埋め込み字幕を検出', detecting: '検出中...', none: 'テキスト字幕トラックが見つかりません',
+            image: '画像字幕', text: 'テキスト', lang: '言語', codec: 'コーデック', def: 'デフォルト', forced: '強制',
+            extractSel: '選択したトラックをライブラリに抽出', extracting: '抽出中...', done: 'N 件の字幕を抽出してライブラリに追加しました',
+            vid: '関連付ける動画ID（任意）', needFile: '動画ファイルパスを入力してください', needTrack: 'テキスト字幕トラックを1つ以上選択してください',
+            notFound: 'ffprobe の実行に失敗：サーバーに ffmpeg がインストールされているか、プラグイン設定で ffprobePath / ffmpegPath を指定してください',
+            empty: 'なし'
+        },
+        fr: {
+            title: 'Extraction des sous-titres incrustés', tip: 'Saisissez le chemin d\'un fichier vidéo local (relatif à la racine du projet, ex. public/videos/demo.mkv, ou absolu) pour détecter ses pistes de sous-titres incrustés et les extraire dans la bibliothèque avec ffmpeg.',
+            file: 'Chemin du fichier vidéo', detect: 'Détecter les sous-titres incrustés', detecting: 'Détection...', none: 'Aucune piste de sous-titres texte trouvée',
+            image: 'image', text: 'texte', lang: 'Langue', codec: 'Codec', def: 'défaut', forced: 'forcé',
+            extractSel: 'Extraire les pistes sélectionnées', extracting: 'Extraction...', done: 'N sous-titres extraits et ajoutés à la bibliothèque',
+            vid: 'ID vidéo à lier (optionnel)', needFile: 'Saisissez le chemin du fichier vidéo', needTrack: 'Sélectionnez au moins une piste de sous-titres texte',
+            notFound: 'ffprobe a échoué : vérifiez que ffmpeg est installé sur le serveur, ou définissez ffprobePath / ffmpegPath dans la configuration du plugin',
+            empty: 'aucun'
         }
     };
     function T(k) {
