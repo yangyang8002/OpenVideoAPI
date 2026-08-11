@@ -14,7 +14,8 @@ OpenVideoAPI **内封字幕采集插件**：检测视频内嵌的字幕轨道（
 
 - 市场一键安装 `openvideo-plugin-embed-subtitle`（或 npm / GitHub 安装），后台启用
 - **跨平台开箱即用（Linux / Windows / macOS）**：插件内置 `ffmpeg-static` + `@ffprobe-installer/ffprobe` 静态二进制（含 linux-x64 / linux-arm64 / win / mac），**无需在服务器安装 ffmpeg**（Docker 部署同样适用）
-- 二进制解析顺序：插件配置指定路径 > 内置模块 > 系统 PATH；可在插件配置中覆盖
+- **安装不卡死**：二进制依赖为可选依赖（`optionalDependencies`），GitHub 下载失败不会导致安装失败；若 ffmpeg 缺失，插件首次使用时自动从 **npmmirror 镜像**（GitHub 回退）下载到 `data/bin/` 并缓存
+- 二进制解析顺序：插件配置指定路径 > 内置 npm 模块 > `data/bin` 懒下载缓存 > 系统 PATH；可在插件配置中覆盖
 
 ## 使用
 
@@ -48,7 +49,7 @@ OpenVideoAPI **内封字幕采集插件**：检测视频内嵌的字幕轨道（
 - **图形字幕**（PGS / VOBSUB / DVB 等图片轨）：可检测并标注，但无法提取为文本（v1 不支持 OCR）
 - 检测/提取为按需触发，无后台扫描
 - URL 源需要服务器能访问目标链接（出站代理插件配置的 HTTPS_PROXY 不自动生效于 ffmpeg 子进程）
-- 内置二进制由 npm 安装时按平台自动下载（`postinstall`）；离线安装可改用系统 ffmpeg 并在配置中指定路径
+- 懒下载需要服务器能访问 `registry.npmmirror.com`（镜像）或 `github.com`（回退）；离线环境请配置 ffmpegPath / ffprobePath 或安装系统 ffmpeg
 
 ## 开发
 

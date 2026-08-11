@@ -1,6 +1,6 @@
 {
   "name": "openvideo-plugin-embed-subtitle",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "OpenVideoAPI 内封字幕采集插件：ffprobe 检测视频内嵌字幕轨道（多轨/多语言），ffmpeg 提取到字幕库（跨平台：内置 ffmpeg/ffprobe 二进制，Linux/Windows/macOS 开箱即用）",
   "main": "lib/index.js",
   "license": "MIT",
@@ -18,7 +18,7 @@
     "lib",
     "README.md"
   ],
-  "dependencies": {
+  "optionalDependencies": {
     "ffmpeg-static": "^5.2.0",
     "@ffprobe-installer/ffprobe": "^2.1.0"
   },

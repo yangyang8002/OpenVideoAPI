@@ -37,6 +37,66 @@ function findRoot() {
 }
 const ROOT = findRoot();
 const SUB_DIR = path.join(ROOT, 'data', 'subtitles');
+const BIN_DIR = path.join(ROOT, 'data', 'bin'); /* 懒下载的 ffmpeg 二进制缓存 */
+
+/* ---------- ffmpeg 二进制懒下载（optionalDependencies 安装失败时自动补齐，镜像优先） ----------
+ * ffmpeg-static 的 postinstall 从 GitHub 下载约 30MB gz，国内网络常挂起导致 npm 安装失败，
+ * 因此改为可选依赖 + 首次使用时从 npmmirror 镜像（GitHub 回退）下载到 data/bin/。 */
+const FFMPEG_STATIC_TAG = 'b6.1.1'; /* 与 ffmpeg-static 内置版本一致 */
+const FFMPEG_MIRROR = 'https://registry.npmmirror.com/-/binary/ffmpeg-static';
+const FFMPEG_GITHUB = 'https://github.com/eugeneware/ffmpeg-static/releases/download';
+const ffmpegAssetName = () => 'ffmpeg-' + process.platform + '-' + process.arch + '.gz';
+const ffmpegLocalName = () => 'ffmpeg' + (process.platform === 'win32' ? '.exe' : '');
+const MIN_FFMPEG_SIZE = 1024 * 1024; /* 下载解压后低于 1MB 视为损坏 */
+
+function httpGet(url, timeoutMs) {
+    return new Promise((resolve, reject) => {
+        const lib = url.startsWith('https:') ? require('https') : require('http');
+        const req = lib.get(url, { timeout: timeoutMs, headers: { 'User-Agent': 'OpenVideoAPI/embed-subtitle' } }, (res) => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                res.resume();
+                return resolve(httpGet(new URL(res.headers.location, url).href, timeoutMs));
+            }
+            if (res.statusCode !== 200) { res.resume(); return reject(new Error('HTTP ' + res.statusCode)); }
+            resolve(res);
+        });
+        req.on('timeout', () => req.destroy(new Error('下载超时')));
+        req.on('error', reject);
+    });
+}
+
+async function downloadFfmpegTo(localPath) {
+    const zlib = require('zlib');
+    if (!fs.existsSync(BIN_DIR)) fs.mkdirSync(BIN_DIR, { recursive: true });
+    const urls = [
+        FFMPEG_MIRROR + '/' + FFMPEG_STATIC_TAG + '/' + ffmpegAssetName(),
+        FFMPEG_GITHUB + '/' + FFMPEG_STATIC_TAG + '/' + ffmpegAssetName()
+    ];
+    let lastErr = null;
+    for (const u of urls) {
+        try {
+            const res = await httpGet(u, 60000);
+            await new Promise((resolve, reject) => {
+                const out = fs.createWriteStream(localPath);
+                const gunzip = zlib.createGunzip();
+                res.pipe(gunzip).pipe(out);
+                out.on('finish', resolve);
+                out.on('error', reject);
+                gunzip.on('error', reject);
+                res.on('error', reject);
+            });
+            if (fs.existsSync(localPath) && fs.statSync(localPath).size > MIN_FFMPEG_SIZE) {
+                try { fs.chmodSync(localPath, 0o755); } catch (e) {}
+                return localPath;
+            }
+            throw new Error('解压产物异常（' + (fs.existsSync(localPath) ? fs.statSync(localPath).size : 0) + ' bytes）');
+        } catch (e) {
+            lastErr = e;
+            try { fs.unlinkSync(localPath); } catch (x) {}
+        }
+    }
+    throw new Error(lastErr ? ('下载失败: ' + lastErr.message) : '下载失败');
+}
 
 /* ---------- 路径安全解析：仅允许项目根内的文件 ---------- */
 function resolveFile(file) {
@@ -208,9 +268,9 @@ async function autoVid(ctx, url) {
     return null;
 }
 
-/* ---------- ffmpeg / ffprobe 二进制解析：用户配置 > 内置 npm 模块（跨平台） > PATH ----------
+/* ---------- ffmpeg / ffprobe 二进制解析：用户配置 > 内置 npm 模块（可选依赖，跨平台） > data/bin 懒下载 > PATH
    内置模块：ffmpeg-static（Linux x64/arm64 / macOS / Windows 静态构建）、
-   @ffprobe-installer/ffprobe（同平台集）。Linux/Docker 无需安装系统 ffmpeg。 */
+   @ffprobe-installer/ffprobe（同平台集）。安装时若 GitHub 下载失败（可选依赖）将自动懒下载补齐。 */
 function makeBinResolver(config) {
     const cache = {};
     return function resolveBinary(kind) {
@@ -223,10 +283,17 @@ function makeBinResolver(config) {
             p = kind === 'ffprobe'
                 ? require('@ffprobe-installer/ffprobe').path
                 : require('ffmpeg-static');
-        } catch (e) { /* 依赖未安装（本地目录模式），回退 PATH */ }
+        } catch (e) { /* 依赖未安装（可选依赖失败/本地目录模式），继续回退 */ }
         if (typeof p === 'string' && p && fs.existsSync(p)) {
             cache[kind] = p;
             return p;
+        }
+        if (kind === 'ffmpeg') {
+            const local = path.join(BIN_DIR, ffmpegLocalName());
+            if (fs.existsSync(local) && fs.statSync(local).size > MIN_FFMPEG_SIZE) {
+                cache[kind] = local;
+                return local;
+            }
         }
         return kind === 'ffprobe' ? 'ffprobe' : 'ffmpeg';
     };
@@ -235,9 +302,30 @@ function makeBinResolver(config) {
 module.exports = {
     apply(ctx, config) {
         const resolveBinary = makeBinResolver(config);
-        const ffprobe = resolveBinary('ffprobe');
-        const ffmpeg = resolveBinary('ffmpeg');
         const timeoutMs = Math.max(15, parseInt(config.timeoutSec) || 120) * 1000;
+
+        /* ffmpeg 可用性保障：内置/data/bin 缺失时自动懒下载（并发共享同一次下载，失败仅本次进程内生效） */
+        function binExists(bin) { return !!bin && (/[/\\]/.test(bin) ? fs.existsSync(bin) : true); } /* 纯命令名视为 PATH 命令 */
+        let ffmpegReady = null;
+        function ensureFfmpeg() {
+            const bin = resolveBinary('ffmpeg');
+            if (binExists(bin)) return Promise.resolve({ ok: true, bin });
+            if (!ffmpegReady) {
+                ctx.logger.info('embed-sub', '未找到 ffmpeg 二进制，开始自动下载（镜像 ' + FFMPEG_MIRROR + '）...');
+                ffmpegReady = downloadFfmpegTo(path.join(BIN_DIR, ffmpegLocalName()))
+                    .then((b) => { ctx.logger.info('embed-sub', 'ffmpeg 自动下载完成: ' + b); return { ok: true, bin: b }; })
+                    .catch((e) => { ctx.logger.error('embed-sub', 'ffmpeg 自动下载失败: ' + e.message); return { ok: false, err: e.message }; });
+            }
+            return ffmpegReady;
+        }
+        function ffprobeBin() {
+            const b = resolveBinary('ffprobe');
+            return { ok: binExists(b), bin: b };
+        }
+        function binErrMsg(kind, r) {
+            return kind + ' 不可用' + (r && r.err ? '（' + r.err + '）' : '') +
+                '：可在插件配置中指定 ' + (kind === 'ffmpeg' ? 'ffmpegPath' : 'ffprobePath') + '，或安装系统 ffmpeg';
+        }
 
         const wrap = (fn) => async (req, res) => {
             try {
@@ -254,8 +342,12 @@ module.exports = {
             const source = parseSource(file);
             if (!source) { const e = new Error('文件不存在或路径非法'); e.status = 400; throw e; }
             if (source.type === 'url' && !(await isSafeUrl(source.url))) { const e = new Error('链接无效或指向内网/保留地址，已拒绝'); e.status = 400; throw e; }
-            const streams = await detectStreams(ffprobe, source);
-            res.json({ code: 0, data: { file, streams, ffprobe } });
+            const fm = await ensureFfmpeg();
+            if (!fm.ok) { const e = new Error(binErrMsg('ffmpeg', fm)); e.status = 503; throw e; }
+            const fp = ffprobeBin();
+            if (!fp.ok) { const e = new Error(binErrMsg('ffprobe', fp)); e.status = 503; throw e; }
+            const streams = await detectStreams(fp.bin, source);
+            res.json({ code: 0, data: { file, streams, ffprobe: fp.bin } });
         }));
 
         /* 提取单条轨道到字幕库 */
@@ -264,11 +356,15 @@ module.exports = {
             const source = parseSource(file);
             if (!source) { const e = new Error('文件不存在或路径非法'); e.status = 400; throw e; }
             if (source.type === 'url' && !(await isSafeUrl(source.url))) { const e = new Error('链接无效或指向内网/保留地址，已拒绝'); e.status = 400; throw e; }
-            const streams = await detectStreams(ffprobe, source);
+            const fm = await ensureFfmpeg();
+            if (!fm.ok) { const e = new Error(binErrMsg('ffmpeg', fm)); e.status = 503; throw e; }
+            const fp = ffprobeBin();
+            if (!fp.ok) { const e = new Error(binErrMsg('ffprobe', fp)); e.status = 503; throw e; }
+            const streams = await detectStreams(fp.bin, source);
             const st = streams.find(s => s.index === parseInt(index));
             if (!st) { const e = new Error('字幕轨道不存在: ' + index); e.status = 400; throw e; }
             if (!st.text) { const e = new Error('轨道 ' + index + ' 为图形字幕（' + (st.codec || '?') + '），无法提取为文本'); e.status = 400; throw e; }
-            const item = await extractOne(source, st, lang, name, vid);
+            const item = await extractOne(source, st, lang, name, vid, fm.bin);
             res.json({ code: 0, msg: '已提取并加入字幕库', data: item });
         }));
 
@@ -278,17 +374,21 @@ module.exports = {
             const source = parseSource(file);
             if (!source) { const e = new Error('文件不存在或路径非法'); e.status = 400; throw e; }
             if (source.type === 'url' && !(await isSafeUrl(source.url))) { const e = new Error('链接无效或指向内网/保留地址，已拒绝'); e.status = 400; throw e; }
-            const streams = await detectStreams(ffprobe, source);
+            const fm = await ensureFfmpeg();
+            if (!fm.ok) { const e = new Error(binErrMsg('ffmpeg', fm)); e.status = 503; throw e; }
+            const fp = ffprobeBin();
+            if (!fp.ok) { const e = new Error(binErrMsg('ffprobe', fp)); e.status = 503; throw e; }
+            const streams = await detectStreams(fp.bin, source);
             const want = Array.isArray(indexes) ? indexes.map(i => parseInt(i)) : [];
             const picked = streams.filter(s => want.includes(s.index) && s.text);
             if (!picked.length) { const e = new Error('未选择可提取的文本字幕轨道'); e.status = 400; throw e; }
             const items = [];
-            for (const st of picked) items.push(await extractOne(source, st, '', '', vid));
+            for (const st of picked) items.push(await extractOne(source, st, '', '', vid, fm.bin));
             ctx.logger.info('embed-sub', '从 ' + baseNameOf(source) + ' 提取 ' + items.length + ' 条字幕');
             res.json({ code: 0, msg: '已提取 ' + items.length + ' 条字幕并加入字幕库', data: { items } });
         }));
 
-        async function extractOne(source, st, langOverride, nameOverride, vid) {
+        async function extractOne(source, st, langOverride, nameOverride, vid, ffmpegBin) {
             if (!fs.existsSync(SUB_DIR)) fs.mkdirSync(SUB_DIR, { recursive: true });
             /* 自动关联：未指定 vid 时推导播放 URL 并分配/复用映射，提取后播放器立即可见字幕 */
             if (!vid) {
@@ -303,7 +403,7 @@ module.exports = {
             const args = ['-v', 'error'];
             if (source.type === 'url') args.push('-rw_timeout', '30000000');
             args.push('-i', source.type === 'url' ? source.url : source.path, '-map', '0:' + st.index, '-c:s', outCodec(ext), '-y', outPath);
-            const r = await run(ffmpeg, args, timeoutMs);
+            const r = await run(ffmpegBin, args, timeoutMs);
             if (!r.ok || !fs.existsSync(outPath) || fs.statSync(outPath).size === 0) {
                 try { fs.unlinkSync(outPath); } catch (e) {}
                 throw new Error('ffmpeg 提取失败: ' + (r.err || r.out || 'code ' + r.code).slice(-300));
@@ -334,6 +434,10 @@ module.exports = {
             return item;
         }
 
-        ctx.logger.info('embed-sub', '内封字幕采集插件已加载（ffprobe: ' + ffprobe + '，ffmpeg: ' + ffmpeg + '）');
+        /* 后台预检：若 ffmpeg 缺失则立即启动懒下载（不阻塞服务，首次调用前完成即可） */
+        if (!resolveBinary('ffmpeg') || !fs.existsSync(resolveBinary('ffmpeg'))) {
+            ensureFfmpeg().catch(() => {});
+        }
+        ctx.logger.info('embed-sub', '内封字幕采集插件已加载（ffprobe: ' + resolveBinary('ffprobe') + '，ffmpeg: ' + resolveBinary('ffmpeg') + '）');
     }
 };

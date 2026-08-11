@@ -3,7 +3,7 @@
 <update>
   <version>26.8.14</version>
   <date>2026-08-11</date>
-  <message>v26.8.14: embed-subtitle plugin 1.0.4 - detect/extract embedded subtitles from http(s) video URLs (SSRF protected)</message>
+  <message>v26.8.14: embed-subtitle 1.0.5 - install no longer hangs (optional binary deps + npmmirror lazy download)</message>
   <files>
   <file path=".dockerignore" sha256="92b725988b57a03160cb825d470f929fbecbf4ee25b4dbc28a7fdb3a8c41a781" size="78"/>
   <file path=".github/social-preview.png" sha256="0949997a033350b2096a95f68c4a3eaabe2e3952913e91a0bec59807bbfdb246" size="21642"/>
@@ -31,16 +31,16 @@
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
   <file path="package-lock.json" sha256="f708fbfa08ab0f9d61957c08b601b3a7799def43168c65bb3092369e2596556e" size="86521"/>
   <file path="package.json" sha256="2e01817fc1caf51a06bb3261a2d6f027f6768e597f6b714b87bc43d6d344c1b7" size="1565"/>
-  <file path="plugin-registry.json" sha256="5a97390c8bd291b3093dd2ad9d9154b00e26259da1b1af2b8d52f3bcc0c32064" size="2978"/>
+  <file path="plugin-registry.json" sha256="a0bdb80f5b87876634ddc55d5b3dfca5a7790e9c6384ab7b45ac4b765786401a" size="2995"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/admin/debug.js" sha256="3464753a927d51247d75172d3bd06fdb8c8a3391b9b39e6d4837b01de4e877fc" size="6036"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/player/overlay.js" sha256="3fec13a81e5d8d4af2b8e7e2b37b97e0723265f5c5e25fc5a3e41e7be9f5324e" size="1503"/>
   <file path="plugins/openvideo-plugin-demo/lib/index.js" sha256="0a193d7d1f101de41c4be8cd8a18941e71155e501909193c1c200755d89c08a2" size="3811"/>
   <file path="plugins/openvideo-plugin-demo/package.json" sha256="8ee40affefa20d00eff1dd1ebf6004985df58e3f4f6b692b22d5046cb74e17d8" size="1257"/>
-  <file path="plugins/openvideo-plugin-embed-subtitle/README.md" sha256="72073824ff2384b46f226fcbb542c699fedb1f9f65262498a13a6a5a47a6f56b" size="4090"/>
+  <file path="plugins/openvideo-plugin-embed-subtitle/README.md" sha256="6c60d152656423fa3354c4e3bf32e0b981538657f0092cc125f11e93af10bd8f" size="4410"/>
   <file path="plugins/openvideo-plugin-embed-subtitle/lib/client/admin/embed.js" sha256="e22a2dd9b215bf056b63ce383ace1abdc2c3333d7448a2aad2ab25119fa0bf9d" size="13083"/>
-  <file path="plugins/openvideo-plugin-embed-subtitle/lib/index.js" sha256="35f35c6f6057d636a5675e4bbc76688e53e0f1515509665c46d8b463065da2ed" size="16773"/>
+  <file path="plugins/openvideo-plugin-embed-subtitle/lib/index.js" sha256="ecabd59d69ac856b9c50e08c3dfe1fb4e0704013015fc94aa7c1d5820f74476a" size="22784"/>
   <file path="plugins/openvideo-plugin-embed-subtitle/package-lock.json" sha256="0e3887d5cf7e7361a9e9219a824b79a92a802b9a28b2e8f4a925cd705dd57c7d" size="12634"/>
-  <file path="plugins/openvideo-plugin-embed-subtitle/package.json" sha256="73730b7c67688817657a8490666acffb90f0b12cde8a12d1f9717b82352bba0c" size="1969"/>
+  <file path="plugins/openvideo-plugin-embed-subtitle/package.json" sha256="2e70264670a4562e19fee718d934ce7d5fe4807fb4d2dc9db1fdd79e507416cf" size="1977"/>
   <file path="plugins/openvideo-plugin-ip-ban/README.md" sha256="fd14a209508d1b0da7f0936f0d0b7aaaf3ffec6953976eace7c397829e70b7e7" size="3585"/>
   <file path="plugins/openvideo-plugin-ip-ban/lib/client/admin/ipban.js" sha256="bc1a11b76655d22eb5d0c12c72b82208994eef137d6db3f74580dd3fd049b361" size="11959"/>
   <file path="plugins/openvideo-plugin-ip-ban/lib/index.js" sha256="d50759b8df550261b7a817e4a825d7dfc03134ec2b54f5728644de5dbb3f865c" size="15967"/>
