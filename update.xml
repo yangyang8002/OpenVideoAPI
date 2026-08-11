@@ -12,7 +12,7 @@
   <file path=".gitignore" sha256="a7eb71a4bb93a4e18c12dbf9192c2c53bc938615112c977e258c30b492526a64" size="69"/>
   <file path=".npmignore" sha256="408a2ab327b75ed60f56173f106c02754a75a569a02648a633c243c34cd935e8" size="130"/>
   <file path="DOCKER.md" sha256="5435ba3a8a6bab4a2a9515d4b96fff72c8ec43f4398cd1569bc13dcdb0b4a27e" size="3388"/>
-  <file path="Dockerfile" sha256="c844310f89d85988e9d6073f5a205015a486e8f632ef91fb7fbef3a7248f02a6" size="439"/>
+  <file path="Dockerfile" sha256="399f597c91d113a6bc18afeafdbb6e4965e4073f408b6dd90754599aa92cbae2" size="446"/>
   <file path="LICENSE" sha256="be32bbf292492d6e69d71085c6c9311517c8152df5d003cbebd57ea0bdfb0ba3" size="1069"/>
   <file path="README.md" sha256="e89e758367c5b2ce4d74ba9ad8de7c2fcb7d497b09a6f632b23d8d404c5e0149" size="5156"/>
   <file path="README_CN.md" sha256="9d86dfe0367f23307b95f4030c0d99ecfb01ec8f7391a74654933abe7e81808f" size="26860"/>
@@ -30,14 +30,14 @@
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
   <file path="package-lock.json" sha256="3b99c310a8bf59b2b4bd9dc4ab11337bc02486464f9c659e45a0b5df19774ddb" size="88919"/>
   <file path="package.json" sha256="cc6476b15d33994682e9dd5e063f98f5e22c0a5cf457517056c0389c0562b695" size="1565"/>
-  <file path="plugin-registry.json" sha256="83e241255b6e5b39d43e86c70cab2af3e5fa1b9cba3d0812af1686cd9e48698a" size="1916"/>
+  <file path="plugin-registry.json" sha256="1b6e4398dbc11887763dc84af1f7ea18d51c8d909aaad393de0068c2f5ba3966" size="2117"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/admin/debug.js" sha256="3464753a927d51247d75172d3bd06fdb8c8a3391b9b39e6d4837b01de4e877fc" size="6036"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/player/overlay.js" sha256="56322175b4de4075511e9587a30e6bf6a830a67e4e210edf2081e1687dc70874" size="1356"/>
   <file path="plugins/openvideo-plugin-demo/lib/index.js" sha256="0a193d7d1f101de41c4be8cd8a18941e71155e501909193c1c200755d89c08a2" size="3811"/>
   <file path="plugins/openvideo-plugin-demo/package.json" sha256="8ee40affefa20d00eff1dd1ebf6004985df58e3f4f6b692b22d5046cb74e17d8" size="1257"/>
-  <file path="plugins/openvideo-plugin-embed-subtitle/package.json" sha256="2c8cbab289cca561e0a76bb1cc24e394a139b44d151dd93383e592270caa8106" size="1370"/>
-  <file path="plugins/openvideo-plugin-embed-subtitle/README.md" sha256="b04d4581bc94c14ca23cb1d71b0249aee3f6a408cbea1c3e23ee42620240e13f" size="2874"/>
-  <file path="plugins/openvideo-plugin-embed-subtitle/lib/index.js" sha256="17900692a4b1ad9fabed138e6560fe7c4314446907966595c4016f88ed1c2250" size="10499"/>
+  <file path="plugins/openvideo-plugin-embed-subtitle/package.json" sha256="0c524a8748cb93d703edf6dd1370da4d73975c3bb468b2a5a71ea7d1fc5d848d" size="1685"/>
+  <file path="plugins/openvideo-plugin-embed-subtitle/README.md" sha256="61a8a1b7e252319a4da637575caa4765b2f3aa42704f2ff70fad96510ecfb59b" size="3319"/>
+  <file path="plugins/openvideo-plugin-embed-subtitle/lib/index.js" sha256="5d6525369aef98f0dfd7655a4a85c3192d080ac0a1bf8b4b9b06b0358533d27b" size="11573"/>
   <file path="plugins/openvideo-plugin-embed-subtitle/lib/client/admin/embed.js" sha256="6988068e4b02d25e0fdec606b385ca8fa07b710c215c35cb84ecdcf683bfadcb" size="8467"/>
   <file path="lib/proxy.js" sha256="52a453c81a8c6c7acfd4a625baba397feddd9ba46e635a558840647b5f893ebe" size="5032"/>
   <file path="plugins/openvideo-plugin-otp/package.json" sha256="2d662fa47f2a254bb869cb4b1fcc8f4e374b02b754b9eff736d706e59ad44a74" size="1722"/>
@@ -46,7 +46,7 @@
   <file path="plugins/openvideo-plugin-otp/lib/client/login/otp.js" sha256="46d3bc1d6053f6ba96b7edc9d67cf48ac49b8932f44b76904ef213efa8886da5" size="5031"/>
   <file path="plugins/openvideo-plugin-otp/lib/client/admin/otp.js" sha256="9a506e5499c8271bf6d5b7713deb1e259c84fa180b61aa8a74f5338b9f364cb5" size="19796"/>
   <file path="public/CUSTOM_THEME.md" sha256="a4394eb9fd4e0d7b68d0273fd957ec17cadfa2a0481aa28f5f55298c006008c0" size="3271"/>
-  <file path="public/admin.html" sha256="ba0a6a480625dbc1a8fec64250cc6688f88db4138b67f721e150cbd7b4c36064" size="285267"/>
+  <file path="public/admin.html" sha256="ea11e6e45fffd015007814fe10d5bdd4f2966cbe9bcc912e56cf5135a6fc1c94" size="285710"/>
   <file path="public/favicon-128.png" sha256="de8371137f6c9648f8728550e71de67fb5460771062ec1b45970909a1e5dd3dc" size="2034"/>
   <file path="public/favicon.svg" sha256="ca0f3061d459fc5636914978579613a6a8b626dc69123909eceee07d2f3c8d9f" size="555"/>
   <file path="public/i18n.js" sha256="7b91ea8376c525d8e198bb55327a3d3e390d09f83fec4767359be85f05b099ff" size="234745"/>

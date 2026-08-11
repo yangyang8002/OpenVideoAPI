@@ -1,18 +1,22 @@
 {
   "name": "openvideo-plugin-embed-subtitle",
-  "version": "1.0.0",
-  "description": "OpenVideoAPI 内封字幕采集插件：ffprobe 检测视频内嵌字幕轨道（多轨/多语言），ffmpeg 提取到字幕库",
+  "version": "1.0.1",
+  "description": "OpenVideoAPI 内封字幕采集插件：ffprobe 检测视频内嵌字幕轨道（多轨/多语言），ffmpeg 提取到字幕库（跨平台：内置 ffmpeg/ffprobe 二进制，Linux/Windows/macOS 开箱即用）",
   "main": "lib/index.js",
   "license": "MIT",
-  "keywords": ["openvideo", "plugin", "subtitle", "embed", "ffprobe", "ffmpeg", "muxed"],
+  "keywords": ["openvideo", "plugin", "subtitle", "embed", "ffprobe", "ffmpeg", "muxed", "linux"],
   "files": ["lib", "README.md"],
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "@ffprobe-installer/ffprobe": "^2.1.0"
+  },
   "openvideoPlugin": {
     "name": "embed-subtitle",
-    "description": "内封字幕采集：ffprobe 检测视频内嵌字幕轨道，ffmpeg 提取为独立字幕文件并写入字幕库（支持多轨、批量提取、可选关联视频）",
+    "description": "内封字幕采集：ffprobe 检测视频内嵌字幕轨道，ffmpeg 提取为独立字幕文件并写入字幕库（支持多轨、批量提取、可选关联视频；内置跨平台 ffmpeg/ffprobe，Linux/Windows/macOS 开箱即用）",
     "inject": ["store", "logger", "http"],
     "schema": [
-      { "key": "ffprobePath", "label": "ffprobe 路径", "type": "string", "default": "ffprobe", "hint": "默认从 PATH 查找；可填绝对路径（Windows 可用 7zip 同目录的 ffprobe.exe）" },
-      { "key": "ffmpegPath", "label": "ffmpeg 路径", "type": "string", "default": "ffmpeg", "hint": "提取字幕用，默认从 PATH 查找" },
+      { "key": "ffprobePath", "label": "ffprobe 路径", "type": "string", "default": "", "hint": "留空自动使用内置二进制（ffmpeg-static / @ffprobe-installer/ffprobe），找不到时回退 PATH；可填绝对路径强制指定" },
+      { "key": "ffmpegPath", "label": "ffmpeg 路径", "type": "string", "default": "", "hint": "留空自动使用内置二进制，找不到时回退 PATH" },
       { "key": "timeoutSec", "label": "提取超时（秒）", "type": "number", "default": 120, "hint": "ffmpeg 提取超时，超时自动终止" }
     ],
     "client": {

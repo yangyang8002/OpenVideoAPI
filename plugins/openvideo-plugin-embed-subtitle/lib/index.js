@@ -116,10 +116,35 @@ function genSubId() {
     return s;
 }
 
+/* ---------- ffmpeg / ffprobe 二进制解析：用户配置 > 内置 npm 模块（跨平台） > PATH ----------
+   内置模块：ffmpeg-static（Linux x64/arm64 / macOS / Windows 静态构建）、
+   @ffprobe-installer/ffprobe（同平台集）。Linux/Docker 无需安装系统 ffmpeg。 */
+function makeBinResolver(config) {
+    const cache = {};
+    return function resolveBinary(kind) {
+        const cfgKey = kind === 'ffprobe' ? 'ffprobePath' : 'ffmpegPath';
+        const cfg = String((config && config[cfgKey]) || '').trim();
+        if (cfg) return cfg;
+        if (cache[kind]) return cache[kind];
+        let p = '';
+        try {
+            p = kind === 'ffprobe'
+                ? require('@ffprobe-installer/ffprobe').path
+                : require('ffmpeg-static');
+        } catch (e) { /* 依赖未安装（本地目录模式），回退 PATH */ }
+        if (typeof p === 'string' && p && fs.existsSync(p)) {
+            cache[kind] = p;
+            return p;
+        }
+        return kind === 'ffprobe' ? 'ffprobe' : 'ffmpeg';
+    };
+}
+
 module.exports = {
     apply(ctx, config) {
-        const ffprobe = String(config.ffprobePath || 'ffprobe').trim();
-        const ffmpeg = String(config.ffmpegPath || 'ffmpeg').trim();
+        const resolveBinary = makeBinResolver(config);
+        const ffprobe = resolveBinary('ffprobe');
+        const ffmpeg = resolveBinary('ffmpeg');
         const timeoutMs = Math.max(15, parseInt(config.timeoutSec) || 120) * 1000;
 
         const wrap = (fn) => async (req, res) => {

@@ -12,7 +12,8 @@ OpenVideoAPI **内封字幕采集插件**：检测视频文件内嵌的字幕轨
 ## 安装
 
 - 市场一键安装 `openvideo-plugin-embed-subtitle`（或 npm / GitHub 安装），后台启用
-- **前置**：服务器需安装 [ffmpeg](https://ffmpeg.org)（含 ffprobe）；可在插件配置中指定 `ffprobePath` / `ffmpegPath` 绝对路径
+- **跨平台开箱即用（Linux / Windows / macOS）**：插件内置 `ffmpeg-static` + `@ffprobe-installer/ffprobe` 静态二进制（含 linux-x64 / linux-arm64 / win / mac），**无需在服务器安装 ffmpeg**（Docker 部署同样适用）
+- 二进制解析顺序：插件配置指定路径 > 内置模块 > 系统 PATH；可在插件配置中覆盖
 
 ## 使用
 
@@ -35,14 +36,15 @@ OpenVideoAPI **内封字幕采集插件**：检测视频文件内嵌的字幕轨
 
 | 项 | 默认 | 说明 |
 | --- | --- | --- |
-| ffprobe 路径 | ffprobe | 从 PATH 查找；可填绝对路径 |
-| ffmpeg 路径 | ffmpeg | 提取字幕用 |
+| ffprobe 路径 | （空） | 留空自动使用内置二进制（`@ffprobe-installer/ffprobe`），找不到回退 PATH |
+| ffmpeg 路径 | （空） | 留空自动使用内置二进制（`ffmpeg-static`），找不到回退 PATH |
 | 提取超时（秒） | 120 | 超时自动终止 |
 
 ## 限制
 
 - **图形字幕**（PGS / VOBSUB / DVB 等图片轨）：可检测并标注，但无法提取为文本（v1 不支持 OCR）
-- 需要 ffmpeg 环境；检测/提取为按需触发，无后台扫描
+- 检测/提取为按需触发，无后台扫描
+- 内置二进制由 npm 安装时按平台自动下载（`postinstall`）；离线安装可改用系统 ffmpeg 并在配置中指定路径
 
 ## 开发
 

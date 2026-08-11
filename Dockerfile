@@ -1,6 +1,6 @@
 FROM node:22-alpine
 
-RUN apk add --no-cache git wget python3 make g++
+RUN apk add --no-cache git wget python3 make g++ ffmpeg
 
 WORKDIR /app
 
