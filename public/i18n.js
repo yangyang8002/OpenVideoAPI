@@ -317,6 +317,7 @@ var I18N = (function () {
 
         /* ===== 补齐：插件市场 ===== */
         '市场源': 'Market source', '官方源': 'Official', '自定义源': 'Custom',
+        'Gitee 镜像（国内加速）': 'Gitee mirror (faster in China)', '镜像: ': 'mirror: ',
         '本地源（file://plugins/registry.json）': 'Local file (file://plugins/registry.json)',
         'https://... 或 file://plugins/registry.json': 'https://... or file://plugins/registry.json',
         '保存并刷新': 'Save & reload', '无效的源地址': 'Invalid source URL',
@@ -806,6 +807,7 @@ var ZH_HANT = {
 
     /* ===== 补齐：插件市场 ===== */
     '市场源': '市場源', '官方源': '官方源', '自定义源': '自定義源',
+    'Gitee 镜像（国内加速）': 'Gitee 鏡像（國內加速）', '镜像: ': '鏡像: ',
     '本地源（file://plugins/registry.json）': '本地源（file://plugins/registry.json）',
     'https://... 或 file://plugins/registry.json': 'https://... 或 file://plugins/registry.json',
     '保存并刷新': '保存並刷新', '无效的源地址': '無效的源地址',
@@ -1226,6 +1228,7 @@ var DICT_WYW = {
 
     /* ===== 补齐：插件市场 ===== */
     '市场源': '市之源', '官方源': '官源', '自定义源': '自定源',
+    'Gitee 镜像（国内加速）': 'Gitee 鏡（國內速）', '镜像: ': '鏡: ',
     '本地源（file://plugins/registry.json）': '本地源（file://plugins/registry.json）',
     'https://... 或 file://plugins/registry.json': 'https://... 或 file://plugins/registry.json',
     '保存并刷新': '存之且新', '无效的源地址': '無效之源址',
@@ -1534,6 +1537,7 @@ var DICT_JA = {
 
     /* ===== 補完：プラグインマーケット ===== */
     '市场源': 'マーケットソース', '官方源': '公式', '自定义源': 'カスタム',
+    'Gitee 镜像（国内加速）': 'Gitee ミラー（中国国内で高速）', '镜像: ': 'ミラー: ',
     '本地源（file://plugins/registry.json）': 'ローカルファイル（file://plugins/registry.json）',
     'https://... 或 file://plugins/registry.json': 'https://... または file://plugins/registry.json',
     '保存并刷新': '保存して更新', '无效的源地址': '無効なソースURL',
@@ -1846,6 +1850,7 @@ var DICT_FR = {
 
     /* ===== Complément : marché de plugins ===== */
     '市场源': 'Source du marché', '官方源': 'Officielle', '自定义源': 'Personnalisée',
+    'Gitee 镜像（国内加速）': 'Miroir Gitee (plus rapide en Chine)', '镜像: ': 'miroir : ',
     '本地源（file://plugins/registry.json）': 'Fichier local (file://plugins/registry.json)',
     'https://... 或 file://plugins/registry.json': 'https://... ou file://plugins/registry.json',
     '保存并刷新': 'Enregistrer et actualiser', '无效的源地址': 'URL de source invalide',

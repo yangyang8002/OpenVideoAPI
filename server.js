@@ -13,6 +13,13 @@ const ip2rJs = require('ip2region.js');
 const { createStore, collectAll, restoreAll, summarizeData } = require('./lib/store');
 const { createCloud, TYPES: CLOUD_TYPES } = require('./lib/cloud');
 const { PluginManager, PLUGIN_DIR } = require('./lib/plugin');
+const { enableProxyFetch } = require('./lib/proxy');
+
+/* 出站代理支持（可选）：设置 HTTPS_PROXY / HTTP_PROXY 后，所有 fetch
+   （插件市场 / 更新检查 / ip2region 下载 / 字幕本地化等）走代理，适配国内网络 */
+if (enableProxyFetch()) {
+    console.log('[代理] 已启用出站 HTTP 代理: ' + (process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy));
+}
 
 /* 当前数据存储（启动时初始化，可在管理后台热切换，切换时自动迁移数据） */
 let store = null;
@@ -3315,10 +3322,15 @@ function npmRegistryArg() {
     return reg ? '--registry="' + reg + '"' : '';
 }
 
+const DEFAULT_PLUGIN_REGISTRY = 'https://raw.githubusercontent.com/yangyang8002/OpenVideoAPI/master/plugin-registry.json';
+/* 官方源镜像（国内直连友好），仅当配置为官方默认源时作为回退 */
+const PLUGIN_REGISTRY_MIRRORS = {
+    'https://gitee.com/yangyang8002/Artplayer-Web-Api/raw/master/plugin-registry.json': 'Gitee'
+};
 function getPluginConfig() {
     const c = readConfig().plugin || {};
     return {
-        registry: process.env.OPENVIDEO_PLUGIN_REGISTRY || c.registry || 'https://raw.githubusercontent.com/yangyang8002/OpenVideoAPI/master/plugin-registry.json',
+        registry: process.env.OPENVIDEO_PLUGIN_REGISTRY || c.registry || DEFAULT_PLUGIN_REGISTRY,
         npmRegistry: getNpmRegistry()
     };
 }
@@ -3415,7 +3427,12 @@ app.get('/api/admin/plugins/market', checkAdmin, async (req, res) => {
         }
         const cfg = getPluginConfig();
         /* 支持本地文件 registry（file:// 路径，插件开发环境用） */
-        let text = null;
+        let text = null, usedRegistry = cfg.registry, lastErr = '';
+        const fetchRegistry = async (url) => {
+            const r = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'User-Agent': 'OpenVideoAPI' } });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return await r.text();
+        };
         if (/^file:\/\//i.test(cfg.registry)) {
             try {
                 const fp = cfg.registry.replace(/^file:\/\//i, '');
@@ -3424,9 +3441,19 @@ app.get('/api/admin/plugins/market', checkAdmin, async (req, res) => {
                 return res.status(502).json({ code: 1, msg: '本地 registry 读取失败: ' + safeErrMsg(e) });
             }
         } else {
-            const r = await fetch(cfg.registry, { signal: AbortSignal.timeout(15000), headers: { 'User-Agent': 'OpenVideoAPI' } });
-            if (!r.ok) return res.status(502).json({ code: 1, msg: '插件市场获取失败: HTTP ' + r.status });
-            text = await r.text();
+            /* 官方源失败时自动回退镜像（Gitee），国内直连友好 */
+            const chain = [cfg.registry];
+            if (cfg.registry === DEFAULT_PLUGIN_REGISTRY) chain.push(...Object.keys(PLUGIN_REGISTRY_MIRRORS));
+            for (const url of chain) {
+                try {
+                    text = await fetchRegistry(url);
+                    usedRegistry = url;
+                    break;
+                } catch (e) {
+                    lastErr = (e && e.message) || String(e);
+                }
+            }
+            if (text == null) return res.status(502).json({ code: 1, msg: '插件市场获取失败: ' + lastErr });
         }
         const j = JSON.parse(text);
         const plugins = (Array.isArray(j.plugins) ? j.plugins : []).map(p => ({
@@ -3446,7 +3473,7 @@ app.get('/api/admin/plugins/market', checkAdmin, async (req, res) => {
             latest: Array.isArray(p.versions) && p.versions.length ? String(p.versions[0]) : '',
             dependencies: Array.isArray(p.dependencies) ? p.dependencies : []
         })).filter(p => p.name);
-        const data = { updated: j.updated || '', registry: cfg.registry, categories: Array.isArray(j.categories) ? j.categories : [], list: plugins };
+        const data = { updated: j.updated || '', registry: usedRegistry, mirror: usedRegistry !== cfg.registry ? (PLUGIN_REGISTRY_MIRRORS[usedRegistry] || 'mirror') : '', categories: Array.isArray(j.categories) ? j.categories : [], list: plugins };
         marketCache = { at: now, data };
         res.json({ code: 0, data });
     } catch (e) {

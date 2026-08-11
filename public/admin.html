@@ -1056,6 +1056,7 @@
                         <span>市场源</span>
                         <select id="mktSourceSel" onchange="onMarketSourceChange()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer">
                             <option value="official">官方源</option>
+                            <option value="gitee">Gitee 镜像（国内加速）</option>
                             <option value="local">本地源（file://plugins/registry.json）</option>
                             <option value="custom">自定义源</option>
                         </select>
@@ -2974,6 +2975,7 @@
         /* ===== 插件市场（独立 tab，支持自定义源） ===== */
         const MARKET_PRESETS = {
             official: 'https://raw.githubusercontent.com/yangyang8002/OpenVideoAPI/master/plugin-registry.json',
+            gitee: 'https://gitee.com/yangyang8002/Artplayer-Web-Api/raw/master/plugin-registry.json',
             local: 'file://plugins/registry.json'
         };
         function loadMarketSrc() {
@@ -3019,8 +3021,14 @@
         function loadMarket(force) {
             fetch('/api/admin/plugins/market' + (force ? '?force=1' : ''), { headers: authHeaders() })
                 .then(r => r.json()).then(d => {
-                    if (d.code !== 0) { document.getElementById('marketList').innerHTML = '<div class="empty-state">' + esc(d.msg || '插件市场获取失败') + '</div>'; return; }
-                    document.getElementById('marketChecked').textContent = d.data.updated ? '更新于 ' + d.data.updated : '';
+                    if (d.code !== 0) {
+                        /* 刷新失败不清空已有数据：有数据时仅提示，无数据时显示错误 */
+                        if (marketState.all.length) { toast(d.msg || '插件市场获取失败', false); return; }
+                        document.getElementById('marketList').innerHTML = '<div class="empty-state">' + esc(d.msg || '插件市场获取失败') + '</div>';
+                        return;
+                    }
+                    const checked = document.getElementById('marketChecked');
+                    if (checked) checked.textContent = (d.data.updated ? '更新于 ' + d.data.updated : '') + (d.data.mirror ? ' · 镜像: ' + d.data.mirror : '');
                     /* 回显实际使用的市场源 */
                     const srcUrl = document.getElementById('mktSourceUrl');
                     const srcSel = document.getElementById('mktSourceSel');
@@ -3031,7 +3039,10 @@
                     marketState.all = d.data.list || [];
                     marketState.categories = Array.isArray(d.data.categories) ? d.data.categories : [];
                     marketInstalledMap(() => { renderMarketSide(); renderMarketGrid(); });
-                }).catch(() => { document.getElementById('marketList').innerHTML = '<div class="empty-state">插件市场获取失败（网络不可达）</div>'; });
+                }).catch(() => {
+                    if (marketState.all.length) { toast('插件市场获取失败（网络不可达）', false); return; }
+                    document.getElementById('marketList').innerHTML = '<div class="empty-state">插件市场获取失败（网络不可达）</div>';
+                });
         }
 
         /* ===== Koishi 风格插件市场：侧栏（排序/筛选/分类）+ 搜索 + 卡片网格 ===== */
