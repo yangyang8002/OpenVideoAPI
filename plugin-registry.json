@@ -76,6 +76,31 @@
         "1.0.0"
       ],
       "dependencies": []
+    },
+    {
+      "name": "openvideo-plugin-ip-ban",
+      "description": "自动封禁超限 IP：请求数 / 流量阈值可调，白名单 IP 除外，支持按地区（国家）屏蔽（ip2region），与安全中心联动",
+      "author": "yangyang8002",
+      "homepage": "https://github.com/yangyang8002/openvideo-plugin-ip-ban",
+      "icon": "",
+      "category": "安全",
+      "official": true,
+      "score": 4.8,
+      "downloads": 21,
+      "created": "2026-08-11",
+      "updated": "2026-08-11",
+      "tags": [
+        "官方",
+        "安全",
+        "封禁",
+        "IP",
+        "限流",
+        "地区屏蔽"
+      ],
+      "versions": [
+        "1.0.0"
+      ],
+      "dependencies": []
     }
   ]
 }

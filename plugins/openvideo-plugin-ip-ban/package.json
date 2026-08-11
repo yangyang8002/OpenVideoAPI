@@ -1,0 +1,33 @@
+{
+  "name": "openvideo-plugin-ip-ban",
+  "version": "1.0.0",
+  "description": "OpenVideoAPI 自动封禁插件：按 IP 请求数 / 流量超限自动封禁（阈值可调），安全中心白名单 IP 除外，支持按 IP 地区屏蔽（ip2region）",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "keywords": ["openvideo", "plugin", "ip-ban", "auto-ban", "rate", "traffic", "region", "geo", "security"],
+  "files": ["lib", "README.md"],
+  "openvideoPlugin": {
+    "name": "ip-ban",
+    "description": "自动封禁超限 IP：请求数 / 流量阈值可调，白名单 IP 除外，可按 IP 地区（国家）屏蔽；封禁与安全中心联动（后台可见、生效）",
+    "inject": ["store", "logger", "http"],
+    "schema": [
+      { "key": "enabled", "label": "启用自动封禁", "type": "boolean", "default": true, "hint": "关闭后停止扫描（已封禁的保留）" },
+      { "key": "scanInterval", "label": "扫描间隔（秒）", "type": "number", "default": 60, "hint": "定时扫描 IP 统计的间隔" },
+      { "key": "reqPerMin", "label": "每分钟请求阈值", "type": "number", "default": 300, "hint": "最近 60 秒请求数超过则封禁；0 = 关闭该项" },
+      { "key": "reqPerHour", "label": "每小时请求阈值", "type": "number", "default": 5000, "hint": "最近 1 小时请求数超过则封禁；0 = 关闭该项" },
+      { "key": "mbPerMin", "label": "每分钟流量阈值（MB）", "type": "number", "default": 50, "hint": "最近 60 秒流量超过则封禁；0 = 关闭该项" },
+      { "key": "mbPerHour", "label": "每小时流量阈值（MB）", "type": "number", "default": 500, "hint": "最近 1 小时流量超过则封禁；0 = 关闭该项" },
+      { "key": "banMinutes", "label": "封禁时长（分钟）", "type": "number", "default": 1440, "hint": "0 = 永久封禁；到期自动解封" },
+      { "key": "regionBlock", "label": "启用地区屏蔽", "type": "boolean", "default": false, "hint": "对活跃 IP 按归属地（国家）自动封禁" },
+      { "key": "regionList", "label": "屏蔽地区（国家名，逗号分隔）", "type": "string", "default": "俄罗斯,美国", "hint": "ip2region 归属地第一段国家名，如：俄罗斯,美国,韩国" },
+      { "key": "whitelistBypass", "label": "白名单 IP 除外", "type": "boolean", "default": true, "hint": "安全中心白名单中的 IP 永不自动封禁" },
+      { "key": "activeWindowMin", "label": "活跃判定窗口（分钟）", "type": "number", "default": 10, "hint": "仅扫描最近 N 分钟有请求的 IP" }
+    ],
+    "client": {
+      "admin": {
+        "scripts": ["lib/client/admin/ipban.js"],
+        "tabs": [{ "id": "ip-ban", "title": "IP 封禁" }]
+      }
+    }
+  }
+}
