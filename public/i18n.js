@@ -179,12 +179,12 @@ var I18N = (function () {
 
         /* ===== 补齐：导航栏设置 ===== */
         '导航栏设置': 'Navigation Settings', '分组': 'Group', '上移': 'Up', '下移': 'Down', '重置默认': 'Reset defaults', '扩展': 'Extensions',
-        '默认折叠': 'Default collapse', '仅系统展开': 'System only', '全部展开': 'Expand all', '全部折叠': 'Collapse all',
+        '折叠': 'Default collapse', '仅系统展开': 'System only', '全部展开': 'Expand all', '全部折叠': 'Collapse all',
         '首次打开或清除折叠记忆时的默认状态': 'Default state on first open or after clearing collapse memory',
         '添加分组': 'Add group', '新分组': 'New group',
         '空分组，可把其他分组中的项目移动到这里': 'Empty group - move items here from other groups',
         '确认删除该分组？组内项目将保留在页面但不再显示。': 'Delete this group? Its items stay on the page but will no longer be shown.',
-                                '侧边导航按分组（次级 tab）展示，组头可点击折叠。「默认折叠」仅影响首次打开（或清除折叠记忆后）；「折叠 / 展开」按钮可即时单独设置每个栏目的当前状态（不影响其他组）。插件扩展 tab 固定归入「扩展」组。': 'Sidebar navigation is grouped (sub-tabs); group headers are collapsible. "Default collapse" only affects the first open (or after clearing the collapse memory); the Fold / Unfold buttons instantly set each section\'s current state independently (other groups are untouched). Plugin extension tabs always go to the "Extensions" group.',
+                                                                '侧边导航按分组（次级 tab）展示，组头可点击折叠。每组「折叠」勾选表示该组折叠、取消表示展开（所见即所得）；保存时只应用本次改动的组，其余组保持当前状态。插件扩展 tab 固定归入「扩展」组。': 'Sidebar navigation is grouped (sub-tabs); group headers are collapsible. Checking "Fold" for a group folds it, unchecking unfolds it (what you see is what you get); saving applies only the groups you changed, the rest keep their current state. Plugin extension tabs always go to the "Extensions" group.',
         '点击「读取当前」加载导航配置': 'Click "Load" to read the current nav config',
         '添加 / 更新视频映射': 'Add / update video mapping',
         '统计保留': 'Retention', '天（1-90）': 'days (1-90)', 'API 配置': 'API config',
@@ -600,12 +600,12 @@ var ZH_HANT = {
 
     /* ===== 补齐：导航栏设置 ===== */
     '导航栏设置': '導航欄設置', '分组': '分組', '上移': '上移', '下移': '下移', '重置默认': '重置默認', '扩展': '擴展',
-    '默认折叠': '默認折疊', '仅系统展开': '僅系統展開', '全部展开': '全部展開', '全部折叠': '全部折疊',
+    '折叠': '默認折疊', '仅系统展开': '僅系統展開', '全部展开': '全部展開', '全部折叠': '全部折疊',
     '首次打开或清除折叠记忆时的默认状态': '首次打開或清除折疊記憶時的默認狀態',
     '添加分组': '添加分組', '新分组': '新分組',
     '空分组，可把其他分组中的项目移动到这里': '空分組，可把其他分組中的項目移動到這裡',
     '确认删除该分组？组内项目将保留在页面但不再显示。': '確認刪除該分組？組內項目將保留在頁面但不再顯示。',
-                '侧边导航按分组（次级 tab）展示，组头可点击折叠。「默认折叠」仅影响首次打开（或清除折叠记忆后）；「折叠 / 展开」按钮可即时单独设置每个栏目的当前状态（不影响其他组）。插件扩展 tab 固定归入「扩展」组。': '側邊導航按分組（次級 tab）展示，組頭可點擊折疊。「默認折疊」僅影響首次打開（或清除折疊記憶後）；「折疊 / 展開」按鈕可即時單獨設置每個欄目的當前狀態（不影響其他組）。插件擴展 tab 固定歸入「擴展」組。',
+                                '侧边导航按分组（次级 tab）展示，组头可点击折叠。每组「折叠」勾选表示该组折叠、取消表示展开（所见即所得）；保存时只应用本次改动的组，其余组保持当前状态。插件扩展 tab 固定归入「扩展」组。': '側邊導航按分組（次級 tab）展示，組頭可點擊折疊。每組「折疊」勾選表示該組折疊、取消表示展開（所見即所得）；保存時只應用本次改動的組，其餘組保持當前狀態。插件擴展 tab 固定歸入「擴展」組。',
     '点击「读取当前」加载导航配置': '點擊「讀取當前」加載導航配置',
     '添加 / 更新视频映射': '添加 / 更新視頻映射',
     '统计保留': '統計保留',
@@ -1151,12 +1151,12 @@ var DICT_WYW = {
 
     /* ===== 补齐：导航栏设置 ===== */
     '导航栏设置': '導航欄之設', '分组': '組', '上移': '上之', '下移': '下之', '重置默认': '復常', '扩展': '展',
-    '默认折叠': '常疊', '仅系统展开': '唯系統展', '全部展开': '盡展', '全部折叠': '盡疊',
+    '折叠': '常疊', '仅系统展开': '唯系統展', '全部展开': '盡展', '全部折叠': '盡疊',
     '首次打开或清除折叠记忆时的默认状态': '初啟或清疊憶之常態',
     '添加分组': '增組', '新分组': '新組',
     '空分组，可把其他分组中的项目移动到这里': '空組，可移他組之項於此',
     '确认删除该分组？组内项目将保留在页面但不再显示。': '果欲刪此組乎？組內之項仍在頁而不復顯。',
-                '侧边导航按分组（次级 tab）展示，组头可点击折叠。「默认折叠」仅影响首次打开（或清除折叠记忆后）；「折叠 / 展开」按钮可即时单独设置每个栏目的当前状态（不影响其他组）。插件扩展 tab 固定归入「扩展」组。': '側導航分組（次級 tab）而列，組首可擊而疊。「常疊」唯涉初啟（或清疊憶後）；「疊 / 展」之鈕可即時獨設每欄之今狀（不涉餘組）。插件之展 tab 恒入「展」組。',
+                                '侧边导航按分组（次级 tab）展示，组头可点击折叠。每组「折叠」勾选表示该组折叠、取消表示展开（所见即所得）；保存时只应用本次改动的组，其余组保持当前状态。插件扩展 tab 固定归入「扩展」组。': '側導航分組（次級 tab）而列，組首可擊而疊。每組「疊」勾則疊、罷則展（所見即所得）；存時唯用所改之組，餘組守其今狀。插件之展 tab 恒入「展」組。',
     '点击「读取当前」加载导航配置': '擊「讀今」以載導航之設',
     'API 配置': 'API 之設', 'API 路径': 'API 之徑', '带宽上限(KB/s)': '帶寬上限(KB/s)',
     '实时调用曲线': '實時調用之曲', '统计': '統計', '站点总开放时间': '站之總開時',
@@ -1463,12 +1463,12 @@ var DICT_JA = {
 
     /* ===== 補完：ナビゲーション設定 ===== */
     '导航栏设置': 'ナビゲーション設定', '分组': 'グループ', '上移': '上へ', '下移': '下へ', '重置默认': 'デフォルトに戻す', '扩展': '拡張',
-    '默认折叠': 'デフォルトの折りたたみ', '仅系统展开': 'システムのみ展開', '全部展开': 'すべて展開', '全部折叠': 'すべて折りたたむ',
+    '折叠': 'デフォルトの折りたたみ', '仅系统展开': 'システムのみ展開', '全部展开': 'すべて展開', '全部折叠': 'すべて折りたたむ',
     '首次打开或清除折叠记忆时的默认状态': '初回表示時または折りたたみ記憶クリア時のデフォルト状態',
     '添加分组': 'グループを追加', '新分组': '新しいグループ',
     '空分组，可把其他分组中的项目移动到这里': '空のグループ - 他のグループから項目を移動できます',
     '确认删除该分组？组内项目将保留在页面但不再显示。': 'このグループを削除しますか？項目はページに残りますが表示されなくなります。',
-                '侧边导航按分组（次级 tab）展示，组头可点击折叠。「默认折叠」仅影响首次打开（或清除折叠记忆后）；「折叠 / 展开」按钮可即时单独设置每个栏目的当前状态（不影响其他组）。插件扩展 tab 固定归入「扩展」组。': 'サイドナビはグループ（サブタブ）で表示され、グループ見出しは折りたためます。「デフォルト折りたたみ」は初回表示時（または折りたたみ記憶クリア後）にのみ影響します。「折りたたむ / 展開」ボタンで各セクションの現在の状態を個別に即時設定できます（他のグループには影響しません）。プラグイン拡張タブは常に「拡張」グループへ。',
+                                '侧边导航按分组（次级 tab）展示，组头可点击折叠。每组「折叠」勾选表示该组折叠、取消表示展开（所见即所得）；保存时只应用本次改动的组，其余组保持当前状态。插件扩展 tab 固定归入「扩展」组。': 'サイドナビはグループ（サブタブ）で表示され、グループ見出しは折りたためます。各グループの「折りたたみ」チェックで折りたたみ、解除で展開（見たままの状態）。保存時は変更したグループのみ適用され、他のグループは現在の状態を維持します。プラグイン拡張タブは常に「拡張」グループへ。',
     '点击「读取当前」加载导航配置': '「読み込む」をクリックして現在のナビ設定を読み込み',
     '统计保留': '統計保持', '天（1-90）': '日（1-90）', 'API 配置': 'API 設定', 'API 路径': 'API パス',
     '带宽上限(KB/s)': '帯域制限(KB/s)', '实时调用曲线': 'リアルタイム呼び出しチャート', '统计': '統計',
@@ -1785,12 +1785,12 @@ var DICT_FR = {
 
     /* ===== Complément : réglages de navigation ===== */
     '导航栏设置': 'Réglages de navigation', '分组': 'Groupe', '上移': 'Monter', '下移': 'Descendre', '重置默认': 'Rétablir les défauts', '扩展': 'Extensions',
-    '默认折叠': 'Repli par défaut', '仅系统展开': 'Système uniquement', '全部展开': 'Tout déplier', '全部折叠': 'Tout replier',
+    '折叠': 'Repli par défaut', '仅系统展开': 'Système uniquement', '全部展开': 'Tout déplier', '全部折叠': 'Tout replier',
     '首次打开或清除折叠记忆时的默认状态': 'État par défaut à la première ouverture ou après effacement de la mémoire de repli',
     '添加分组': 'Ajouter un groupe', '新分组': 'Nouveau groupe',
     '空分组，可把其他分组中的项目移动到这里': 'Groupe vide - déplacez ici des éléments d\'autres groupes',
     '确认删除该分组？组内项目将保留在页面但不再显示。': 'Supprimer ce groupe ? Ses éléments restent sur la page mais ne seront plus affichés.',
-                '侧边导航按分组（次级 tab）展示，组头可点击折叠。「默认折叠」仅影响首次打开（或清除折叠记忆后）；「折叠 / 展开」按钮可即时单独设置每个栏目的当前状态（不影响其他组）。插件扩展 tab 固定归入「扩展」组。': 'La navigation latérale est regroupée (sous-onglets) ; les en-têtes de groupe sont repliables. « Repli par défaut » n\'affecte que la première ouverture (ou après effacement de la mémoire de repli) ; les boutons Replier / Déplier règlent instantanément l\'état actuel de chaque section, indépendamment (les autres groupes ne sont pas touchés). Les onglets d\'extension de plugins vont toujours dans le groupe « Extensions ».',
+                                '侧边导航按分组（次级 tab）展示，组头可点击折叠。每组「折叠」勾选表示该组折叠、取消表示展开（所见即所得）；保存时只应用本次改动的组，其余组保持当前状态。插件扩展 tab 固定归入「扩展」组。': 'La navigation latérale est regroupée (sous-onglets) ; les en-têtes de groupe sont repliables. Cocher « Replier » pour un groupe le replie, décocher le déplie (ce que vous voyez est ce que vous obtenez) ; l\'enregistrement n\'applique que les groupes modifiés, les autres conservent leur état actuel. Les onglets d\'extension de plugins vont toujours dans le groupe « Extensions ».',
     '点击「读取当前」加载导航配置': 'Cliquez sur « Charger » pour lire la configuration actuelle',
     '统计保留': 'Rétention', '天（1-90）': 'jours (1-90)', 'API 配置': 'Configuration API', 'API 路径': 'Chemin API',
     '带宽上限(KB/s)': 'Limite de bande passante (KB/s)', '实时调用曲线': 'Courbe d\'appels en direct', '统计': 'Stats',

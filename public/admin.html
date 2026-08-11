@@ -1159,7 +1159,7 @@
                     <span id="navCfgMsg" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:8px"></span>
                 </h3>
                 <div id="navCardBody" style="display:none">
-                    <div class="cfg-hint">侧边导航按分组（次级 tab）展示，组头可点击折叠。「默认折叠」仅影响首次打开（或清除折叠记忆后）；「折叠 / 展开」按钮可即时单独设置每个栏目的当前状态（不影响其他组）。插件扩展 tab 固定归入「扩展」组。</div>
+                    <div class="cfg-hint">侧边导航按分组（次级 tab）展示，组头可点击折叠。每组「折叠」勾选表示该组折叠、取消表示展开（所见即所得）；保存时只应用本次改动的组，其余组保持当前状态。插件扩展 tab 固定归入「扩展」组。</div>
                     <div id="navEditor"><div class="empty-state">点击「读取当前」加载导航配置</div></div>
                 </div>
             </div>
@@ -1831,14 +1831,14 @@
             if (!wrap) return;
             if (!navConfig) navConfig = JSON.parse(JSON.stringify(NAV_DEFAULT));
             const groups = navConfig.groups;
+            /* checkbox = 当前折叠状态（所见即所得），初始值取当前记忆 */
+            const cur = navCollapsed();
             wrap.innerHTML = groups.map((g, gi) => `
                 <div class="nav-edit-group" data-gid="${esc(g.id)}" style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px">
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
                         <span style="font-size:11px;color:var(--text3)">分组</span>
                         <input class="nav-edit-gname" value="${esc(g.name)}" style="flex:1;min-width:100px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
-                        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);cursor:pointer"><input type="checkbox" class="nav-edit-gcollapse" ${g.collapsed ? 'checked' : ''} style="accent-color:var(--primary)"> 默认折叠</label>
-                        <button class="btn btn-sm" onclick="navApplyNow('${esc(g.id)}',true)">折叠</button>
-                        <button class="btn btn-sm" onclick="navApplyNow('${esc(g.id)}',false)">展开</button>
+                        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);cursor:pointer"><input type="checkbox" class="nav-edit-gcollapse" ${cur.includes(g.id) ? 'checked' : ''} style="accent-color:var(--primary)"> 折叠</label>
                         <button class="btn btn-sm" onclick="navMoveGroup(${gi},-1)">上移</button>
                         <button class="btn btn-sm" onclick="navMoveGroup(${gi},1)">下移</button>
                         ${g.id.startsWith('custom') ? `<button class="btn btn-sm" style="border-color:var(--danger);color:var(--danger)" onclick="navRemoveGroup('${esc(g.id)}')">删除</button>` : ''}
@@ -1854,6 +1854,10 @@
                         </div>`).join('') || '<div style="font-size:11px;color:var(--text3);padding:4px 8px">空分组，可把其他分组中的项目移动到这里</div>'}</div>
                 </div>`).join('') +
                 '<div style="margin-top:10px"><button class="btn btn-sm" onclick="navAddGroup()">+ 添加分组</button></div>';
+            /* 记录各组 checkbox 初值，用于保存时只应用本次改动的组 */
+            wrap.querySelectorAll('.nav-edit-group').forEach(ge => {
+                ge.dataset.c0 = ge.querySelector('.nav-edit-gcollapse').checked ? '1' : '0';
+            });
         }
         function navAddGroup() {
             if (!navConfig) navConfig = JSON.parse(JSON.stringify(NAV_DEFAULT));
@@ -1867,26 +1871,33 @@
         }
         function saveNav() {
             if (!navConfig) return toast('请先读取当前配置', false);
+            /* 收集 checkbox 与初值，仅应用本次改动的组（其他组保持当前状态） */
+            const changed = [];
             document.querySelectorAll('#navEditor .nav-edit-group').forEach(ge => {
                 const g = navFindGroup(ge.dataset.gid);
                 if (!g) return;
                 g.name = ge.querySelector('.nav-edit-gname').value.trim() || g.name;
                 const cb = ge.querySelector('.nav-edit-gcollapse');
-                if (cb) g.collapsed = cb.checked;
+                if (!cb) return;
+                const was = ge.dataset.c0 === '1';
+                const now = cb.checked;
+                g.collapsed = now;
+                if (was !== now) changed.push({ id: g.id, fold: now });
+                ge.dataset.c0 = now ? '1' : '0';
             });
             fetch('/api/admin/config', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ ui: { nav: navConfig } }) })
                 .then(r => r.json()).then(d => {
                     toast(d.msg, d.code === 0);
-                    if (d.code === 0) { renderNav(); loadNavEditor(); }
+                    if (d.code === 0) {
+                        /* 只应用本次改动的组 */
+                        const cur = navCollapsed();
+                        const next = new Set(cur);
+                        changed.forEach(c => { if (c.fold) next.add(c.id); else next.delete(c.id); });
+                        try { localStorage.setItem('ap_nav_collapsed', JSON.stringify([...next])); localStorage.setItem('ap_nav_init', '1'); } catch (e) {}
+                        renderNav();
+                        loadNavEditor();
+                    }
                 });
-        }
-        /* 即时应用单个分组的折叠状态（不改变其他组，单独设置当前状态） */
-        function navApplyNow(gid, fold) {
-            const cur = navCollapsed();
-            const next = cur.filter(x => x !== gid);
-            if (fold) next.push(gid);
-            try { localStorage.setItem('ap_nav_collapsed', JSON.stringify(next)); localStorage.setItem('ap_nav_init', '1'); } catch (e) {}
-            renderNav();
         }
         function resetNav() {
             if (!confirm('确认恢复默认导航分组与顺序？')) return;
