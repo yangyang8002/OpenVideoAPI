@@ -910,7 +910,8 @@ async function securityMiddleware(req, res, next) {
     const ip = String(req.ip || req.socket.remoteAddress || 'unknown').replace(/^::ffff:/, '');
     req.clientIp = ip;
     const sec = await readSecurity();
-    if (sec.banned[ip]) {
+    /* 封禁不拦截管理后台（/api/admin/*）：防止管理员被误封后无法登录自救 */
+    if (sec.banned[ip] && !req.path.startsWith('/api/admin/')) {
         return res.status(403).json({ code: 403, msg: 'IP 已被封禁' });
     }
     req.ipWhitelisted = !!sec.whitelist[ip];

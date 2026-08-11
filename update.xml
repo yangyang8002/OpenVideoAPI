@@ -30,7 +30,7 @@
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
   <file path="package-lock.json" sha256="3b99c310a8bf59b2b4bd9dc4ab11337bc02486464f9c659e45a0b5df19774ddb" size="88919"/>
   <file path="package.json" sha256="cc6476b15d33994682e9dd5e063f98f5e22c0a5cf457517056c0389c0562b695" size="1565"/>
-  <file path="plugin-registry.json" sha256="3e24764c8aa14f13e2983081c4f2eefab2ca769f0501d99218e43091660479b7" size="2852"/>
+  <file path="plugin-registry.json" sha256="d4ff31ec317a7a7ea05c21f0c0f2b3ba918390621fa259c4946f20735e5a256b" size="2869"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/admin/debug.js" sha256="3464753a927d51247d75172d3bd06fdb8c8a3391b9b39e6d4837b01de4e877fc" size="6036"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/player/overlay.js" sha256="56322175b4de4075511e9587a30e6bf6a830a67e4e210edf2081e1687dc70874" size="1356"/>
   <file path="plugins/openvideo-plugin-demo/lib/index.js" sha256="0a193d7d1f101de41c4be8cd8a18941e71155e501909193c1c200755d89c08a2" size="3811"/>
@@ -58,7 +58,7 @@
   <file path="public/test_video1.vtt" sha256="65bf5090bbb808e9825b4205eff66e8f3799b9ef482070ae54a460b6ac18eb0d" size="115"/>
   <file path="public/test_video2.mp4" sha256="f192304389dbc213c8dde5dc6f6b77cdd09f1785dbef6255a9857b108757eb8e" size="330061"/>
   <file path="public/test_video3.mp4" sha256="5520e9715ab6371aaf5532877a3dff6010ce57793cd6cc89752aa4116d4b9d50" size="108190"/>
-  <file path="server.js" sha256="2ac19e0eb9cc318548b0bd642386a33c699f7ac5961f55456c7db50f1a6a241b" size="192856"/>
+  <file path="server.js" sha256="974e5e1909d6381abaaec3fb7bbec5a56994e0aea3dfcd8b0d2d4442de5c02e1" size="192999"/>
   <file path="theme/README.md" sha256="d3f4cc2fbc639f7eb6cbd98b210dd6642a840ecbbbda1b86944d574ec348746e" size="4676"/>
   <file path="theme/admin.css" sha256="2748ab4434965280b2993b3e9c565c2684bd389414fa873459c630060bd825f7" size="10177"/>
   <file path="theme/admin/bilibili/style.css" sha256="1bf60cf612a5a20cecf5f0bf8676c9831af78b54d30314bf5d27e3cc3bdec703" size="132"/>
