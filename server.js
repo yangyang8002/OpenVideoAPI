@@ -1509,8 +1509,14 @@ const DEFAULT_NAV = {
 function getNavConfig() {
     const c = readConfig();
     const nav = c.ui && c.ui.nav;
-    if (!nav || !Array.isArray(nav.groups)) return DEFAULT_NAV;
-    return nav;
+    if (!nav || typeof nav !== 'object') return DEFAULT_NAV;
+    /* 容错：缺失字段回退默认（防止部分更新破坏结构） */
+    const out = { ...DEFAULT_NAV, ...nav };
+    if (!Array.isArray(out.groups)) out.groups = DEFAULT_NAV.groups;
+    if (!Array.isArray(out.pinnedTop)) out.pinnedTop = DEFAULT_NAV.pinnedTop;
+    if (!Array.isArray(out.pinnedBottom)) out.pinnedBottom = DEFAULT_NAV.pinnedBottom;
+    if (!out.defaultCollapse) out.defaultCollapse = DEFAULT_NAV.defaultCollapse || 'system';
+    return out;
 }
 
 app.get('/api/admin/config', checkAdmin, (req, res) => {
@@ -1805,7 +1811,19 @@ app.post('/api/admin/config', checkAdmin, (req, res) => {
     if (theme) config.theme = theme;
     if (adminTheme) config.adminTheme = adminTheme;
     if (cdn) config.cdn = { ...config.cdn, ...cdn };
-    if (ui) config.ui = { ...config.ui, ...ui };
+    if (ui) {
+        /* nav 部分更新时合并缺失字段（只改 defaultCollapse 不会丢失分组配置） */
+        if (ui.nav && typeof ui.nav === 'object') {
+            const base = ((config.ui && config.ui.nav) || {});
+            ui.nav = {
+                groups: Array.isArray(ui.nav.groups) ? ui.nav.groups : (Array.isArray(base.groups) ? base.groups : DEFAULT_NAV.groups),
+                pinnedTop: Array.isArray(ui.nav.pinnedTop) ? ui.nav.pinnedTop : (Array.isArray(base.pinnedTop) ? base.pinnedTop : DEFAULT_NAV.pinnedTop),
+                pinnedBottom: Array.isArray(ui.nav.pinnedBottom) ? ui.nav.pinnedBottom : (Array.isArray(base.pinnedBottom) ? base.pinnedBottom : DEFAULT_NAV.pinnedBottom),
+                defaultCollapse: ui.nav.defaultCollapse || base.defaultCollapse || DEFAULT_NAV.defaultCollapse || 'system'
+            };
+        }
+        config.ui = { ...config.ui, ...ui };
+    }
     writeConfig(config);
     applyTrustProxy(config);
     res.json({ code: 0, msg: '配置已更新', data: config });

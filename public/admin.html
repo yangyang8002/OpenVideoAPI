@@ -1737,7 +1737,8 @@
                 { id: 'monitor', name: '监控', items: ['logs', 'api'] }
             ],
             pinnedTop: ['console'],
-            pinnedBottom: ['about']
+            pinnedBottom: ['about'],
+            defaultCollapse: 'system' /* 首次打开默认：none=全部展开 / system=仅系统展开 / all=全部折叠 */
         };
         let navConfig = null;
         const NAV_ITEM_LABELS = {};
@@ -1764,7 +1765,15 @@
             const btns = {};
             nav.querySelectorAll('.nav-item[data-tab]').forEach(b => { btns[b.dataset.tab] = b; });
             const anchor = pinnedBottom.map(id => btns[id]).filter(Boolean)[0] || null;
-            const collapsed = navCollapsed();
+            /* 折叠状态：有记忆用记忆；首次打开按 defaultCollapse（默认仅系统展开） */
+            let collapsedIds;
+            try { if (localStorage.getItem('ap_nav_init') === '1') collapsedIds = navCollapsed(); } catch (e) {}
+            if (!collapsedIds) {
+                const mode = (navConfig && navConfig.defaultCollapse) || 'system';
+                collapsedIds = mode === 'all' ? groups.map(g => g.id)
+                    : mode === 'system' ? groups.filter(g => g.id !== 'system').map(g => g.id) : [];
+                try { localStorage.setItem('ap_nav_init', '1'); localStorage.setItem('ap_nav_collapsed', JSON.stringify(collapsedIds)); } catch (e) {}
+            }
             groups.forEach(g => {
                 const head = document.createElement('button');
                 head.type = 'button';
@@ -1781,7 +1790,7 @@
                 else nav.appendChild(grp);
                 head.addEventListener('click', function () { toggleNavGroup(g.id, grp); });
                 (g.items || []).forEach(id => { if (btns[id]) body.appendChild(btns[id]); });
-                if (collapsed.includes(g.id)) grp.classList.add('collapsed');
+                if (collapsedIds.includes(g.id)) grp.classList.add('collapsed');
             });
         }
         function initNav() {
@@ -1822,7 +1831,18 @@
             if (!wrap) return;
             if (!navConfig) navConfig = JSON.parse(JSON.stringify(NAV_DEFAULT));
             const groups = navConfig.groups;
-            wrap.innerHTML = groups.map((g, gi) => `
+            const dc = navConfig.defaultCollapse || 'system';
+            wrap.innerHTML = `
+                <div class="cfg-row" style="margin-bottom:10px">
+                    <span>默认折叠</span>
+                    <select id="navDefaultCollapse" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer">
+                        <option value="system" ${dc === 'system' ? 'selected' : ''}>仅系统展开</option>
+                        <option value="none" ${dc === 'none' ? 'selected' : ''}>全部展开</option>
+                        <option value="all" ${dc === 'all' ? 'selected' : ''}>全部折叠</option>
+                    </select>
+                    <span style="font-size:11px;color:var(--text3)">首次打开或清除折叠记忆时的默认状态</span>
+                </div>` +
+                groups.map((g, gi) => `
                 <div class="nav-edit-group" data-gid="${esc(g.id)}" style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px">
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
                         <span style="font-size:11px;color:var(--text3)">分组</span>
@@ -1848,6 +1868,8 @@
                 if (!g) return;
                 g.name = ge.querySelector('.nav-edit-gname').value.trim() || g.name;
             });
+            const sel = document.getElementById('navDefaultCollapse');
+            if (sel) navConfig.defaultCollapse = sel.value;
             fetch('/api/admin/config', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ ui: { nav: navConfig } }) })
                 .then(r => r.json()).then(d => {
                     toast(d.msg, d.code === 0);
@@ -1857,6 +1879,7 @@
         function resetNav() {
             if (!confirm('确认恢复默认导航分组与顺序？')) return;
             navConfig = JSON.parse(JSON.stringify(NAV_DEFAULT));
+            try { localStorage.removeItem('ap_nav_collapsed'); localStorage.removeItem('ap_nav_init'); } catch (e) {}
             loadNavEditor();
         }
         function populateThemeSelects() {
@@ -2074,6 +2097,7 @@
             else stopDashPanel();
             if (name === 'plugins' && !window._plLoaded) { window._plLoaded = true; loadPlugins(); }
             if (name === 'market' && !window._marketLoaded) { window._marketLoaded = true; loadMarket(false); loadMarketSrc(); }
+            if (name === 'config' && !window._navEditorLoaded) { window._navEditorLoaded = true; loadNavEditor(); }
             if (name === 'deps' && !window._depsLoaded) { window._depsLoaded = true; loadDeps(false); }
             if (name === 'db' && !window._dbLoaded) { window._dbLoaded = true; loadDbInfo(); loadDbBrowse(); }
             if (name === 'backup' && !window._bkLoaded) { window._bkLoaded = true; loadBackups(); loadCloudList(); }
