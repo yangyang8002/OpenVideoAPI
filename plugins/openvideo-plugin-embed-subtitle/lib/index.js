@@ -116,6 +116,29 @@ function genSubId() {
     return s;
 }
 
+const VID_CHARS = '23456789abcdefghijkmnpqrstuvwxyz'; /* 与 server.js 同字符集 */
+
+/* 由文件路径推导播放 URL：public/ 下的文件可直接播放（如 public/test_embed/a.mkv → /test_embed/a.mkv） */
+function playUrlOf(filePath) {
+    const rel = path.relative(ROOT, filePath).replace(/\\/g, '/');
+    if (rel.startsWith('public/')) return '/' + rel.slice('public/'.length);
+    return null;
+}
+
+/* 自动关联：查已有映射，否则分配 8 位 vid 并写入（提取后播放器立即可见字幕） */
+async function autoVid(ctx, url) {
+    const videos = await ctx.store.videosAll();
+    for (const [v, u] of Object.entries(videos)) if (u === url) return v;
+    const used = new Set(Object.keys(videos));
+    try { (await ctx.store.danmuAllVids()).forEach(v => used.add(v)); } catch (e) {}
+    for (let i = 0; i < 50; i++) {
+        let s = '';
+        for (let j = 0; j < 8; j++) s += VID_CHARS[Math.floor(Math.random() * VID_CHARS.length)];
+        if (!used.has(s)) { await ctx.store.videoSet(s, url); return s; }
+    }
+    return null;
+}
+
 /* ---------- ffmpeg / ffprobe 二进制解析：用户配置 > 内置 npm 模块（跨平台） > PATH ----------
    内置模块：ffmpeg-static（Linux x64/arm64 / macOS / Windows 静态构建）、
    @ffprobe-installer/ffprobe（同平台集）。Linux/Docker 无需安装系统 ffmpeg。 */
@@ -195,6 +218,11 @@ module.exports = {
 
         async function extractOne(filePath, st, langOverride, nameOverride, vid) {
             if (!fs.existsSync(SUB_DIR)) fs.mkdirSync(SUB_DIR, { recursive: true });
+            /* 自动关联：未指定 vid 时推导播放 URL 并分配/复用映射，提取后播放器立即可见字幕 */
+            if (!vid) {
+                const pUrl = playUrlOf(filePath);
+                if (pUrl) vid = await autoVid(ctx, pUrl);
+            }
             const base = path.basename(filePath, path.extname(filePath));
             const lang = langOverride || st.language || String(st.index);
             const ext = extFor(st.codec);
@@ -225,6 +253,8 @@ module.exports = {
                 if (!Array.isArray(subsMap[vid])) subsMap[vid] = [];
                 if (!subsMap[vid].includes(item.id)) subsMap[vid].push(item.id);
                 await ctx.store.videoSubsWrite(subsMap);
+                item.vid = vid;
+                item.playUrl = playUrlOf(filePath);
             }
             return item;
         }
