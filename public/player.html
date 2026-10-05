@@ -33,8 +33,8 @@
         #artplayer{width:100%;height:100%}
         /* iframe 嵌入模式：铺满视口并按视频宽高比贴合，无黑边，无信息区 */
         body.embed-mode{overflow:hidden}
-        body.embed-mode #app{height:100dvh;max-width:none;min-height:0;padding:0;justify-content:center;align-items:center}
-        body.embed-mode #player-wrapper{flex:none;aspect-ratio:auto;max-height:none;min-height:0;margin:auto;border-radius:0;box-shadow:none}
+        body.embed-mode #app{height:100vh;height:100dvh;max-width:none;min-height:0;padding:0;justify-content:center;align-items:center}
+        body.embed-mode #player-wrapper{width:100%;height:100%;flex:none;aspect-ratio:auto;max-height:none;min-height:0;margin:auto;border-radius:0;box-shadow:none}
         body.embed-mode .bili-info{display:none!important}
 
         /* ===== ArtPlayer 覆写：B站式控制层 ===== */
@@ -292,6 +292,7 @@
         if(h>ah){h=ah;w=Math.round(h*aspect)}
         wrap.style.width=Math.max(1,w)+'px';
         wrap.style.height=Math.max(1,h)+'px';
+        try{if(art&&art.resize)art.resize()}catch(e){}
     }
 
     function qs(n){return new URLSearchParams(location.search).get(n)}
