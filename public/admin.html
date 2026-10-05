@@ -1162,7 +1162,8 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
             <button class="nav-item" data-tab="deps" onclick="switchTab('deps')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16"/><path d="M6 6h12"/><path d="M8 14h8"/><path d="M10 18h4"/></svg></span><span>依赖与更新</span></button>
             <button class="nav-item" data-tab="config" onclick="switchTab('config')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/></svg></span><span>服务器配置</span></button>
             <button class="nav-item" data-tab="files" onclick="switchTab('files')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><span>文件管理</span></button>
-            <button class="nav-item" data-tab="logs" onclick="switchTab('logs')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span><span>日志</span></button>
+            <button class="nav-item" data-tab="logs" onclick="switchTab('logs')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span><span>请求记录</span></button>
+            <button class="nav-item" data-tab="debug" onclick="switchTab('debug')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></span><span>Debug日志</span></button>
             <button class="nav-item" data-tab="api" onclick="switchTab('api')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span><span>API管理</span></button>
             <button class="nav-item" data-tab="db" onclick="switchTab('db')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></span><span>数据库管理</span></button>
             <button class="nav-item" data-tab="backup" onclick="switchTab('backup')"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span><span>备份中心</span></button>
@@ -1595,7 +1596,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         <!-- Logs -->
         <div class="panel" id="logsPanel">
             <div class="card">
-                <h3><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>请求日志</h3>
+                <h3><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>请求记录</h3>
                 <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
                     <button class="btn btn-sm" onclick="loadLogs()">刷新</button>
                     <span style="font-size:11px;color:var(--text3);align-self:center">最近 500 条请求记录</span>
@@ -1608,7 +1609,30 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                 </div>
                 <div style="overflow-x:auto">
                     <table><thead><tr><th>时间</th><th>方法</th><th>路径</th><th>状态</th><th>IP</th><th>耗时</th></tr></thead><tbody id="logTbody"></tbody></table>
-                    <div class="empty-state" id="logEmpty" style="display:none">暂无日志</div>
+                    <div class="empty-state" id="logEmpty" style="display:none">暂无请求记录</div>
+                </div>
+            </div>
+        </div>
+        <!-- Debug Logs -->
+        <div class="panel" id="debugPanel">
+            <div class="card">
+                <h3><span class="dot" style="background:var(--danger);box-shadow:0 0 6px var(--danger)"></span>Debug日志</h3>
+                <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+                    <button class="btn btn-sm" onclick="loadDebugLogs()">刷新</button>
+                    <select id="debugSrcSel" onchange="debugLogState.src=this.value;loadDebugLogs()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px">
+                        <option value="all">全部来源</option><option value="core">本体</option><option value="plugin">插件</option>
+                    </select>
+                    <span style="font-size:11px;color:var(--text3);align-self:center">每个插件与本体的请求日志（最近 500 条）</span>
+                    <label class="pg-size" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);margin-left:auto">条数
+                        <select id="debugLimitSel" onchange="debugLogState.limit=+this.value;loadDebugLogs()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px">
+                            <option value="10">10 条</option><option value="50">50 条</option>
+                            <option value="100" selected>100 条</option><option value="200">200 条</option>
+                        </select>
+                    </label>
+                </div>
+                <div style="overflow-x:auto">
+                    <table><thead><tr><th>时间</th><th>来源</th><th>方法</th><th>路径</th><th>状态</th><th>IP</th><th>耗时</th></tr></thead><tbody id="debugLogTbody"></tbody></table>
+                    <div class="empty-state" id="debugLogEmpty" style="display:none">暂无Debug日志</div>
                 </div>
             </div>
         </div>
@@ -1927,7 +1951,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                     <div>· 播放器 + 后台双主题（各 10 套）</div>
                     <div>· 屏蔽词 + GitHub 词库订阅</div>
                     <div>· 文件管理：压缩/解压/批量操作/上传</div>
-                    <div>· 请求日志（最近 500 条）</div>
+                    <div>· 请求记录（最近 500 条）</div>
                 </div>
             </div>
             <div class="card" style="max-width:520px;margin:0 auto">
@@ -2008,7 +2032,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                 { id: 'content', name: '内容管理', items: ['words', 'danmu', 'videos', 'subs'], collapsed: true },
                 { id: 'system', name: '系统', items: ['config', 'security', 'db', 'backup', 'files'], collapsed: false },
                 { id: 'ext', name: '扩展', items: ['plugins', 'market', 'deps'], collapsed: true },
-                { id: 'monitor', name: '监控', items: ['logs', 'api'], collapsed: true }
+                { id: 'monitor', name: '监控', items: ['logs', 'debug', 'api'], collapsed: true }
             ],
             pinnedTop: ['console'],
             pinnedBottom: ['about']
@@ -2505,6 +2529,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
             if (name === 'db' && !window._dbLoaded) { window._dbLoaded = true; loadDbInfo(); loadDbBrowse(); }
             if (name === 'backup' && !window._bkLoaded) { window._bkLoaded = true; loadBackups(); loadCloudList(); }
             if (name === 'subs' && !window._subsLoaded) { window._subsLoaded = true; loadSubVideos(); }
+            if (name === 'debug') loadDebugLogs();
             if (window.__mdOnTab) try { __mdOnTab(name); } catch (e) {}
         }
 
@@ -2788,6 +2813,34 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                         const st = l.s >= 400 ? 'var(--danger)' : l.s >= 300 ? 'var(--warn)' : 'var(--success)';
                         const meth = l.m === 'GET' ? 'var(--accent)' : l.m === 'POST' ? 'var(--primary)' : l.m === 'DELETE' ? 'var(--danger)' : 'var(--text2)';
                         return `<tr><td style="font-size:11px;color:var(--text3)">${esc(new Date(l.t).toLocaleTimeString('zh-CN'))}</td><td style="color:${meth};font-weight:600">${esc(l.m)}</td><td data-i18n-skip style="font-size:12px;font-family:monospace">${esc(l.p)}</td><td style="color:${st};font-weight:600">${l.s}</td><td style="font-size:11px;color:var(--text3)">${esc(l.ip)}</td><td style="font-size:11px;color:var(--text3)">${l.ms}ms</td></tr>`;
+                    }).join('');
+                }).catch(() => {});
+        }
+
+        /* ===== Debug Logs ===== */
+        let debugLogState = { limit: 100, src: 'all' };
+        function loadDebugLogs() {
+            const lim = document.getElementById('debugLimitSel');
+            if (lim) debugLogState.limit = +lim.value;
+            const sel = document.getElementById('debugSrcSel');
+            if (sel) debugLogState.src = sel.value;
+            fetch('/api/admin/debug-logs?limit=' + debugLogState.limit, { headers: authHeaders() })
+                .then(r => r.json()).then(d => {
+                    if (d.code !== 0) return;
+                    let rows = d.data || [];
+                    if (debugLogState.src === 'core') rows = rows.filter(l => l.src === 'core');
+                    else if (debugLogState.src === 'plugin') rows = rows.filter(l => String(l.src).startsWith('plugin:'));
+                    const tb = document.getElementById('debugLogTbody'), em = document.getElementById('debugLogEmpty');
+                    if (!rows.length) { tb.innerHTML = ''; em.style.display = 'block'; return; }
+                    em.style.display = 'none';
+                    tb.innerHTML = rows.map(l => {
+                        const st = l.s >= 400 ? 'var(--danger)' : l.s >= 300 ? 'var(--warn)' : 'var(--success)';
+                        const meth = l.m === 'GET' ? 'var(--accent)' : l.m === 'POST' ? 'var(--primary)' : l.m === 'DELETE' ? 'var(--danger)' : 'var(--text2)';
+                        const isPlug = String(l.src || '').startsWith('plugin:');
+                        const srcCol = isPlug
+                            ? '<span class="pl-chip" style="color:var(--primary)">' + esc(String(l.src).slice(7)) + '</span>'
+                            : '<span class="pl-chip" style="color:var(--accent)">本体</span>';
+                        return `<tr><td style="font-size:11px;color:var(--text3)">${esc(new Date(l.t).toLocaleTimeString('zh-CN'))}</td><td>${srcCol}</td><td style="color:${meth};font-weight:600">${esc(l.m)}</td><td style="font-family:monospace;font-size:12px">${esc(l.p)}</td><td style="color:${st};font-weight:600">${esc(l.s)}</td><td style="font-size:11px;color:var(--text3)">${esc(l.ip || '-')}</td><td style="font-size:11px;color:var(--text3)">${esc(l.ms || 0)}ms</td></tr>`;
                     }).join('');
                 }).catch(() => {});
         }

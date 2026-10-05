@@ -228,7 +228,7 @@ module.exports = {
     },
 
     mount(ctx) {
-        const { app, checkAdmin, readConfig, DEFAULT_API_RULES, apiLayers, API_START_TIME, apiTotals, getRetentionDays, writeConfig, invalidateApiConfig, appLogs, DEFAULT_NAV, applyTrustProxy, S, ipTotals, listBackups, ROOT_DIR, APP_VERSION, safeErrMsg, restartServer, getNpmRegistry, getPluginConfig, SETTINGS_SCHEMA, SETTINGS_DOMAIN_ORDER, settingsResolve, settingsValuesFromConfig, validateSettingsValues, settingsDeepSet, settingsCoerce, getBackupCfg, checkBackupSchedule } = ctx;
+        const { app, checkAdmin, readConfig, DEFAULT_API_RULES, apiLayers, API_START_TIME, apiTotals, getRetentionDays, writeConfig, invalidateApiConfig, appLogs, debugLogs, DEFAULT_NAV, applyTrustProxy, S, ipTotals, listBackups, ROOT_DIR, APP_VERSION, safeErrMsg, restartServer, getNpmRegistry, getPluginConfig, SETTINGS_SCHEMA, SETTINGS_DOMAIN_ORDER, settingsResolve, settingsValuesFromConfig, validateSettingsValues, settingsDeepSet, settingsCoerce, getBackupCfg, checkBackupSchedule } = ctx;
 
     /* ── 原 server.js L1526-1529 ── */
     app.get('/api/admin/config', checkAdmin, (req, res) => {
@@ -280,6 +280,12 @@ module.exports = {
     app.get('/api/admin/logs', checkAdmin, (req, res) => {
         const limit = parseInt(req.query.limit) || 100;
         res.json({ code: 0, data: appLogs.slice(-limit).reverse() });
+    });
+
+    /* Debug 日志：每个插件与本体的请求记录（含来源分类） */
+    app.get('/api/admin/debug-logs', checkAdmin, (req, res) => {
+        const limit = Math.min(parseInt(req.query.limit) || 100, 500);
+        res.json({ code: 0, data: debugLogs.slice(-limit).reverse() });
     });
 
     /* ── 原 server.js L1803-1833 ── */

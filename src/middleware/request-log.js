@@ -3,7 +3,7 @@
 
 module.exports = {
     define(ctx) {
-        const { appLogs, MAX_LOG } = ctx;
+        const { appLogs, debugLogs, MAX_LOG } = ctx;
 
     /* ── 原 server.js L179-194 ── */
     function logRequest(req, res, next) {
@@ -19,6 +19,10 @@ module.exports = {
             };
             appLogs.push(entry);
             if (appLogs.length > MAX_LOG) appLogs.shift();
+            /* debug 日志：按路径分类本体/插件（/api/plugin/<name>/…） */
+            const pm = entry.p.match(/^\/api\/plugin\/([^/]+)/);
+            debugLogs.push(Object.assign({ src: pm ? ('plugin:' + pm[1]) : 'core' }, entry));
+            if (debugLogs.length > MAX_LOG) debugLogs.shift();
         });
         next();
     }

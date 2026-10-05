@@ -12,7 +12,8 @@ module.exports = {
 
     /* ── 原 server.js L40-40 ── */
     const appLogs = [];
+    const debugLogs = [];
 
-        Object.assign(ctx, { MAX_LOG, MAX_LOG, appLogs, appLogs });
+        Object.assign(ctx, { MAX_LOG, MAX_LOG, appLogs, appLogs, debugLogs, debugLogs });
     },
 };
