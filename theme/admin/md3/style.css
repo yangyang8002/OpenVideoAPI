@@ -1,0 +1,7 @@
+/* MD3 · Material 3 —— 默认后台主题
+   Material Design 3 色彩角色 + tonal palette（常量表见 theme.json --md-tonal-*）。
+   组件基础形态（形状/高度/排版/动效/组件样式）位于 public/admin.html 内联样式；
+   此处仅做主题点缀，与既有 10 套主题同构（每行一条规则，构建脚本自动加 [data-theme="md3"] 前缀）。 */
+.side-nav .nav-item.active{font-weight:600}
+.card,.cfg-card{border-color:var(--md-outline-variant)}
+.md-topbar .md-seg-btn.on{font-weight:600}
