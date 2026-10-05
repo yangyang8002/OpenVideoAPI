@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Bold.min.css">
     <link rel="stylesheet" href="/api/theme/player.css">
     <style>
-        :root, [data-theme="bilibili"]{--bg:#07070d;--surface:#14141f;--border:rgba(255,255,255,0.07);--bili-blue:#00a1d6;--bili-blue-hover:#00b3e6;--bili-pink:#fb7299;--text:#e6e6ee;--text-dim:#9099a3;--danger:#ff4d6a;--radius:12px;--gradient:linear-gradient(135deg,var(--bili-blue),var(--bili-pink));}
+        :root, [data-theme="bili"]{--bg:#101014;--surface:#1c1c22;--border:rgba(255,255,255,0.08);--bili-blue:#00AEEC;--bili-blue-hover:#23ADE5;--bili-pink:#FB7299;--bili-pink-hover:#fc8bab;--text:#f1f1f3;--text-dim:#9499a0;--danger:#f25d8e;--radius:8px;--gradient:linear-gradient(135deg,#00AEEC,#FB7299);}
+        [data-theme="bilibili"]{--bg:#07070d;--surface:#14141f;--border:rgba(255,255,255,0.07);--bili-blue:#00a1d6;--bili-blue-hover:#00b3e6;--bili-pink:#fb7299;--text:#e6e6ee;--text-dim:#9099a3;--danger:#ff4d6a;--radius:12px;--gradient:linear-gradient(135deg,var(--bili-blue),var(--bili-pink));}
         [data-theme="sakura"]{--bg:#1a1218;--surface:#261c24;--bili-blue:#ff85a2;--bili-blue-hover:#ff9db5;--bili-pink:#c792ea;--text:#f5e6ed;--text-dim:#b89aaa;--danger:#ff6188;--gradient:linear-gradient(135deg,#ff85a2,#c792ea);}
         [data-theme="ocean"]{--bg:#0a1628;--surface:#101e36;--bili-blue:#00d4ff;--bili-blue-hover:#33dfff;--bili-pink:#5ce6c6;--text:#d4edf4;--text-dim:#6b9bb0;--danger:#ff5370;--gradient:linear-gradient(135deg,#00d4ff,#5ce6c6);}
         [data-theme="sunset"]{--bg:#1a1018;--surface:#2a1826;--bili-blue:#ff8c42;--bili-blue-hover:#ffa564;--bili-pink:#e06c9f;--text:#f0e0d6;--text-dim:#b09580;--danger:#f44;--gradient:linear-gradient(135deg,#ff8c42,#e06c9f);}
@@ -22,90 +23,149 @@
         [data-theme="jrpg"]{--bg:#100e08;--surface:rgba(20,16,10,.88);--bili-blue:#e0b040;--bili-blue-hover:#f0c860;--bili-pink:#c09030;--text:#e8e0d0;--text-dim:#b0a080;--danger:#e04040;--gradient:linear-gradient(135deg,#e0b040,#c09030);}
         [data-theme="neon"]{--bg:#080808;--surface:rgba(14,10,18,.88);--bili-blue:#ff3050;--bili-blue-hover:#ff6080;--bili-pink:#e02070;--text:#f0e8e8;--text-dim:#c08080;--danger:#ff2040;--gradient:linear-gradient(135deg,#ff3050,#e02070);}
 
-        :root{--ctrl-h:clamp(36px,min(11vw,9vh),42px);--icon-btn:clamp(22px,min(6.8vw,6vh),30px);--icon-svg:clamp(14px,min(4.4vw,3.8vh),20px);--danmu-w:clamp(84px,30vw,180px);--danmu-h:clamp(22px,min(7.2vw,6vh),28px);--title-fs:clamp(11px,min(3.3vw,2.8vh),13px);--shot:clamp(32px,min(10vw,9vh),40px);            --dm-font:20;}
+        :root{--ctrl-h:clamp(36px,min(11vw,9vh),42px);--icon-btn:clamp(22px,min(6.8vw,6vh),30px);--icon-svg:clamp(14px,min(4.4vw,3.8vh),20px);--danmu-w:clamp(84px,30vw,180px);--danmu-h:clamp(22px,min(7.2vw,6vh),28px);--title-fs:clamp(11px,min(3.3vw,2.8vh),13px);--shot:clamp(32px,min(10vw,9vh),40px);--dm-font:20;}
 
         *{margin:0;padding:0;box-sizing:border-box}
-        html,body{width:100%;height:100%;height:100dvh;background:var(--bg);font-family:'MiSans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden}
-        #app{display:flex;flex-direction:column;width:100%;height:100%}
-        #player-wrapper{flex:1;position:relative;background:#000;min-height:0}
+        html,body{width:100%;background:var(--bg);color:var(--text);font-family:'MiSans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif}
+        body{overflow-x:hidden;overflow-y:auto}
+        #app{display:flex;flex-direction:column;width:100%;max-width:1440px;margin:0 auto;min-height:100dvh;padding:clamp(10px,2vw,20px) clamp(12px,3vw,32px) 48px}
+        #player-wrapper{position:relative;width:100%;aspect-ratio:16/9;max-height:calc(100dvh - 220px);min-height:240px;background:#000;border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 44px rgba(0,0,0,.4)}
         #artplayer{width:100%;height:100%}
-        /* iframe 嵌入模式：播放器按视频宽高比贴合，无黑边 */
-        body.embed-mode #app{justify-content:center;align-items:center}
-        body.embed-mode #player-wrapper{flex:none;margin:auto}
+        /* iframe 嵌入模式：铺满视口并按视频宽高比贴合，无黑边，无信息区 */
+        body.embed-mode{overflow:hidden}
+        body.embed-mode #app{height:100dvh;max-width:none;min-height:0;padding:0;justify-content:center;align-items:center}
+        body.embed-mode #player-wrapper{flex:none;aspect-ratio:auto;max-height:none;min-height:0;margin:auto;border-radius:0;box-shadow:none}
+        body.embed-mode .bili-info{display:none!important}
 
-        /* ArtPlayer overrides */
-        .art-video-player{font-family:'MiSans',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif!important}
-        .art-control{color:rgba(255,255,255,.88)!important}
-        .art-control:hover{color:var(--bili-blue)!important}
-        .art-bottom{padding:0 clamp(8px,3vw,12px);padding-bottom:env(safe-area-inset-bottom,0px)}
-        .art-progress{padding:0 clamp(8px,3vw,12px)!important}
-        .art-progress-inner{background:linear-gradient(90deg,var(--bili-blue),#00c3f0)!important}
-        .art-progress-loaded{background:rgba(255,255,255,.35)!important}
-        .art-progress-indicator{background:#fff!important;box-shadow:0 0 6px rgba(0,0,0,.6)!important}
-        .art-state{background:rgba(0,0,0,.4)!important;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:50%!important}
+        /* ===== ArtPlayer 覆写：B站式控制层 ===== */
+        .art-video-player{font-family:'MiSans',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif!important;--art-control-height:var(--ctrl-h);--art-control-icon-size:var(--icon-svg);--art-control-icon-scale:1;--art-progress-height:8px;--art-widget-background:rgba(24,24,28,.92);--art-hover-color:rgba(255,255,255,.28);--art-loaded-color:rgba(255,255,255,.25)}
+        .art-control{color:rgba(255,255,255,.88)!important;transition:color .2s}
+        .art-control:hover{color:#fff!important}
+        .art-bottom{background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.25) 34%,rgba(0,0,0,.8) 100%);padding:12px clamp(8px,2.5vw,14px) calc(env(safe-area-inset-bottom,0px) + 4px)}
+        .art-progress{padding:0 clamp(4px,1.5vw,10px)!important}
+        .art-progress-played{background:var(--bili-pink)!important}
+        .art-progress-loaded{background:rgba(255,255,255,.28)!important}
+        .art-progress-indicator{background:#fff!important;border:2px solid var(--bili-pink)!important;border-radius:50%!important;box-shadow:0 2px 8px rgba(0,0,0,.45)!important}
+        .art-progress-tip{background:rgba(0,0,0,.82)!important;border-radius:5px!important;color:#fff!important;font-size:11px!important;padding:3px 8px!important}
+        .art-state{background:rgba(0,0,0,.42)!important;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.16);border-radius:50%!important}
         .art-state svg{fill:#fff!important}
-        .art-loading svg{filter:drop-shadow(0 0 8px rgba(0,161,214,.6))}
-        .art-contextmenu{background:rgba(20,20,24,.96)!important;backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08)!important;border-radius:10px!important;color:#fff!important}
+        .art-loading svg{filter:drop-shadow(0 0 8px rgba(251,114,153,.6))}
+        .art-contextmenu{background:rgba(24,24,28,.96)!important;backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08)!important;border-radius:10px!important;color:#fff!important}
         .art-contextmenu-item:hover{background:rgba(255,255,255,.06)!important}
-        .art-info{background:rgba(20,20,24,.94)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:10px!important;color:#fff!important}
+        .art-info{background:rgba(24,24,28,.94)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:10px!important;color:#fff!important}
         .art-notice{background:rgba(0,0,0,.75)!important;border-radius:6px!important;backdrop-filter:blur(6px)}
         .art-video-notice,.art-notice{display:none!important}
-        .art-setting-panel,.art-selector-list{background:rgba(20,20,24,.94)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:10px!important;color:#fff!important}
-        .art-settings{right:10px!important;bottom:calc(var(--art-control-height) + 6px)!important;top:auto!important;max-height:calc(100% - 100px)!important;max-width:160px!important}
-        div.art-video-player.art-backdrop .art-settings{background-color:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-        .art-setting-item{min-height:32px;height:32px!important}
-        .art-setting-item-left>*{transition:opacity .25s}
-        /* Slider & tooltip overlay: slider rightmost, tooltip to its left.
-           Default hidden; on hover, text fades + slider/tooltip appear.
-           Slider is 22px tall so the whole row acts as a click target. */
-        .art-setting-item{position:relative}
-        .art-setting-range{-webkit-appearance:none;appearance:none;position:absolute;right:0;top:50%;transform:translateY(-50%);width:0!important;height:22px!important;opacity:0;pointer-events:none;background:transparent!important;border:0;outline:0;accent-color:var(--bili-blue);transition:width .3s,opacity .3s}
-        .art-setting-range::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:transparent}
-        .art-setting-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid var(--bili-blue);cursor:pointer;box-shadow:0 0 6px rgba(0,0,0,.5);margin-top:-5px;transition:transform .15s}
-        .art-setting-range::-webkit-slider-thumb:active{transform:scale(1.2)}
-        .art-setting-range::-moz-range-track{height:4px;border-radius:2px;background:transparent}
-        .art-setting-range::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid var(--bili-blue);cursor:pointer;box-shadow:0 0 6px rgba(0,0,0,.5)}
-        .art-setting-range::-moz-range-progress{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--bili-blue),#00c3f0)}
-        .art-setting-item-right-tooltip{position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0;white-space:nowrap;transition:right .3s,opacity .25s}
-        .art-setting-item:hover .art-setting-range{width:120px!important;opacity:1;pointer-events:auto}
-        .art-setting-item:hover .art-setting-item-right-tooltip{right:125px;opacity:1}
-        .art-setting-item:hover .art-setting-item-left>*{opacity:0}
-        .art-selector-list{bottom:calc(var(--art-control-height) + 6px)!important}
         .art-fullscreen{--art-control-icon-scale:1!important;--art-indicator-size:16px!important}
         .art-fullscreen-web{--art-control-icon-scale:1!important;--art-indicator-size:16px!important}
-        .art-setting-item:hover,.art-selector-list-item:hover{background:rgba(255,255,255,.06)!important}
-        .art-volume-inner{background:rgba(10,10,24,.9)!important;backdrop-filter:none!important}
-        .art-volume-loaded{background:linear-gradient(180deg,var(--bili-blue),#00c3f0)!important}
+        /* 右侧控件分组排序：音量 → 弹幕设置 → PIP → 网页全屏 → 全屏 → 截图 */
+        .art-controls-right .art-control-volume{order:1}
+        .art-controls-right .art-control:nth-child(2){order:3}
+        .art-controls-right .art-control:nth-child(3){order:4}
+        .art-controls-right .art-control:nth-child(4){order:5}
+        .bili-overflow-btn{order:9!important}
+        /* 音量：B站式竖向滑杆 */
+        .art-volume-inner{background:rgba(24,24,28,.94)!important;backdrop-filter:none!important;border:1px solid rgba(255,255,255,.08)}
+        .art-volume-loaded{background:var(--bili-pink)!important}
+        .art-volume-indicator{background:#fff!important;box-shadow:0 0 4px rgba(0,0,0,.5)!important}
+        .art-volume-handle{background:var(--bili-pink)!important}
+        /* 齿轮图标 */
+        .dm-gear{display:flex;align-items:center;justify-content:center}
+        .dm-gear svg{width:var(--icon-svg);height:var(--icon-svg);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
         /* Danmaku canvas */
         #danmaku-canvas{position:absolute;inset:0;z-index:30;width:100%;height:100%;pointer-events:none}
 
-        /* Danmaku input */
-        .bili-danmu{position:relative;display:flex;align-items:center;gap:clamp(4px,1.5vw,6px);height:100%;padding:0 clamp(4px,1.5vw,8px);pointer-events:auto;flex-shrink:1;min-width:0}
-        .bili-danmu .bd-input{width:var(--danmu-w);min-width:60px;flex-shrink:1;height:var(--danmu-h);padding:0 12px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:14px;font-size:12.5px;color:#fff;outline:none;transition:all .25s;box-sizing:border-box}
-        .bili-danmu .bd-input:focus{background:rgba(255,255,255,.2);border-color:var(--bili-blue)}
+        /* ===== 弹幕发送栏（B站式：开关 + 调色 + 胶囊输入 + 粉色发送） ===== */
+        .bili-danmu{position:relative;display:flex;align-items:center;gap:clamp(4px,1.2vw,8px);height:100%;padding:0 clamp(4px,1.5vw,8px);pointer-events:auto;flex-shrink:1;min-width:0}
+        .bili-danmu .bd-toggle{width:var(--icon-btn);height:var(--icon-btn);flex-shrink:0;border:none;background:none;color:rgba(255,255,255,.9);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:color .2s}
+        .bili-danmu .bd-toggle:hover{color:#fff}
+        .bili-danmu .bd-toggle.off{color:rgba(255,255,255,.4)}
+        .bili-danmu .bd-toggle svg{width:var(--icon-svg);height:var(--icon-svg);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .bili-danmu .bd-input{width:var(--danmu-w);min-width:60px;flex-shrink:1;height:var(--danmu-h);padding:0 14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:calc(var(--danmu-h)/2);font-size:12.5px;color:#fff;outline:none;transition:all .25s;box-sizing:border-box;font-family:inherit}
+        .bili-danmu .bd-input:focus{background:rgba(255,255,255,.2);border-color:var(--bili-pink)}
         .bili-danmu .bd-input::placeholder{color:rgba(255,255,255,.55)}
         .bili-danmu .bd-color{position:relative;width:clamp(20px,6vw,24px);height:clamp(20px,6vw,24px);flex:0 0 clamp(20px,6vw,24px);border:none;border-radius:50%;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
         .bili-danmu .bd-color .dot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.85);box-shadow:0 0 4px rgba(0,0,0,.4)}
-        .bili-danmu .bd-color-panel{position:absolute;bottom:calc(var(--art-control-height)+34px);right:0;display:none;flex-direction:column;gap:8px;padding:12px;background:rgba(20,20,24,.94);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:10px;z-index:20}
+        .bili-danmu .bd-color-panel{position:absolute;bottom:calc(var(--art-control-height)+34px);right:0;display:none;flex-direction:column;gap:8px;padding:12px;background:rgba(24,24,28,.94);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:10px;z-index:20}
         .bili-danmu .bd-color-panel.open{display:flex}
         .bili-danmu .bd-colors{display:flex;gap:8px}
         .bili-danmu .bd-colors button{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.15);cursor:pointer;transition:transform .15s;padding:0}
         .bili-danmu .bd-colors button:hover{transform:scale(1.2)}
-        .bili-danmu .bd-colors button.active{border-color:#fff;box-shadow:0 0 0 2px var(--bili-blue)}
+        .bili-danmu .bd-colors button.active{border-color:#fff;box-shadow:0 0 0 2px var(--bili-pink)}
         .bili-danmu .bd-types{display:flex;gap:6px}
-        .bili-danmu .bd-types button{flex:1;padding:4px 10px;border:1px solid rgba(255,255,255,.3);border-radius:6px;background:none;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;transition:all .2s}
-        .bili-danmu .bd-types button.active{background:var(--bili-blue);border-color:var(--bili-blue);color:#fff}
-        .bili-danmu .bd-send{width:clamp(22px,7vw,28px);height:clamp(22px,7vw,28px);flex:0 0 clamp(22px,7vw,28px);border:none;border-radius:50%;background:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-        .bili-danmu .bd-send:hover{color:var(--bili-pink);background:rgba(251,114,153,.12)}
+        .bili-danmu .bd-types button{flex:1;padding:4px 10px;border:1px solid rgba(255,255,255,.3);border-radius:6px;background:none;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;transition:all .2s;font-family:inherit}
+        .bili-danmu .bd-types button.active{background:var(--bili-pink);border-color:var(--bili-pink);color:#fff}
+        .bili-danmu .bd-send{height:var(--danmu-h);flex-shrink:0;padding:0 16px;border:none;border-radius:calc(var(--danmu-h)/2);background:var(--bili-pink);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .15s;font-family:inherit}
+        .bili-danmu .bd-send:hover{background:var(--bili-pink-hover,var(--bili-pink));transform:translateY(-1px)}
+        .bili-danmu .bd-send:active{transform:translateY(0)}
 
-        /* Screenshot */
+        /* ===== 弹幕设置面板（B站式齿轮弹窗） ===== */
+        .dm-panel{position:absolute;right:clamp(8px,2.5vw,14px);bottom:calc(var(--art-control-height,42px) + env(safe-area-inset-bottom,0px) + 14px);width:270px;max-height:min(440px,72%);overflow-y:auto;background:rgba(24,24,28,.96);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.09);border-radius:10px;z-index:50;display:none;box-shadow:0 8px 40px rgba(0,0,0,.5);color:#fff;font-size:13px}
+        .dm-panel.open{display:block}
+        .dm-panel::-webkit-scrollbar{width:4px}
+        .dm-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:2px}
+        .dm-head{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:rgba(24,24,28,.98);z-index:2}
+        .dm-head .dm-back{width:24px;height:24px;border:none;background:none;color:rgba(255,255,255,.85);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+        .dm-head .dm-back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .dm-head .dm-title{font-size:13.5px;font-weight:600}
+        .dm-row{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;transition:background .15s;border:none;background:none;width:100%;box-sizing:border-box;text-align:left;color:rgba(255,255,255,.92);font-family:inherit;font-size:13px}
+        .dm-row:hover{background:rgba(255,255,255,.07)}
+        .dm-row .dm-row-label{flex:1}
+        .dm-row .dm-val{color:rgba(255,255,255,.55);font-size:12px;display:flex;align-items:center;gap:2px}
+        .dm-row .dm-val svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .dm-row.active{color:var(--bili-pink)}
+        .dm-row.active .dm-val{color:var(--bili-pink)}
+        .dm-switch{position:relative;width:34px;height:18px;border-radius:9px;background:rgba(255,255,255,.25);transition:background .2s;flex-shrink:0}
+        .dm-switch .dm-knob{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s}
+        .dm-switch.on{background:var(--bili-pink)}
+        .dm-switch.on .dm-knob{left:18px}
+        .dm-slider-row{padding:8px 12px 12px}
+        .dm-slider-row .dm-slider-head{display:flex;justify-content:space-between;font-size:12.5px;color:rgba(255,255,255,.85);margin-bottom:6px}
+        .dm-slider-row .dm-slider-head b{font-weight:500;color:#fff}
+        input.dm-range{-webkit-appearance:none;appearance:none;width:100%;height:16px;background:transparent;margin:0;cursor:pointer}
+        input.dm-range::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:rgba(255,255,255,.25)}
+        input.dm-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;margin-top:-4.5px;box-shadow:0 0 4px rgba(0,0,0,.5);cursor:pointer}
+        input.dm-range::-moz-range-track{height:3px;border-radius:2px;background:rgba(255,255,255,.25)}
+        input.dm-range::-moz-range-thumb{width:12px;height:12px;border:none;border-radius:50%;background:#fff;cursor:pointer}
+        .dm-sec{padding:10px 12px 4px;font-size:11px;color:var(--bili-blue);letter-spacing:.5px}
+        .dm-empty{padding:8px 12px 12px;color:rgba(255,255,255,.4);font-size:12px}
+        .dm-chips{display:flex;flex-wrap:wrap;gap:6px;padding:4px 12px 10px}
+        .dm-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);font-size:12px;max-width:100%}
+        .dm-chip>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
+        .dm-chip button{border:none;background:none;color:rgba(255,255,255,.6);cursor:pointer;padding:0;display:flex}
+        .dm-chip button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+        .dm-chip button:hover{color:#fff}
+        .dm-add{display:flex;gap:6px;padding:4px 12px 12px}
+        .dm-add input{flex:1;min-width:0;padding:6px 10px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:rgba(255,255,255,.08);color:#fff;font-size:12px;outline:none;font-family:inherit}
+        .dm-add input:focus{border-color:var(--bili-pink)}
+        .dm-add button{padding:6px 12px;border:none;border-radius:6px;background:var(--bili-pink);color:#fff;font-size:12px;cursor:pointer;font-family:inherit}
+        .dm-check{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.92);transition:background .15s}
+        .dm-check:hover{background:rgba(255,255,255,.07)}
+        .dm-check .dm-box{width:15px;height:15px;border:1px solid rgba(255,255,255,.35);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+        .dm-check.on .dm-box{background:var(--bili-pink);border-color:var(--bili-pink)}
+        .dm-check .dm-box svg{width:11px;height:11px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
+        .dm-check.on .dm-box svg{opacity:1}
+
+        /* ===== 页面信息区（B站视频页神韵） ===== */
+        .bili-info{margin-top:clamp(12px,2.5vw,20px);width:100%}
+        .bi-title{color:var(--text);font-size:clamp(16px,2.2vw,20px);font-weight:600;line-height:1.45;word-break:break-all}
+        .bi-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:10px;color:var(--text-dim);font-size:13px}
+        .bi-meta b{color:var(--text);font-weight:500}
+        .bi-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .bi-tag{padding:3px 10px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text-dim);font-size:12px}
+        .bi-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+        .bi-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit}
+        .bi-btn:hover{background:var(--surface);border-color:var(--bili-pink);color:var(--bili-pink)}
+        .bi-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+        /* Screenshot float */
         .bili-screenshot{position:absolute;right:clamp(10px,3vw,14px);top:50%;transform:translateY(-50%);width:var(--shot);height:var(--shot);border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:8;transition:all .2s;opacity:0;pointer-events:none}
         .art-video-player.art-control-show .bili-screenshot,.art-video-player.art-hover .bili-screenshot{opacity:1;pointer-events:auto}
-        .bili-screenshot:hover{background:rgba(0,0,0,.55);color:var(--bili-blue);transform:translateY(-50%) scale(1.08)}
+        .bili-screenshot:hover{background:rgba(0,0,0,.55);color:var(--bili-pink);transform:translateY(-50%) scale(1.08)}
+        .bili-screenshot svg{width:calc(var(--shot)*.5);height:calc(var(--shot)*.5);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
         /* Overflow */
-        .bili-overflow-panel{position:absolute;right:clamp(8px,3vw,12px);bottom:calc(var(--art-control-height)+env(safe-area-inset-bottom,0px)+6px);background:rgba(20,20,24,.94);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:10px;display:none;flex-direction:column;padding:4px;z-index:30;min-width:130px}
+        .bili-overflow-panel{position:absolute;right:clamp(8px,3vw,12px);bottom:calc(var(--art-control-height)+env(safe-area-inset-bottom,0px)+6px);background:rgba(24,24,28,.94);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:10px;display:none;flex-direction:column;padding:4px;z-index:30;min-width:130px}
         .bili-overflow-panel.open{display:flex}
         .bili-overflow-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,.9);font-size:12.5px;transition:background .2s;border:none;background:none;white-space:nowrap;font-family:'MiSans','Microsoft YaHei',sans-serif;width:100%;box-sizing:border-box;text-align:left}
         .bili-overflow-item:hover{background:rgba(255,255,255,.06)}
@@ -114,7 +174,7 @@
         .bili-overflow-item .item-label{flex:1}
 
         /* Stats */
-         .ap-stats-panel{position:absolute;right:8px;bottom:calc(var(--art-control-height)+20px);background:rgba(20,20,24,.94);border:1px solid rgba(255,255,255,.08);border-radius:10px;min-width:220px;z-index:40;display:none;padding:4px 0}
+        .ap-stats-panel{position:absolute;right:8px;bottom:calc(var(--art-control-height)+20px);background:rgba(24,24,28,.94);border:1px solid rgba(255,255,255,.08);border-radius:10px;min-width:220px;z-index:40;display:none;padding:4px 0}
         .ap-stats-panel.open{display:block}
         .ap-stats-sec{font-size:11px;color:var(--bili-blue);padding:8px 12px 4px;letter-spacing:.5px}
         .ap-stats-row{display:flex;align-items:center;justify-content:space-between;padding:3px 12px;font-size:12px;color:rgba(255,255,255,.85)}
@@ -134,11 +194,11 @@
         .overlay-card h2{color:#fff;font-size:clamp(17px,5vw,20px);font-weight:600;margin-bottom:8px}
         .overlay-card p{color:var(--text-dim);font-size:clamp(12.5px,3.6vw,14px);line-height:1.6}
         .overlay-card .code{font-family:'Fira Code','Cascadia Code',monospace;color:var(--bili-blue);font-size:13px;word-break:break-all}
-        .overlay-card input{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.04);color:#fff;font-size:14px;outline:none;transition:border-color .2s;margin-top:16px}
-        .overlay-card input:focus{border-color:var(--bili-blue)}
+        .overlay-card input{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.04);color:#fff;font-size:14px;outline:none;transition:border-color .2s;margin-top:16px;font-family:inherit}
+        .overlay-card input:focus{border-color:var(--bili-pink)}
         .overlay-card input::placeholder{color:#555}
-        .overlay-card button{width:100%;padding:12px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--bili-blue),var(--bili-pink));color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;transition:transform .15s,box-shadow .15s}
-        .overlay-card button:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,161,214,.3)}
+        .overlay-card button{width:100%;padding:12px;border:none;border-radius:8px;background:var(--gradient);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;transition:transform .15s,box-shadow .15s;font-family:inherit}
+        .overlay-card button:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(251,114,153,.3)}
 
         #toast{position:fixed;top:clamp(12px,4vw,20px);left:50%;transform:translateX(-50%) translateY(-120px);padding:clamp(10px,3vw,12px) clamp(20px,7vw,28px);border-radius:24px;background:var(--surface);border:1px solid var(--border);color:#fff;font-size:clamp(11px,3.4vw,13px);backdrop-filter:blur(12px);z-index:999;transition:transform .35s cubic-bezier(.4,0,.2,1);pointer-events:none}
         #toast.show{transform:translateX(-50%) translateY(0)}
@@ -146,7 +206,7 @@
 
         @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.75;transform:scale(.96)}}
 
-        @media(max-width:640px){.bili-overflow-panel{right:8px}}
+        @media(max-width:640px){.bili-overflow-panel{right:8px}.dm-panel{right:8px;width:min(270px,86vw)}.bi-actions{gap:8px}}
     </style>
 </head>
 <body>
@@ -171,6 +231,12 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="bili-info" id="biliInfo">
+        <h1 class="bi-title" id="biTitle"></h1>
+        <div class="bi-meta" id="biMeta"></div>
+        <div class="bi-tags" id="biTags"></div>
+        <div class="bi-actions" id="biActs"></div>
     </div>
     <div id="toast"></div>
 
@@ -204,7 +270,12 @@
     var danmakuVisible=true, danmakuOpacity=parseFloat(localStorage.getItem('ap_dm_opacity'))||1, danmakuSpeed=parseFloat(localStorage.getItem('ap_dm_speed'))||7, danmakuMask=parseInt(localStorage.getItem('ap_dm_mask')||'0')||0;
     var subtitleVisible=true, subtitleSize=parseInt(localStorage.getItem('ap_sub_fs'))||20, subtitleBottom=parseInt(localStorage.getItem('ap_sub_bottom'))||15;
     var subtitleList=[], currentSub=-1;
-    var currentTheme=localStorage.getItem('ap_theme')||'bilibili';
+    var danmakuFont=parseInt(localStorage.getItem('ap_dm_font'))||20, danmakuArea=parseInt(localStorage.getItem('ap_dm_area'))||100, danmakuProtect=localStorage.getItem('ap_dm_protect')==='1';
+    var dmKeywords=[], dmRegexes=[], dmTypes={0:false,1:false,2:false};
+    try{var _kw=JSON.parse(localStorage.getItem('ap_dm_kw'));if(_kw&&_kw.length)dmKeywords=_kw}catch(e){}
+    try{var _re=JSON.parse(localStorage.getItem('ap_dm_re'));if(_re&&_re.length)dmRegexes=_re}catch(e){}
+    try{var _ty=JSON.parse(localStorage.getItem('ap_dm_types'));if(_ty)dmTypes=_ty}catch(e){}
+    var currentTheme=localStorage.getItem('ap_theme')||'bili';
     var _overflowSystem=null;
     /* iframe 嵌入时开启贴合模式（无黑边） */
     var isEmbed=window.self!==window.top;
@@ -250,8 +321,8 @@
     }
     function setTheme(name){
         currentTheme=name;document.documentElement.dataset.theme=name;localStorage.setItem('ap_theme',name);
-        var blue=getComputedStyle(document.documentElement).getPropertyValue('--bili-blue').trim();
-        if(art)art.theme=blue;
+        var accent=getComputedStyle(document.documentElement).getPropertyValue('--bili-pink').trim()||'#FB7299';
+        if(art)art.theme=accent;
     }
     function applyDanmakuMask(v){
         danmakuMask=v;localStorage.setItem('ap_dm_mask',String(v));
@@ -266,7 +337,16 @@
         camera:function(){return lucide('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')},
         comment:function(){return lucide('<path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>')},
         send:function(){return lucide('<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',{filled:true})},
-        more:function(){return lucide('<circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>')}
+        more:function(){return lucide('<circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>')},
+        gear:function(){return lucide('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>')},
+        danmu:function(){return lucide('<path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>')},
+        danmuOff:function(){return lucide('<path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="3" y1="3" x2="21" y2="21"/>')},
+        chevron:function(){return lucide('<polyline points="9 18 15 12 9 6"/>')},
+        back:function(){return lucide('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>')},
+        plus:function(){return lucide('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>')},
+        close:function(){return lucide('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>')},
+        link:function(){return lucide('<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>')},
+        code:function(){return lucide('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>')}
     };
 
     /* ===== Danmaku Engine (canvas) ===== */
@@ -295,6 +375,11 @@
         this.opacity=1;
         this.speed=7;           // seconds to cross screen
         this.margin=0;          // bottom margin percent
+        this.areaPct=100;        // 滚动弹幕显示区域（占画面高度百分比 25/50/75/100）
+        this.protect=false;      // 字幕防挡：跳过与字幕区域重叠的弹幕渲染
+        this.keywords=[];        // 屏蔽关键词
+        this.regexList=[];       // 屏蔽正则（已编译）
+        this.blockedTypes={};    // 屏蔽类型 {0:滚动,1:顶部,2:底部}
         this.baseFontSize=Math.max(16,Math.min(22,parseInt(getComputedStyle(document.documentElement).getPropertyValue('--dm-font'))||20));
         this.fontSize=this.baseFontSize;
         this.fontFamily="'MiSans','Microsoft YaHei','PingFang SC',sans-serif";
@@ -351,7 +436,7 @@
         for(var rs=0;rs<this.topRows;rs++){this.topSlots.push(0);this.bottomSlots.push(0);}
         // Scroll danmaku share the full video area with top danmaku (they may
         // overlap). Only the bottom margin (mask) reserves space at the bottom.
-        var scrollAreaH=this.vh-this.margin*this.vh/100;
+        var scrollAreaH=this.vh*Math.max(10,Math.min(100,this.areaPct))/100-this.margin*this.vh/100;
         this.trackCount=Math.max(1,Math.floor(scrollAreaH/this.trackH));
         this.scrollY0=this.vy;
         this.tracks=[];for(var i=0;i<this.trackCount;i++)this.tracks.push(0);
@@ -391,6 +476,20 @@
     };
     /* 入队：按密度采样（100% = 显示所有），发射限流，满则排队不丢弃 */
     DanmakuEngine.prototype._enqueue=function(dm){
+        /* 屏蔽过滤：关键词 / 正则 / 类型（仅作用于非本端实时弹幕） */
+        if(!dm._live){
+            if(this.blockedTypes&&this.blockedTypes[dm.mode||0])return;
+            if(dm.text&&this.keywords&&this.keywords.length){
+                for(var ki=0;ki<this.keywords.length;ki++){
+                    if(dm.text.indexOf(this.keywords[ki])>=0)return;
+                }
+            }
+            if(dm.text&&this.regexList&&this.regexList.length){
+                for(var ri=0;ri<this.regexList.length;ri++){
+                    try{if(this.regexList[ri].test(dm.text))return}catch(e){}
+                }
+            }
+        }
         if(!dm._live&&this.density<100&&Math.random()*100>=this.density)return;
         if(!dm._live&&!this._canEmit()){
             this.pending.push(dm);
@@ -603,6 +702,22 @@
         ctx.rect(this.vx,this.vy,this.vw,this.vh);
         ctx.clip();
         if(!this.visible){ctx.restore();return;}
+        /* 字幕防挡：计算字幕相对画布的区域，命中者跳过渲染 */
+        var band=null;
+        if(this.protect){
+            var sub=document.querySelector('.art-subtitle');
+            if(sub&&sub.offsetWidth&&sub.offsetHeight){
+                var cr=this.canvas.getBoundingClientRect(),sr=sub.getBoundingClientRect();
+                var pad=8;
+                var bTop=sr.top-cr.top-pad,bBot=sr.bottom-cr.top+pad;
+                var bLeft=Math.max(this.vx,sr.left-cr.left-pad),bRight=Math.min(this.vx+this.vw,sr.right-cr.left+pad);
+                if(bBot>bTop&&bRight>bLeft)band={top:bTop,bot:bBot,left:bLeft,right:bRight};
+            }
+        }
+        var bandHit=function(item){
+            var iy0=item.y-this.fontSize,iy1=item.y;
+            return iy1>band.top&&iy0<band.bot&&item.x<band.right&&item.x+item.width>band.left;
+        };
         ctx.font='bold '+this.fontSize+'px '+this.fontFamily;
         ctx.textBaseline='bottom';
         // Pass 1: scroll danmaku (bottom layer)
@@ -610,6 +725,7 @@
         for(i=0;i<this.active.length;i++){
             item=this.active[i];
             if(item._done||item.mode!==0)continue;
+            if(band&&bandHit(item))continue;
             alpha=this.opacity;
             if(item.opacity!=null)alpha*=item.opacity;
             ctx.globalAlpha=alpha;
@@ -625,6 +741,7 @@
         for(i=0;i<this.active.length;i++){
             item=this.active[i];
             if(item._done||item.mode===0||item._live)continue;
+            if(band&&bandHit(item))continue;
             alpha=this.opacity;
             if(item.opacity!=null)alpha*=item.opacity;
             ctx.globalAlpha=alpha;
@@ -640,6 +757,7 @@
         for(i=0;i<this.active.length;i++){
             item=this.active[i];
             if(item._done||item.mode===0||!item._live)continue;
+            if(band&&bandHit(item))continue;
             alpha=this.opacity;
             if(item.opacity!=null)alpha*=item.opacity;
             ctx.globalAlpha=alpha;
@@ -669,6 +787,19 @@
     DanmakuEngine.prototype.setDensity=function(v){
         this.density=Math.max(5,Math.min(100,v));
         localStorage.setItem('ap_dm_density',String(this.density));
+    };
+    DanmakuEngine.prototype.setArea=function(v){this.areaPct=Math.max(10,Math.min(100,v));this.resize()};
+    DanmakuEngine.prototype.setBaseFont=function(v){this.baseFontSize=Math.max(12,Math.min(32,v));localStorage.setItem('ap_dm_font',String(this.baseFontSize));this.resize()};
+    DanmakuEngine.prototype.setProtect=function(v){this.protect=!!v};
+    DanmakuEngine.prototype.setFilters=function(kws,res,types){
+        var self=this;
+        this.keywords=(kws||[]).filter(function(k){return !!k});
+        this.regexList=[];
+        (res||[]).forEach(function(r){
+            if(!r)return;
+            try{self.regexList.push(new RegExp(r))}catch(e){}
+        });
+        this.blockedTypes=types||{};
     };
     DanmakuEngine.prototype.clear=function(){this.active=[];this.pending=[];this.data=[];this.cursor=0;this.tracks=[];for(var i=0;i<this.trackCount;i++)this.tracks.push(0)};
     DanmakuEngine.prototype.destroy=function(){this.stop();this.active=[];this.pending=[];this.data=[];this.cursor=0};
@@ -764,7 +895,7 @@
         var danmakuData=[];
         try{var dr=await fetch('/api/danmu/v3/?id='+encodeURIComponent(vid));var dd=await dr.json();if(dd.code===0)danmakuData=dd.data}catch(e){}
 
-        var themeColor=getComputedStyle(document.documentElement).getPropertyValue('--bili-blue').trim();
+        var themeColor=getComputedStyle(document.documentElement).getPropertyValue('--bili-pink').trim()||'#FB7299';
 
         /* ArtPlayer 原生控件语言（播放/暂停/音量等按钮提示） */
         var artLangs={zh:'zh-cn',zhHant:'zh-tw',wyw:'zh-cn',en:'en',ja:'ja',fr:'fr'};
@@ -779,51 +910,18 @@
             hotkey:true,screenshot:false,fullscreen:true,fullscreenWeb:true,
             notice:false,
             miniProgressBar:true,mutex:true,backdrop:true,
-            playsInline:true,setting:true,pip:true,lock:true,
+            playsInline:true,setting:false,pip:true,lock:true,
             loop:false,flip:false,aspectRatio:false,playbackRate:true,
             customType:customType,
-            settings:[
-                {
-                    html:t('弹幕开关'),icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-                     switch:true,width:170,onSwitch:function(item){danmakuVisible=!item.switch;if(dmEngine)danmakuVisible?dmEngine.show():dmEngine.hide();return!item.switch}
-                },
-                {
-                    html:t('弹幕设置'),width:170,
-                    selector:[
-                        {html:t('透明度'),width:170,range:[danmakuOpacity,0.2,1,0.01],onRange:function(item){danmakuOpacity=item.range[0];localStorage.setItem('ap_dm_opacity',String(item.range[0]));if(dmEngine)dmEngine.setOpacity(item.range[0]);return Math.round(item.range[0]*100)+'%'}},
-                        {html:t('速度'),width:170,range:[danmakuSpeed,3,15,0.1],onRange:function(item){danmakuSpeed=item.range[0];localStorage.setItem('ap_dm_speed',String(item.range[0]));if(dmEngine)dmEngine.setSpeed(item.range[0]);return(item.range[0]).toFixed(1)+'s'}},
-                        {html:t('数量'),width:170,range:[parseFloat(localStorage.getItem('ap_dm_density'))||100,5,100,1],onRange:function(item){if(dmEngine)dmEngine.setDensity(item.range[0]);return Math.round(item.range[0])+'%'}},
-                        {html:t('顶/底堆叠'),width:170,range:[parseFloat(localStorage.getItem('ap_dm_stack'))||100,10,100,1],onRange:function(item){if(dmEngine)dmEngine.setFixedStack(item.range[0]);return Math.round(item.range[0])+'%'}},
-                        {html:t('底边距'),width:170,range:[danmakuMask,0,100,1],onRange:function(item){applyDanmakuMask(item.range[0]);return Math.round(item.range[0])+'%'}}
-                    ]
-                },
-                {
-                    html:t('字幕设置'),width:170,
-                    selector:[
-                        {html:t('字幕开关'),width:170,switch:true,onSwitch:function(item){subtitleVisible=!item.switch;var el=document.querySelector('.art-subtitle');if(el)el.style.display=subtitleVisible?'':'none';return!item.switch}},
-                        {html:t('字幕大小'),width:170,range:[subtitleSize,14,32,1],onRange:function(item){subtitleSize=item.range[0];localStorage.setItem('ap_sub_fs',String(item.range[0]));if(art)art.subtitle.style({fontSize:item.range[0]+'px'});return item.range[0]+'px'}},
-                        {html:t('字幕底距'),width:170,range:[subtitleBottom,5,80,1],onRange:function(item){subtitleBottom=item.range[0];localStorage.setItem('ap_sub_bottom',String(item.range[0]));var p=document.querySelector('.art-video-player');if(p)p.style.setProperty('--art-subtitle-bottom',item.range[0]+'px');return item.range[0]+'px'}},
-                        {html:t('字幕选择'),width:170,selector:subtitleList.map(function(s,i){return{html:s.title,value:i,default:i===currentSub}}),onSelect:function(item){if(art&&subtitleList[item.value]){art.subtitle.switch(resolveSubUrl(subtitleList[item.value].url),{name:subtitleList[item.value].title,type:subtitleList[item.value].url.endsWith('.vtt')?'vtt':'srt'});currentSub=item.value}return item.html}}
-                    ]
-                },
-                {html:t('统计信息'),onClick:function(){var p=document.querySelector('.ap-stats-panel');if(p){p.classList.toggle('open');buildStats()}return t('统计信息')}},
-                {
-                    html:t('语言'),width:170,
-                    selector:[
-                        {html:'中文',value:'zh',default:I18N.lang==='zh'},
-                        {html:'繁體中文',value:'zhHant',default:I18N.lang==='zhHant'},
-                        {html:'文言',value:'wyw',default:I18N.lang==='wyw'},
-                        {html:'English',value:'en',default:I18N.lang==='en'},
-                        {html:'日本語',value:'ja',default:I18N.lang==='ja'},
-                        {html:'Français',value:'fr',default:I18N.lang==='fr'}
-                    ],
-                    onSelect:function(item){I18N.setLang(item.value);var u=new URL(location.href);u.searchParams.delete('lang');location.href=u.toString();return item.html}
-                }
-            ],
             controls:[{
                 position:'right',
+                html:'<span class="dm-gear">'+ICONS.gear()+'</span>',
+                tooltip:t('弹幕设置'),style:{order:2},
+                click:function(){toggleDmPanel()}
+            },{
+                position:'right',
                 html:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
-                tooltip:t('截图'),style:{order:10},
+                tooltip:t('截图'),style:{order:6},
                 click:function(){var vv=this.video;if(vv&&vv.readyState>=2){try{var cv=document.createElement('canvas');cv.width=vv.videoWidth;cv.height=vv.videoHeight;cv.getContext('2d').drawImage(vv,0,0);var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='screenshot-'+Date.now()+'.png';a.click();showToast(t('截图已保存'))}catch(e){showToast(t('截图失败（可能因跨域限制）'),true)}}else{showToast(t('视频未就绪'),true)}}
             }]
         };
@@ -848,6 +946,10 @@
             dmEngine.setSpeed(danmakuSpeed);
             dmEngine.setOpacity(danmakuOpacity);
             if(!danmakuVisible)dmEngine.hide();
+            dmEngine.setFilters(dmKeywords,dmRegexes,dmTypes);
+            dmEngine.setArea(danmakuArea);
+            dmEngine.setBaseFont(danmakuFont);
+            dmEngine.setProtect(danmakuProtect);
 
             /* Apply saved subtitle settings */
             try{art.subtitle.style({fontSize:subtitleSize+'px'});}catch(e){}
@@ -889,12 +991,38 @@
 
             /* Custom UI */
             setTimeout(function(){
-                setupCommentBox();injectScreenshotFloat();injectStatsPanel();setupOverflow();
+                setupCommentBox();buildDmSettingsPanel();injectScreenshotFloat();injectStatsPanel();setupOverflow();buildInfoArea(decoded,vid,danmakuData.length);
             },600);
         }catch(e){showError(t('播放器初始化失败: ')+e.message)}
     }
 
-    /* ===== Danmaku Input ===== */
+    /* ===== Helpers ===== */
+    function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+    function copyText(s){
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+            navigator.clipboard.writeText(s).then(function(){showToast(t('已复制'))},function(){showToast(t('复制失败'),true)});
+        }else{
+            var ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.opacity='0';
+            document.body.appendChild(ta);ta.select();
+            try{document.execCommand('copy');showToast(t('已复制'))}catch(e){showToast(t('复制失败'),true)}
+            document.body.removeChild(ta);
+        }
+    }
+    /* 字幕地址归一：subtitle:xxx / id:xxx → /api/subtitle/by-id?id=xxx（面板内切换字幕也需要） */
+    function resolveSubUrl(u){
+        if(!u)return u;
+        if(u.indexOf('subtitle:')===0)return '/api/subtitle/by-id?id='+encodeURIComponent(u.slice(9));
+        if(u.indexOf('id:')===0)return '/api/subtitle/by-id?id='+encodeURIComponent(u.slice(3));
+        return u;
+    }
+
+    /* ===== 弹幕发送栏（B站式：开关 + 调色 + 胶囊输入 + 粉色发送按钮） ===== */
+    function syncDmToggle(){
+        var btn=document.querySelector('.bili-danmu .bd-toggle');
+        if(btn){btn.innerHTML=danmakuVisible?ICONS.danmu():ICONS.danmuOff();btn.classList.toggle('off',!danmakuVisible)}
+        var sw=document.querySelector('.dm-panel [data-act="toggle-dm"] .dm-switch');
+        if(sw)sw.classList.toggle('on',danmakuVisible);
+    }
     function setupCommentBox(){
         var app=document.querySelector('.art-video-player');
         var bottom=app?app.querySelector('.art-bottom'):null;
@@ -907,17 +1035,28 @@
         var curColor='#ffffff',curType=0;
 
         var wrap=document.createElement('div');wrap.className='bili-danmu';
+        var toggleBtn=document.createElement('button');toggleBtn.className='bd-toggle';toggleBtn.title=t('弹幕开关');
         var colorBtn=document.createElement('button');colorBtn.className='bd-color';colorBtn.title=t('弹幕设置');colorBtn.innerHTML='<span class="dot" style="background:'+curColor+'"></span>';
         var panel=document.createElement('div');panel.className='bd-color-panel';
         panel.innerHTML='<div class="bd-colors">'+colors.map(function(c){return'<button data-c="'+c+'" style="background:'+c+'"></button>'}).join('')+'</div><div class="bd-types">'+types.map(function(t2){return'<button data-t="'+t2.v+'">'+t2.n+'</button>'}).join('')+'</div>';
         var input=document.createElement('input');input.className='bd-input';input.type='text';input.maxLength=30;input.placeholder=t('发个友善的弹幕见证当下');
-        var sendBtn=document.createElement('button');sendBtn.className='bd-send';sendBtn.title=t('发送弹幕');sendBtn.innerHTML=ICONS.send();
-        wrap.append(colorBtn,panel,input,sendBtn);
+        var sendBtn=document.createElement('button');sendBtn.className='bd-send';sendBtn.title=t('发送弹幕');sendBtn.textContent=t('发送');
+        wrap.append(toggleBtn,colorBtn,panel,input,sendBtn);
         /* Danmaku box lives inside the left control group as a flex child:
            it can never overlap the buttons, and it hides together with the
            whole control bar (opacity / mini-progress mode). */
         controlsLeft.appendChild(wrap);
+        syncDmToggle();
+        panel.querySelectorAll('.bd-colors button').forEach(function(b,i){if(i===0)b.classList.add('active')});
+        panel.querySelectorAll('.bd-types button').forEach(function(b,i){if(i===0)b.classList.add('active')});
 
+        toggleBtn.addEventListener('click',function(e){
+            e.stopPropagation();
+            danmakuVisible=!danmakuVisible;
+            if(dmEngine)danmakuVisible?dmEngine.show():dmEngine.hide();
+            syncDmToggle();
+            showToast(t(danmakuVisible?'弹幕已开启':'弹幕已关闭'));
+        });
         colorBtn.addEventListener('click',function(e){e.stopPropagation();panel.classList.toggle('open')});
         panel.querySelectorAll('.bd-colors button').forEach(function(b){b.addEventListener('click',function(){curColor=b.dataset.c;colorBtn.querySelector('.dot').style.background=curColor;panel.querySelectorAll('.bd-colors button').forEach(function(x){x.classList.remove('active')});b.classList.add('active')})});
         panel.querySelectorAll('.bd-types button').forEach(function(b){b.addEventListener('click',function(){curType=parseInt(b.dataset.t);panel.querySelectorAll('.bd-types button').forEach(function(x){x.classList.remove('active')});b.classList.add('active')})});
@@ -938,6 +1077,275 @@
         sendBtn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();doSend()});
         input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();e.stopPropagation();doSend()}});
         if(_overflowSystem)setTimeout(checkOverflow,50);
+    }
+
+    /* ===== 弹幕设置面板（B站式齿轮弹窗） ===== */
+    var _dmPanel=null;
+    var LANG_NAMES={zh:'中文',zhHant:'繁體中文',wyw:'文言',en:'English',ja:'日本語',fr:'Français'};
+    function dmSwitch(on){return '<span class="dm-switch'+(on?' on':'')+'"><span class="dm-knob"></span></span>'}
+    function dmCheck(){return '<span class="dm-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>'}
+    function dmSlider(id,label,val,min,max,step,unit){
+        return '<div class="dm-slider-row"><div class="dm-slider-head"><span>'+label+'</span><b data-sval="'+id+'">'+val+unit+'</b></div><input class="dm-range" type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" data-sid="'+id+'"></div>';
+    }
+    function buildDmSettingsPanel(){
+        var app=document.querySelector('.art-video-player');
+        if(!app)return;
+        if(_dmPanel&&_dmPanel.parentNode)return;
+        var panel=document.createElement('div');panel.className='dm-panel';
+        app.appendChild(panel);_dmPanel=panel;
+        document.addEventListener('click',function(e){
+            if(!panel.classList.contains('open'))return;
+            if(panel.contains(e.target))return;
+            var n=e.target;
+            while(n){if(n.classList&&n.classList.contains('dm-gear'))return;n=n.parentNode}
+            panel.classList.remove('open');
+        });
+    }
+    function toggleDmPanel(force){
+        if(!_dmPanel||!_dmPanel.parentNode)buildDmSettingsPanel();
+        if(!_dmPanel)return;
+        var open=(typeof force==='boolean')?force:!_dmPanel.classList.contains('open');
+        if(open)dmRender('main');
+        _dmPanel.classList.toggle('open',open);
+    }
+    function dmHead(title,back){
+        return back?'<div class="dm-head"><button class="dm-back" data-back="1">'+ICONS.back()+'</button><span class="dm-title">'+esc(title)+'</span></div>'
+                   :'<div class="dm-head"><span class="dm-title">'+esc(title)+'</span></div>';
+    }
+    function dmApplyFilters(){
+        if(dmEngine)dmEngine.setFilters(dmKeywords,dmRegexes,dmTypes);
+        try{
+            localStorage.setItem('ap_dm_kw',JSON.stringify(dmKeywords));
+            localStorage.setItem('ap_dm_re',JSON.stringify(dmRegexes));
+            localStorage.setItem('ap_dm_types',JSON.stringify(dmTypes));
+        }catch(e){}
+    }
+    function dmRender(page){
+        var panel=_dmPanel;if(!panel)return;
+        var SPEEDS=[0.5,0.75,1,1.25,1.5,2];
+        var curRate=(art&&art.playbackRate)||1;
+        var html='';
+        if(page==='main'){
+            html+=dmHead(t('弹幕设置'));
+            html+='<button class="dm-row" data-act="toggle-dm"><span class="dm-row-label">'+esc(t('弹幕开关'))+'</span>'+dmSwitch(danmakuVisible)+'</button>';
+            html+='<button class="dm-row" data-nav="block"><span class="dm-row-label">'+esc(t('弹幕屏蔽'))+'</span><span class="dm-val">'+ICONS.chevron()+'</span></button>';
+            html+='<button class="dm-row" data-nav="protect"><span class="dm-row-label">'+esc(t('防挡弹幕'))+'</span><span class="dm-val">'+ICONS.chevron()+'</span></button>';
+            html+='<button class="dm-row" data-nav="more"><span class="dm-row-label">'+esc(t('更多设置'))+'</span><span class="dm-val">'+ICONS.chevron()+'</span></button>';
+            html+='<button class="dm-row" data-nav="speed"><span class="dm-row-label">'+esc(t('倍速'))+'</span><span class="dm-val">'+curRate+'×</span></button>';
+            html+='<button class="dm-row" data-nav="subtitle"><span class="dm-row-label">'+esc(t('字幕设置'))+'</span><span class="dm-val">'+ICONS.chevron()+'</span></button>';
+            html+='<button class="dm-row" data-nav="lang"><span class="dm-row-label">'+esc(t('语言'))+'</span><span class="dm-val">'+esc(LANG_NAMES[I18N.lang]||'')+'</span></button>';
+            html+='<button class="dm-row" data-act="stats"><span class="dm-row-label">'+esc(t('统计信息'))+'</span></button>';
+        }else if(page==='block'){
+            html+=dmHead(t('弹幕屏蔽'),true);
+            html+='<div class="dm-sec">'+esc(t('关键词屏蔽'))+'</div>';
+            if(dmKeywords.length){
+                html+='<div class="dm-chips">'+dmKeywords.map(function(k,i){return '<span class="dm-chip"><span>'+esc(k)+'</span><button data-kw="'+i+'" title="'+esc(t('删除'))+'">'+ICONS.close()+'</button></span>'}).join('')+'</div>';
+            }else html+='<div class="dm-empty">—</div>';
+            html+='<div class="dm-add"><input class="dm-kw-in" placeholder="'+esc(t('输入关键词'))+'"><button data-add="kw">'+esc(t('添加'))+'</button></div>';
+            html+='<div class="dm-sec">'+esc(t('正则屏蔽'))+'</div>';
+            if(dmRegexes.length){
+                html+='<div class="dm-chips">'+dmRegexes.map(function(k,i){return '<span class="dm-chip"><span>'+esc(k)+'</span><button data-re="'+i+'" title="'+esc(t('删除'))+'">'+ICONS.close()+'</button></span>'}).join('')+'</div>';
+            }else html+='<div class="dm-empty">—</div>';
+            html+='<div class="dm-add"><input class="dm-re-in" placeholder="'+esc(t('输入正则'))+'"><button data-add="re">'+esc(t('添加'))+'</button></div>';
+            html+='<div class="dm-sec">'+esc(t('按类型屏蔽'))+'</div>';
+            html+='<div class="dm-check'+(dmTypes[0]?' on':'')+'" data-type="0">'+dmCheck()+esc(t('滚动'))+'</div>';
+            html+='<div class="dm-check'+(dmTypes[1]?' on':'')+'" data-type="1">'+dmCheck()+esc(t('顶部'))+'</div>';
+            html+='<div class="dm-check'+(dmTypes[2]?' on':'')+'" data-type="2">'+dmCheck()+esc(t('底部'))+'</div>';
+        }else if(page==='protect'){
+            html+=dmHead(t('防挡弹幕'),true);
+            html+='<button class="dm-row" data-act="protect"><span class="dm-row-label">'+esc(t('字幕防挡'))+'</span>'+dmSwitch(danmakuProtect)+'</button>';
+        }else if(page==='more'){
+            html+=dmHead(t('更多设置'),true);
+            html+=dmSlider('opacity',esc(t('不透明度')),Math.round(danmakuOpacity*100),20,100,1,'%');
+            html+=dmSlider('speed',esc(t('速度')),danmakuSpeed,3,15,0.1,'s');
+            html+=dmSlider('density',esc(t('弹幕密度')),dmEngine?Math.round(dmEngine.density):(parseInt(localStorage.getItem('ap_dm_density'))||100),5,100,1,'%');
+            html+=dmSlider('font',esc(t('弹幕字号')),danmakuFont,12,32,1,'px');
+            html+=dmSlider('area',esc(t('显示区域')),danmakuArea,25,100,25,'%');
+            html+=dmSlider('stack',esc(t('顶/底堆叠')),parseInt(localStorage.getItem('ap_dm_stack'))||100,10,100,1,'%');
+            html+=dmSlider('mask',esc(t('底边距')),danmakuMask,0,100,1,'%');
+        }else if(page==='speed'){
+            html+=dmHead(t('倍速'),true);
+            SPEEDS.forEach(function(s){
+                html+='<button class="dm-row'+(Math.abs(curRate-s)<0.001?' active':'')+'" data-speed="'+s+'"><span class="dm-row-label">'+s+'×</span></button>';
+            });
+        }else if(page==='subtitle'){
+            html+=dmHead(t('字幕设置'),true);
+            html+='<button class="dm-row" data-act="sub-visible"><span class="dm-row-label">'+esc(t('字幕开关'))+'</span>'+dmSwitch(subtitleVisible)+'</button>';
+            html+=dmSlider('subfs',esc(t('字幕大小')),subtitleSize,14,32,1,'px');
+            html+=dmSlider('subbt',esc(t('字幕底距')),subtitleBottom,5,80,1,'px');
+            html+='<div class="dm-sec">'+esc(t('字幕选择'))+'</div>';
+            if(subtitleList&&subtitleList.length){
+                subtitleList.forEach(function(s,i){
+                    html+='<button class="dm-row'+(i===currentSub?' active':'')+'" data-sub="'+i+'"><span class="dm-row-label">'+esc(s.title||s.url)+'</span></button>';
+                });
+            }else html+='<div class="dm-empty">'+esc(t('暂无字幕'))+'</div>';
+        }else if(page==='lang'){
+            html+=dmHead(t('语言'),true);
+            Object.keys(LANG_NAMES).forEach(function(k){
+                html+='<button class="dm-row'+(I18N.lang===k?' active':'')+'" data-lang="'+k+'"><span class="dm-row-label">'+esc(LANG_NAMES[k])+'</span></button>';
+            });
+        }
+        panel.innerHTML=html;
+
+        panel.querySelectorAll('[data-back]').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();dmRender('main')})});
+        panel.querySelectorAll('[data-nav]').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();dmRender(b.dataset.nav)})});
+
+        var act;
+        if((act=panel.querySelector('[data-act="toggle-dm"]'))){
+            act.addEventListener('click',function(e){
+                e.stopPropagation();
+                danmakuVisible=!danmakuVisible;
+                if(dmEngine)danmakuVisible?dmEngine.show():dmEngine.hide();
+                syncDmToggle();
+                showToast(t(danmakuVisible?'弹幕已开启':'弹幕已关闭'));
+            });
+        }
+        if((act=panel.querySelector('[data-act="protect"]'))){
+            act.addEventListener('click',function(e){
+                e.stopPropagation();
+                danmakuProtect=!danmakuProtect;
+                localStorage.setItem('ap_dm_protect',danmakuProtect?'1':'0');
+                if(dmEngine)dmEngine.setProtect(danmakuProtect);
+                act.querySelector('.dm-switch').classList.toggle('on',danmakuProtect);
+            });
+        }
+        if((act=panel.querySelector('[data-act="stats"]'))){
+            act.addEventListener('click',function(e){
+                e.stopPropagation();
+                var p=document.querySelector('.ap-stats-panel');
+                if(p){p.classList.toggle('open');buildStats()}
+            });
+        }
+        if((act=panel.querySelector('[data-act="sub-visible"]'))){
+            act.addEventListener('click',function(e){
+                e.stopPropagation();
+                subtitleVisible=!subtitleVisible;
+                var el=document.querySelector('.art-subtitle');
+                if(el)el.style.display=subtitleVisible?'':'none';
+                act.querySelector('.dm-switch').classList.toggle('on',subtitleVisible);
+            });
+        }
+        /* 屏蔽页：增删关键词 / 正则 / 类型开关 */
+        panel.querySelectorAll('[data-kw]').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();dmKeywords.splice(parseInt(b.dataset.kw),1);dmApplyFilters();dmRender('block')})});
+        panel.querySelectorAll('[data-re]').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();dmRegexes.splice(parseInt(b.dataset.re),1);dmApplyFilters();dmRender('block')})});
+        panel.querySelectorAll('[data-add]').forEach(function(b){
+            var kind=b.dataset.add;
+            var inp=panel.querySelector(kind==='kw'?'.dm-kw-in':'.dm-re-in');
+            function addOne(){
+                if(!inp)return;
+                var v=inp.value.trim();if(!v)return;
+                if(kind==='kw'){if(dmKeywords.indexOf(v)<0)dmKeywords.push(v)}
+                else{try{new RegExp(v)}catch(e2){showToast(t('正则表达式无效'),true);return}if(dmRegexes.indexOf(v)<0)dmRegexes.push(v)}
+                dmApplyFilters();dmRender('block');
+            }
+            b.addEventListener('click',function(e){e.stopPropagation();addOne()});
+            if(inp)inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();e.stopPropagation();addOne()}});
+        });
+        panel.querySelectorAll('[data-type]').forEach(function(b){
+            b.addEventListener('click',function(e){
+                e.stopPropagation();
+                var v=parseInt(b.dataset.type);
+                dmTypes[v]=!dmTypes[v];
+                b.classList.toggle('on',dmTypes[v]);
+                dmApplyFilters();
+            });
+        });
+        /* 滑块 */
+        panel.querySelectorAll('.dm-range').forEach(function(r){
+            r.addEventListener('input',function(){
+                var v=parseFloat(r.value);
+                var out=panel.querySelector('[data-sval="'+r.dataset.sid+'"]');
+                var unit='',shown=Math.round(v);
+                if(r.dataset.sid==='opacity'){danmakuOpacity=v/100;localStorage.setItem('ap_dm_opacity',String(danmakuOpacity));if(dmEngine)dmEngine.setOpacity(danmakuOpacity);unit='%'}
+                else if(r.dataset.sid==='speed'){danmakuSpeed=v;localStorage.setItem('ap_dm_speed',String(v));if(dmEngine)dmEngine.setSpeed(v);unit='s';shown=v.toFixed(1)}
+                else if(r.dataset.sid==='density'){if(dmEngine)dmEngine.setDensity(v);unit='%'}
+                else if(r.dataset.sid==='font'){danmakuFont=Math.round(v);localStorage.setItem('ap_dm_font',String(danmakuFont));if(dmEngine)dmEngine.setBaseFont(danmakuFont);unit='px'}
+                else if(r.dataset.sid==='area'){danmakuArea=Math.round(v);localStorage.setItem('ap_dm_area',String(danmakuArea));if(dmEngine)dmEngine.setArea(danmakuArea);unit='%'}
+                else if(r.dataset.sid==='stack'){if(dmEngine)dmEngine.setFixedStack(v);unit='%'}
+                else if(r.dataset.sid==='mask'){applyDanmakuMask(v);unit='%'}
+                else if(r.dataset.sid==='subfs'){subtitleSize=Math.round(v);localStorage.setItem('ap_sub_fs',String(subtitleSize));if(art){try{art.subtitle.style({fontSize:subtitleSize+'px'})}catch(e3){}}unit='px'}
+                else if(r.dataset.sid==='subbt'){subtitleBottom=Math.round(v);localStorage.setItem('ap_sub_bottom',String(subtitleBottom));var vp=document.querySelector('.art-video-player');if(vp)vp.style.setProperty('--art-subtitle-bottom',subtitleBottom+'px');unit='px'}
+                if(out)out.textContent=shown+unit;
+            });
+        });
+        /* 倍速 */
+        panel.querySelectorAll('[data-speed]').forEach(function(b){
+            b.addEventListener('click',function(e){
+                e.stopPropagation();
+                var s=parseFloat(b.dataset.speed);
+                if(art){try{art.playbackRate=s}catch(e4){}}
+                dmRender('speed');
+            });
+        });
+        /* 字幕选择 */
+        panel.querySelectorAll('[data-sub]').forEach(function(b){
+            b.addEventListener('click',function(e){
+                e.stopPropagation();
+                var i=parseInt(b.dataset.sub);
+                if(art&&subtitleList&&subtitleList[i]){
+                    var s=subtitleList[i];
+                    try{
+                        art.subtitle.switch(resolveSubUrl(s.url),{name:s.title||s.url,type:(s.url&&s.url.indexOf('.vtt')>=0)?'vtt':'srt'});
+                        currentSub=i;
+                    }catch(e5){}
+                    dmRender('subtitle');
+                }
+            });
+        });
+        /* 语言 */
+        panel.querySelectorAll('[data-lang]').forEach(function(b){
+            b.addEventListener('click',function(e){
+                e.stopPropagation();
+                I18N.setLang(b.dataset.lang);
+                location.reload();
+            });
+        });
+    }
+
+    /* ===== 页面信息区（B站视频页神韵：标题 + 统计行 + 标签 + 操作） ===== */
+    function buildInfoArea(url,vid2,dmCount){
+        var box=document.getElementById('biliInfo');if(!box)return;
+        var title=qs('title')||((url||'').split('/').pop()||url||'');
+        try{title=decodeURIComponent(title)}catch(e){}
+        document.getElementById('biTitle').textContent=title;
+        var host='';
+        try{if(url)host=new URL(url).hostname}catch(e){}
+        var vtype=url?getVideoType(url):'normal';
+        var srcName=vtype==='hls'?'HLS':(vtype==='flv'?'FLV':'MP4');
+        document.getElementById('biMeta').innerHTML=
+            '<span>'+esc(t('弹幕数'))+' <b>'+esc(String(dmCount||0))+'</b></span>'+
+            '<span>'+esc(t('时长'))+' <b id="biDur">—</b></span>'+
+            '<span>'+esc(t('分辨率'))+' <b id="biRes">—</b></span>'+
+            (host?'<span>'+esc(t('来源'))+' <b>'+esc(host)+'</b></span>':'');
+        var tags=document.getElementById('biTags');tags.innerHTML='';
+        function addTag(txt){var s=document.createElement('span');s.className='bi-tag';s.textContent=txt;tags.appendChild(s)}
+        addTag(srcName);
+        if(host)addTag(host);
+        if(vid2)addTag('vid: '+vid2);
+        var acts=document.getElementById('biActs');acts.innerHTML='';
+        function addBtn(label,icon,fn){var b=document.createElement('button');b.className='bi-btn';b.innerHTML=icon+'<span>'+esc(label)+'</span>';b.addEventListener('click',fn);acts.appendChild(b)}
+        addBtn(t('截图'),ICONS.camera(),function(){
+            if(art&&art.video&&art.video.readyState>=2){
+                try{
+                    var cv=document.createElement('canvas');cv.width=art.video.videoWidth;cv.height=art.video.videoHeight;
+                    cv.getContext('2d').drawImage(art.video,0,0);
+                    var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='screenshot-'+Date.now()+'.png';a.click();
+                    showToast(t('截图已保存'));
+                }catch(e6){showToast(t('截图失败'),true)}
+            }else showToast(t('视频未就绪'),true);
+        });
+        addBtn(t('复制链接'),ICONS.link(),function(){copyText(location.href)});
+        addBtn(t('嵌入代码'),ICONS.code(),function(){
+            var src=location.origin+'/player/?url='+encodeURIComponent(url||'');
+            copyText('<iframe src="'+src+'" width="960" height="540" frameborder="0" allowfullscreen></iframe>');
+        });
+        if(art){
+            art.on('video:loadedmetadata',function(){
+                var v=art.video;if(!v)return;
+                var d=document.getElementById('biDur');if(d)d.textContent=fmtTime(v.duration);
+                var rr=document.getElementById('biRes');if(rr&&v.videoWidth)rr.textContent=v.videoWidth+' × '+v.videoHeight;
+            });
+        }
     }
 
     /* ===== Screenshot ===== */

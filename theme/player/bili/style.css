@@ -1,0 +1,7 @@
+/* bili 主题点缀：在通用B站式基础样式上的少量专属高光（每行一条规则，构建时自动加 [data-theme="bili"] 前缀） */
+.bili-danmu .bd-input:focus{border-color:var(--bili-pink);box-shadow:0 0 0 2px rgba(251,114,153,.22)}
+.dm-panel{box-shadow:0 12px 40px rgba(0,0,0,.55),0 0 0 1px rgba(251,114,153,.08)}
+.dm-row.active .dm-val{color:var(--bili-pink)}
+.bi-btn:hover{border-color:var(--bili-pink);color:var(--bili-pink)}
+.bi-tag{border-color:rgba(251,114,153,.25);color:#fc8bab}
+#toast{border-color:rgba(251,114,153,.3)}

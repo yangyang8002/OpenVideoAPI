@@ -1,0 +1,18 @@
+{
+  "id": "bili",
+  "displayName": "bili · B站经典",
+  "variables": {
+    "--bg": "#101014",
+    "--surface": "#1c1c22",
+    "--border": "rgba(255,255,255,0.08)",
+    "--bili-blue": "#00AEEC",
+    "--bili-blue-hover": "#23ADE5",
+    "--bili-pink": "#FB7299",
+    "--bili-pink-hover": "#fc8bab",
+    "--text": "#f1f1f3",
+    "--text-dim": "#9499a0",
+    "--danger": "#f25d8e",
+    "--radius": "8px",
+    "--gradient": "linear-gradient(135deg,#00AEEC,#FB7299)"
+  }
+}
