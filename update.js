@@ -171,7 +171,7 @@ function npmUpdate() {
         }
         if (!fs.existsSync(pkgDir)) throw new Error('npm 包结构异常（无 package/ 目录）');
         /* 覆盖项目文件（先清空会随版本变化的目录，再复制；包中不存在的目录跳过） */
-        const dirs = ['lib', 'public', 'theme', 'plugins'];
+        const dirs = ['lib', 'src', 'public', 'theme', 'plugins']; /* src/ = 拆分后的应用模块（v27 起新增，必须随包覆盖） */
         for (const d of dirs) {
             const srcDir = path.join(pkgDir, d);
             if (!fs.existsSync(srcDir)) { log('跳过（npm 包中不存在）: ' + d); continue; }

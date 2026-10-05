@@ -9,6 +9,7 @@ RUN npm install --production
 
 COPY server.js ./
 COPY lib ./lib/
+COPY src ./src/
 COPY public ./public/
 
 RUN mkdir -p data
@@ -19,6 +20,6 @@ ENV PORT=1919
 ENV NODE_ENV=production
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget -q --spider http://localhost:1919/api/config/public || exit 1
+    CMD wget -q --spider http://localhost:1919/healthz || exit 1
 
 CMD ["node", "server.js"]
