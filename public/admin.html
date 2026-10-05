@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Semibold.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Bold.min.css">
     <link rel="stylesheet" href="/api/theme/admin.css">
+    <link rel="stylesheet" href="/settings.css">
     <script src="/i18n.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
     <script>
@@ -1442,16 +1443,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                 </div>
                 <div id="depsNotes" style="display:none;font-size:11px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:10px;max-height:140px;overflow:auto;white-space:pre-wrap"></div>
             </div>
-            <div class="card">
-                <h3><span class="dot" style="background:var(--success);box-shadow:0 0 6px var(--success)"></span>更新与安装配置
-                    <button class="btn btn-sm" style="margin-left:10px" onclick="loadUpdateCfg()">读取当前</button>
-                    <button class="btn btn-sm btn-primary" style="margin-left:6px" onclick="saveUpdateCfg()">保存</button>
-                    <span id="updCfgMsg" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:8px"></span>
-                </h3>
-                <div class="cfg-row"><span>npm 镜像源</span><input type="text" id="cfgNpmRegistry" placeholder="https://registry.npmjs.org 或 https://registry.npmmirror.com（国内加速）" style="flex:1"></div>
-                <div class="cfg-row"><span>插件市场源</span><input type="text" id="cfgPluginRegistry" placeholder="https://raw.githubusercontent.com/yangyang8002/OpenVideoAPI/master/plugin-registry.json" style="flex:1"></div>
-                <div class="cfg-hint">npm 镜像源作用于：程序更新（update.js）、插件安装/更新、依赖更新；插件市场源为市场清单地址。保存后立即生效，无需重启。也可用环境变量 OPENVIDEO_NPM_REGISTRY / OPENVIDEO_PLUGIN_REGISTRY 覆盖。</div>
-            </div>
+
             <div class="card">
                 <h3><span class="dot" style="background:var(--primary);box-shadow:0 0 6px var(--primary)"></span>npm 依赖
                     <button class="btn btn-sm btn-primary" style="margin-left:10px" onclick="updateAllDeps()">更新全部</button>
@@ -1470,113 +1462,24 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
 
         <!-- Config -->        <!-- Config -->
         <div class="panel" id="configPanel">
-            <div class="card">
-                <h3 style="cursor:pointer" onclick="toggleNavCard()"><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>导航栏设置
-                    <span id="navCardCaret" style="font-size:12px;opacity:.7;margin-left:4px">&#9654;</span>
-                    <button class="btn btn-sm" style="margin-left:10px" onclick="event.stopPropagation();loadNavEditor()">读取当前</button>
-                    <button class="btn btn-sm" style="margin-left:6px" onclick="event.stopPropagation();resetNav()">重置默认</button>
-                    <button class="btn btn-sm btn-primary" style="margin-left:6px" onclick="event.stopPropagation();saveNav()">保存</button>
-                    <span id="navCfgMsg" style="font-weight:400;font-size:11px;color:var(--text3);margin-left:8px"></span>
-                </h3>
-                <div id="navCardBody" style="display:none">
-                    <div class="cfg-hint">侧边导航按分组（次级 tab）展示，组头可点击折叠。每组「折叠」勾选表示该组折叠、取消表示展开（所见即所得）；保存时只应用本次改动的组，其余组保持当前状态。插件扩展 tab 固定归入「扩展」组。</div>
-                    <div id="navEditor"><div class="empty-state">点击「读取当前」加载导航配置</div></div>
+            <!-- T4 设置中心：搜索 / dirty 横幅 / 分域锚点导航（内容由 /settings.js 渲染） -->
+            <div class="card st-toolbar" id="stToolbar">
+                <div class="st-search-row">
+                    <svg class="st-search-ic" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+                    <input type="text" id="stSearch" placeholder="搜索设置项…" autocomplete="off">
+                    <span id="stCount" class="st-count"></span>
+                </div>
+                <div class="st-nav" id="stNav"></div>
+                <div class="st-banner" id="stBanner">
+                    <span class="st-banner-dot"></span>
+                    <span id="stBannerText" class="st-banner-text"></span>
+                    <span class="st-banner-actions">
+                        <button type="button" class="btn btn-sm" id="stDiscardBtn">放弃更改</button>
+                        <button type="button" class="btn btn-sm btn-primary" id="stSaveBtn">保存全部</button>
+                    </span>
                 </div>
             </div>
-            <div class="cfg-grid">
-                <div class="cfg-card">
-                    <h4><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>PoW 工作量证明</h4>
-                    <div class="cfg-row"><label><input type="checkbox" id="cfgPowEnabled"> 启用</label></div>
-                    <div class="cfg-row"><span>难度</span><input type="range" id="cfgPowDifficulty" min="1" max="6" value="4"><span id="cfgPowDiffVal" style="width:20px;text-align:center;font-size:12px">4</span></div>
-                </div>
-                <div class="cfg-card">
-                    <h4><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>速率限制</h4>
-                    <div class="cfg-row"><label><input type="checkbox" id="cfgRlEnabled"> 启用</label></div>
-                    <div class="cfg-row"><span>窗口(秒)</span><input type="number" id="cfgRlWindow" min="10" max="3600" step="10"></div>
-                    <div class="cfg-row"><span>上限</span><input type="number" id="cfgRlMax" min="10" max="10000" step="10"></div>
-                </div>
-                <div class="cfg-card">
-                    <h4><span class="dot" style="background:var(--danger);box-shadow:0 0 6px var(--danger)"></span>弹幕频率限制</h4>
-                    <div class="cfg-row"><label><input type="checkbox" id="cfgDlEnabled"> 启用</label></div>
-                    <div class="cfg-row"><span>每分钟</span><input type="number" id="cfgDlMax" min="1" max="120"></div>
-                </div>
-                <div class="cfg-card">
-                    <h4><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>弹幕渲染</h4>
-                    <div class="cfg-row"><span>每秒上限</span><input type="number" id="cfgRenderMaxPerSec" min="1" max="1000"></div>
-                    <div class="cfg-row"><span>速度抖动%</span><input type="number" id="cfgRenderJitter" min="0" max="50"></div>
-                    <div class="cfg-hint">每秒上限：播放器每秒最多渲染的弹幕条数（默认 250）；速度抖动：每条滚动弹幕随机 ±% 速度（默认 5）</div>
-                </div>
-                <div class="cfg-card">
-                    <h4><span class="dot" style="background:var(--success);box-shadow:0 0 6px var(--success)"></span>CDN</h4>
-                    <div class="cfg-row"><label><input type="checkbox" id="cfgCdnEnabled"> 启用</label></div>
-                    <div class="cfg-row"><input type="text" id="cfgCdnUrl" placeholder="https://cdn.example.com" style="width:100%"></div>
-                </div>
-                <div class="cfg-card">
-                    <h4><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>播放器主题（服务器）</h4>
-                    <div class="cfg-row">
-                        <select id="cfgTheme">
-                            <option value="bilibili">bilibili - 深蓝粉</option>
-                            <option value="sakura">sakura - 粉白樱</option>
-                            <option value="ocean">ocean - 深海蓝</option>
-                            <option value="sunset">sunset - 日落橙</option>
-                            <option value="forest">forest - 森林绿</option>
-                            <option value="mono">mono - 黑白极简</option>
-                            <option value="cyber">cyber - 赛博霓虹</option>
-                            <option value="shoujo">shoujo - 少女漫画</option>
-                            <option value="jrpg">jrpg - 日式RPG</option>
-                            <option value="neon">neon - 霓虹武士</option>
-                        </select>
-                    </div>
-                    <div class="cfg-hint">仅影响播放器页面，保存配置后生效</div>
-                </div>
-                <div class="cfg-card">
-                    <h4><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>后台主题</h4>
-                    <div class="cfg-row">
-                        <select id="cfgAdminTheme" onchange="setAdminTheme(this.value)">
-                            <option value="md3">md3 - Material Design 3</option>
-                            <option value="bilibili">bilibili - 深蓝粉</option>
-                            <option value="sakura">sakura - 粉白樱</option>
-                            <option value="ocean">ocean - 深海蓝</option>
-                            <option value="sunset">sunset - 日落橙</option>
-                            <option value="forest">forest - 森林绿</option>
-                            <option value="mono">mono - 黑白极简</option>
-                            <option value="cyber">cyber - 赛博霓虹</option>
-                            <option value="shoujo">shoujo - 少女漫画</option>
-                            <option value="jrpg">jrpg - 日式RPG</option>
-                            <option value="neon">neon - 霓虹武士</option>
-                        </select>
-                    </div>
-                    <div class="cfg-hint">管理后台自身配色，切换即时生效</div>
-                </div>
-                <div class="cfg-card">
-                    <h4><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>安全入口</h4>
-                    <div class="cfg-row"><span>超时(分)</span><input type="number" id="cfgSessionMin" min="5" max="1440"></div>
-                    <div class="cfg-row"><span>入口路径</span><input type="text" id="cfgAdminPath" placeholder="默认 /admin/"></div>
-                    <div class="cfg-row"><label><input type="checkbox" id="cfgTrustProxy"> 信任反向代理头（X-Forwarded-For）</label></div>
-                    <div class="cfg-hint">自定义管理入口，如填 "secret" 则入口变为 /secret/；反代部署需开启信任代理头，否则限流/日志取不到真实 IP</div>
-                    <div style="border-top:1px solid var(--border);margin:10px 0;padding-top:10px">
-                        <div class="cfg-row"><input type="text" id="cfgNewUser" placeholder="新用户名"><input type="password" id="cfgUserPwd" placeholder="密码"><button class="btn btn-sm" onclick="changeUsername()">改名</button></div>
-                        <div class="cfg-row" style="margin-top:4px"><input type="password" id="cfgOldPwd" placeholder="原密码"><input type="password" id="cfgNewPwd" placeholder="新密码"><button class="btn btn-sm" onclick="changePassword()">改密</button></div>
-                    </div>
-                </div>
-                <div class="cfg-card">
-                    <h4><span class="dot" style="background:var(--success);box-shadow:0 0 6px var(--success)"></span>语言 / Language</h4>
-                    <div class="cfg-row">
-                        <span>界面语言</span>
-                        <select id="cfgLang" data-i18n-skip onchange="setAdminLang(this.value)">
-                            <option value="zh">中文</option>
-                            <option value="zhHant">繁體中文</option>
-                            <option value="wyw">文言</option>
-                            <option value="en">English</option>
-                            <option value="ja">日本語</option>
-                            <option value="fr">Français</option>
-                        </select>
-                    </div>
-                    <div class="cfg-hint">切换后立即生效并保存到本地</div>
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="saveConfig()" style="width:200px;margin-top:14px;padding:12px">保存配置</button>
-            <div id="cfgMsg" style="margin-top:8px;font-size:13px"></div>
+            <div id="stSections"></div>
         </div>
 
         <!-- Files -->
@@ -1634,18 +1537,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
 
         <!-- API Management -->
         <div class="panel" id="apiPanel">
-            <div class="card">
-                <h3><span class="dot" style="background:var(--primary);box-shadow:0 0 6px var(--primary)"></span>API 配置</h3>
-                <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
-                    <span style="font-size:12px;color:var(--text3)">统计保留</span>
-                    <input type="number" id="apiRetention" min="1" max="90" style="width:70px;padding:5px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);color:var(--text);font-size:12px;outline:none">
-                    <span style="font-size:11px;color:var(--text3)">天（1-90）</span>
-                    <button class="btn btn-sm btn-primary" onclick="saveApiConfig()">保存配置</button>
-                </div>
-                <div style="overflow-x:auto">
-                    <table><thead><tr><th>API 路径</th><th>启用</th><th>每秒上限</th><th>带宽上限(KB/s)</th></tr></thead><tbody id="apiConfigTbody"></tbody></table>
-                </div>
-            </div>
+
             <div class="card">
                 <h3><span class="dot" style="background:var(--success);box-shadow:0 0 6px var(--success)"></span>实时调用曲线
                     <select id="apiChartSpan" onchange="loadApiStats()" style="margin-left:10px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 8px;outline:none;cursor:pointer">
@@ -1787,30 +1679,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
 
         <!-- Database -->
         <div class="panel" id="dbPanel">
-            <div class="card">
-                <h3><span class="dot" style="background:var(--primary);box-shadow:0 0 6px var(--primary)"></span>当前存储 <span id="dbCurLabel" style="font-weight:400;font-size:12px;color:var(--text3);margin-left:6px"></span></h3>
-                <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:10px">
-                    <div><div style="font-size:11px;color:var(--text3)">存储类型</div><div id="dbCurType" style="font-size:18px;font-weight:700;color:var(--text)">—</div></div>
-                    <div><div style="font-size:11px;color:var(--text3)">连接信息</div><div id="dbCurConn" style="font-size:13px;color:var(--text2);word-break:break-all">—</div></div>
-                </div>
-                <div id="dbTables" style="font-size:12px">加载中...</div>
-                <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-sm" onclick="loadDbInfo()">刷新</button><button class="btn btn-sm" onclick="exportDb()">导出备份</button></div>
-            </div>
-            <div class="card">
-                <h3><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>切换存储 / 迁移数据</h3>
-                <div class="cfg-row"><span>存储类型</span>
-                    <select id="dbType" onchange="dbTypeChange()" style="flex:1">
-                        <option value="json">JSON 文件（默认，零依赖）</option>
-                        <option value="sqlite">SQLite（本地文件，零配置）</option>
-                        <option value="mysql">MySQL</option>
-                        <option value="mariadb">MariaDB</option>
-                        <option value="postgres">PostgreSQL</option>
-                        <option value="mongodb">MongoDB（文档数据库）</option>
-                    </select>
-                </div>
-                <div id="dbConnFields"></div>
-                <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-sm" onclick="testDbConn()">测试连接</button><button class="btn btn-sm btn-primary" onclick="switchDbStorage()">切换并迁移</button></div>
-            </div>
+
             <div class="card">
                 <h3><span class="dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn)"></span>数据浏览</h3>
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
@@ -2464,7 +2333,8 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('mainPage').style.display = 'block';
             document.getElementById('sideUser').textContent = adminUser;
-            loadBannedWords(); loadDanmu(); loadVids(); loadVideos(); loadSubscriptions(); loadConfig(); populateThemeSelects(); loadFiles(); loadLogs();
+            loadBannedWords(); loadDanmu(); loadVids(); loadVideos(); loadSubscriptions(); loadFiles(); loadLogs();
+            OpenVideoSettings.load(); /* T4：设置页分域渲染 + 主题下拉填充（取代原 loadConfig/populateThemeSelects） */
             startDashPanel();
             loadDashboard(true);
             checkUpdate(false);
@@ -2539,6 +2409,8 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         }
 
         function switchTab(name) {
+            const cur = document.querySelector('.nav-item.active');
+            if (cur && cur.dataset.tab === 'config' && name !== 'config' && window.OpenVideoSettings && OpenVideoSettings.isDirty() && !confirm(t('有未保存的设置更改，确定离开？'))) return;
             document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === name));
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.getElementById(name + 'Panel').classList.add('active');
@@ -2671,48 +2543,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                 .then(r => r.json()).then(d => { if (d.code === 0) { toast('已删除', true); loadDanmu(dmPage); } });
         }
 
-        function loadConfig() {
-            fetch('/api/admin/config', { headers: authHeaders() }).then(r => r.json()).then(d => {
-                if (d.code === 0) {
-                    const c = d.data;
-                    document.getElementById('cfgPowEnabled').checked = !!c.pow.enabled;
-                    document.getElementById('cfgPowDifficulty').value = c.pow.difficulty || 4;
-                    document.getElementById('cfgPowDiffVal').textContent = c.pow.difficulty || 4;
-                    document.getElementById('cfgRlEnabled').checked = !!c.rateLimit.enabled;
-                    document.getElementById('cfgRlWindow').value = (c.rateLimit.windowMs || 60000) / 1000;
-                    document.getElementById('cfgRlMax').value = c.rateLimit.max || 60;
-                    document.getElementById('cfgDlEnabled').checked = !!(c.danmakuLimit && c.danmakuLimit.enabled);
-                    document.getElementById('cfgDlMax').value = (c.danmakuLimit && c.danmakuLimit.maxPerMinute) || 10;
-                    document.getElementById('cfgRenderMaxPerSec').value = (c.render && c.render.maxPerSecond) || 250;
-                    document.getElementById('cfgRenderJitter').value = (c.render && c.render.speedJitter != null) ? c.render.speedJitter : 10;
-                    document.getElementById('cfgSessionMin').value = (c.security && c.security.sessionMinutes) || 120;
-                    document.getElementById('cfgAdminPath').value = (c.security && c.security.adminPath) || '';
-                    document.getElementById('cfgTrustProxy').checked = !!(c.security && c.security.trustProxy !== false);
-                    document.getElementById('cfgCdnEnabled').checked = !!c.cdn.enabled;
-                    document.getElementById('cfgCdnUrl').value = c.cdn.baseUrl || '';
-                    document.getElementById('cfgTheme').value = c.theme || 'bilibili';
-                    document.getElementById('cfgAdminTheme').value = c.adminTheme || 'md3';
-                    setAdminTheme(c.adminTheme || 'md3');
-                }
-            });
-        }
-        document.getElementById('cfgPowDifficulty').addEventListener('input', function () { document.getElementById('cfgPowDiffVal').textContent = this.value; });
-        function saveConfig() {
-            const cfg = {
-                pow: { enabled: document.getElementById('cfgPowEnabled').checked, difficulty: parseInt(document.getElementById('cfgPowDifficulty').value) },
-                rateLimit: { enabled: document.getElementById('cfgRlEnabled').checked, windowMs: parseInt(document.getElementById('cfgRlWindow').value) * 1000, max: parseInt(document.getElementById('cfgRlMax').value) },
-                danmakuLimit: { enabled: document.getElementById('cfgDlEnabled').checked, maxPerMinute: parseInt(document.getElementById('cfgDlMax').value) },
-                render: { maxPerSecond: parseInt(document.getElementById('cfgRenderMaxPerSec').value) || 250, speedJitter: parseInt(document.getElementById('cfgRenderJitter').value) || 10 },
-                security: { sessionMinutes: parseInt(document.getElementById('cfgSessionMin').value), adminPath: document.getElementById('cfgAdminPath').value.trim().replace(/^\/+|\/+$/g, ''), trustProxy: document.getElementById('cfgTrustProxy').checked },
-                theme: document.getElementById('cfgTheme').value,
-                adminTheme: document.getElementById('cfgAdminTheme').value,
-                cdn: { enabled: document.getElementById('cfgCdnEnabled').checked, baseUrl: document.getElementById('cfgCdnUrl').value.trim() }
-            };
-            fetch('/api/admin/config', { method: 'POST', headers: authHeaders(), body: JSON.stringify(cfg) })
-                .then(r => r.json()).then(d => {
-                    document.getElementById('cfgMsg').innerHTML = d.code === 0 ? '<span style="color:var(--success)">已保存，重启生效</span>' : '<span style="color:var(--danger)">保存失败</span>';
-                }).catch(() => { document.getElementById('cfgMsg').innerHTML = '<span style="color:var(--danger)">连接失败</span>'; });
-        }
+
         function changePassword() {
             const o = document.getElementById('cfgOldPwd').value, n = document.getElementById('cfgNewPwd').value;
             if (!o) return toast('请输入原密码', false);
@@ -3820,26 +3651,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         }
 
         /* ===== 依赖与更新 ===== */
-        function loadUpdateCfg() {
-            fetch('/api/admin/config', { headers: authHeaders() }).then(r => r.json()).then(d => {
-                if (d.code !== 0 || !d.data.plugin) return;
-                document.getElementById('cfgNpmRegistry').value = d.data.plugin.npmRegistry || '';
-                document.getElementById('cfgPluginRegistry').value = d.data.plugin.registry || '';
-                document.getElementById('updCfgMsg').textContent = '已读取';
-            });
-        }
-        function saveUpdateCfg() {
-            const body = {
-                npmRegistry: document.getElementById('cfgNpmRegistry').value.trim(),
-                pluginRegistry: document.getElementById('cfgPluginRegistry').value.trim()
-            };
-            fetch('/api/admin/update/config', { method: 'POST', headers: authHeaders(), body: JSON.stringify(body) })
-                .then(r => r.json()).then(d => {
-                    document.getElementById('updCfgMsg').textContent = d.code === 0 ? '已保存：' + d.data.npmRegistry : d.msg;
-                    if (d.code === 0) toast('已保存', true);
-                    else toast(d.msg, false);
-                });
-        }
+
         function loadDeps(force) {
             fetch('/api/admin/deps' + (force ? '?force=1' : ''), { headers: authHeaders() })
                 .then(r => r.json()).then(d => {
@@ -3987,8 +3799,8 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
             const mk = (id, ph, def) => `<input type="text" id="${id}" placeholder="${ph}" value="${def}" style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;outline:none">`;
             if (t === 'json') f.innerHTML = '<div class="cfg-hint">JSON 文件存储（data/*.json），零配置</div>';
             else if (t === 'sqlite') f.innerHTML = `<div class="cfg-row"><span>文件路径</span>${mk('dbSqliteFile', '如 data/app.db', 'data/app.db')}</div>`;
-            else if (t === 'mongodb') f.innerHTML = `<div class="cfg-row"><span>主机</span>${mk('dbHost', '127.0.0.1', '127.0.0.1')}</div><div class="cfg-row"><span>端口</span>${mk('dbPort', '27017', '27017')}</div><div class="cfg-row"><span>用户</span>${mk('dbUser', '', '')}</div><div class="cfg-row"><span>密码</span><input type="password" id="dbPass" placeholder="password" style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;outline:none"></div><div class="cfg-row"><span>数据库</span>${mk('dbName', 'artplayer', 'artplayer')}</div>`;
-            else f.innerHTML = `<div class="cfg-row"><span>主机</span>${mk('dbHost', '127.0.0.1', '127.0.0.1')}</div><div class="cfg-row"><span>端口</span>${mk('dbPort', t === 'postgres' ? '5432' : '3306', t === 'postgres' ? '5432' : '3306')}</div><div class="cfg-row"><span>用户</span>${mk('dbUser', 'root', 'root')}</div><div class="cfg-row"><span>密码</span><input type="password" id="dbPass" placeholder="password" style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;outline:none"></div><div class="cfg-row"><span>数据库</span>${mk('dbName', 'artplayer', 'artplayer')}</div>`;
+            else if (t === 'mongodb') f.innerHTML = `<div class="cfg-row"><span>主机</span>${mk('dbHost', '127.0.0.1', '127.0.0.1')}</div><div class="cfg-row"><span>端口</span>${mk('dbPort', '27017', '27017')}</div><div class="cfg-row"><span>用户</span>${mk('dbUser', '', '')}</div><div class="cfg-row"><span>密码</span><span class="st-eye-wrap" style="flex:1;position:relative;display:flex;align-items:center"><input type="password" id="dbPass" placeholder="password" style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 32px 7px 10px;font-size:12px;outline:none"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span></div><div class="cfg-row"><span>数据库</span>${mk('dbName', 'artplayer', 'artplayer')}</div>`;
+            else f.innerHTML = `<div class="cfg-row"><span>主机</span>${mk('dbHost', '127.0.0.1', '127.0.0.1')}</div><div class="cfg-row"><span>端口</span>${mk('dbPort', t === 'postgres' ? '5432' : '3306', t === 'postgres' ? '5432' : '3306')}</div><div class="cfg-row"><span>用户</span>${mk('dbUser', 'root', 'root')}</div><div class="cfg-row"><span>密码</span><span class="st-eye-wrap" style="flex:1;position:relative;display:flex;align-items:center"><input type="password" id="dbPass" placeholder="password" style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 32px 7px 10px;font-size:12px;outline:none"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span></div><div class="cfg-row"><span>数据库</span>${mk('dbName', 'artplayer', 'artplayer')}</div>`;
         }
         function dbConnBody(type) {
             if (type === 'sqlite') return { type, sqlite: { file: document.getElementById('dbSqliteFile').value } };
@@ -4532,6 +4344,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         loadLoginPlugins();
         restoreSession();
     </script>
+<script src="/settings.js"></script>
 <script>
 /* ===== Material Design 3 增强层(T3):明暗模式 / 侧栏收展 / 顶栏 / FAB / 涟漪 =====
    纯增量脚本:不改动既有逻辑;无本脚本时页面仍可运行(仅失去 MD3 增强交互)。 */

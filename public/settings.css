@@ -1,0 +1,91 @@
+/* ===== T4 设置中心样式（public/settings.css）=============================
+ * 依附 admin.css 的 MD3 色彩角色（--surface/--surface2/--border/--text/--accent…），
+ * 明暗两套主题变量直接生效；不覆盖既有组件样式，仅新增 .st-* 命名空间。 */
+
+/* 工具卡：搜索 + 分域锚点 + dirty 横幅（吸顶常驻） */
+.st-toolbar { position: sticky; top: 76px; z-index: 6; display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.st-search-row { display: flex; align-items: center; gap: 8px; }
+.st-search-ic { color: var(--text3); flex: none; }
+#stSearch { flex: 1; min-width: 0; background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none; transition: border-color .15s; }
+#stSearch:focus { border-color: var(--accent); }
+.st-count { font-size: 11px; color: var(--text3); white-space: nowrap; }
+
+.st-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.st-chip { border: 1px solid var(--border); background: var(--surface2); color: var(--text2); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; transition: all .15s; }
+.st-chip:hover { border-color: var(--accent); color: var(--text); }
+.st-chip.st-active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* dirty 横幅：默认隐藏，出现于吸顶工具卡内 */
+.st-banner { display: none; align-items: center; gap: 10px; flex-wrap: wrap; border: 1px solid var(--warn); background: var(--surface2); background: color-mix(in srgb, var(--warn) 12%, var(--surface)); border-radius: 10px; padding: 8px 12px; }
+.st-banner.show { display: flex; }
+.st-banner-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); flex: none; }
+.st-banner-text { font-size: 12px; color: var(--text); flex: 1; min-width: 120px; }
+.st-banner-actions { display: flex; gap: 8px; }
+
+/* 分域 section 包装 */
+.st-wrap { scroll-margin-top: 150px; }
+.st-wrap.st-hidden { display: none; }
+.card.st-section.st-hidden { display: none; }
+.st-sec-title { display: flex; align-items: center; gap: 8px; }
+.st-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 12px; margin-top: 6px; }
+
+/* 设置项卡片 */
+.st-item { position: relative; border: 1px solid var(--border); border-left: 3px solid transparent; border-radius: 10px; padding: 10px 12px; background: var(--surface); display: flex; flex-direction: column; gap: 6px; transition: border-color .15s, background .15s; }
+.st-item.st-hidden { display: none; }
+.st-item.st-item-dirty { border-left-color: var(--warn); background: var(--surface2); background: color-mix(in srgb, var(--warn) 7%, var(--surface)); }
+.st-item.st-item-invalid { border-color: var(--danger); }
+.st-item.st-hit { box-shadow: 0 0 0 2px var(--accent); }
+.st-item.st-flash { animation: stFlash 1.4s ease 1; }
+@keyframes stFlash { 0%, 55% { box-shadow: 0 0 0 4px var(--accent); } 100% { box-shadow: 0 0 0 2px var(--accent); } }
+
+.st-head { display: flex; align-items: center; gap: 8px; }
+.st-label { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; min-width: 0; }
+.st-default { font-size: 10px; color: var(--text3); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.st-reset { flex: none; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--text3); border-radius: 6px; cursor: pointer; transition: all .15s; }
+.st-reset:hover { color: var(--accent); background: var(--surface2); }
+.st-desc { font-size: 11px; color: var(--text3); line-height: 1.5; }
+.st-err { font-size: 11px; color: var(--danger); }
+.st-err:empty { display: none; }
+.st-ctrl { display: flex; align-items: center; }
+
+/* 控件 */
+.st-text, .st-select { width: 100%; box-sizing: border-box; background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; outline: none; transition: border-color .15s; }
+.st-text:focus, .st-select:focus { border-color: var(--accent); }
+.st-unit-wrap { display: inline-flex; align-items: center; gap: 6px; }
+.st-unit-wrap input[type="number"] { width: 130px; background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; outline: none; transition: border-color .15s; }
+.st-unit-wrap input[type="number"]:focus { border-color: var(--accent); }
+.st-unit { font-size: 11px; color: var(--text3); }
+
+/* MD3 开关 */
+.st-check { position: relative; display: inline-flex; align-items: center; cursor: pointer; width: 42px; height: 24px; flex: none; }
+.st-check input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+.st-track { position: absolute; inset: 0; border-radius: 12px; background: var(--surface2); border: 2px solid var(--border); transition: all .2s; }
+.st-knob { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 50%; background: var(--text3); transition: all .2s; }
+.st-check input:checked + .st-track { background: var(--accent); border-color: var(--accent); }
+.st-check input:checked + .st-track + .st-knob { left: 22px; width: 18px; height: 18px; background: #fff; }
+.st-check input:focus-visible + .st-track { box-shadow: 0 0 0 2px var(--accent); }
+
+/* checks 复选组 */
+.st-checks { display: flex; gap: 14px; flex-wrap: wrap; }
+.st-check-opt { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); cursor: pointer; }
+.st-check-opt input { accent-color: var(--accent); }
+
+/* 自定义卡（导航栏 / 账号 / API 规则 / 数据库 / 插件） */
+.st-custom.st-hidden { display: none; }
+.st-plugin-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.st-plugin-row:last-child { border-bottom: none; }
+.st-plugin-name { font-family: Consolas, Menlo, monospace; font-size: 12px; color: var(--text); word-break: break-all; }
+
+/* 密码显隐（settings.js 委托切换 type；dbTypeChange 生成的连接密码同样使用） */
+.st-eye-wrap { position: relative; display: flex; align-items: center; }
+.st-eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text3); cursor: pointer; border-radius: 6px; z-index: 1; }
+.st-eye:hover { color: var(--text); }
+.st-eye-on { color: var(--accent); }
+.st-eye-wrap input { padding-right: 32px; }
+
+/* 移动端：取消吸顶，单列排布 */
+@media (max-width: 900px) {
+    .st-toolbar { position: static; }
+    .st-items { grid-template-columns: 1fr; }
+    .st-wrap { scroll-margin-top: 20px; }
+}
