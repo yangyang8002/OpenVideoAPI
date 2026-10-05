@@ -385,8 +385,22 @@ body {
     pointer-events: none; transform-origin: left top;
     transition: transform var(--md-dur-short) var(--md-ease-standard), color var(--md-dur-short);
 }
+/* 浮动触发:focus / 有值 / 浏览器自动填充 / .filled 类兜底
+   (T3.1 修复:密码管理器异步填充时 :placeholder-shown 可能仍为真,标签不浮动,
+   「密码」二字压在已输入的密码圆点上 —— 追加 autofill 选择器与类兜底双保险) */
 .md-field input:focus + label,
-.md-field input:not(:placeholder-shown) + label { transform: translateY(-11px) scale(.74); color: var(--md-primary); }
+.md-field input:not(:placeholder-shown) + label,
+.md-field input:-webkit-autofill + label,
+.md-field.filled label { transform: translateY(-11px) scale(.74); color: var(--md-primary); }
+/* 自动填充的内置黄底无法以 background 覆盖,用大内阴影注入主题表面色保持 MD3 观感 */
+.md-field input:-webkit-autofill {
+    -webkit-box-shadow: inset 0 0 0 1000px var(--md-surface-container-highest, var(--surface2));
+    -webkit-text-fill-color: var(--md-on-surface);
+    transition: background-color 99999s ease-in-out 0s, color 99999s ease-in-out 0s;
+}
+/* 密码显隐按钮可作为 .md-field 直接子元素(.md-field 已 position:relative) */
+.md-field .st-eye { right: 10px; }
+.md-field input[type="password"] { padding-right: 44px; }
 #rememberWrap { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: var(--md-type-body-s); color: var(--text2); cursor: pointer; margin-bottom: 20px; }
 .login-card > button {
     width: 100%; padding: 13px 24px; border: none; border-radius: var(--md-shape-full);
@@ -459,6 +473,8 @@ body {
     padding: 8px; border-radius: var(--md-shape-full); font-family: inherit;
 }
 .side-footer .logout:hover { color: var(--md-error); background: color-mix(in srgb, var(--md-error) 10%, transparent); }
+/* T3.1 移动端抽屉遮罩(元素由 T3 脚本插入;桌面端隐藏) */
+.drawer-scrim { display: none; }
 
 /* ================= 顶栏 / 内容区 ================= */
 #mainPage { display: none; flex: 1; height: 100%; overflow-y: auto; padding: 20px 32px 40px; scroll-behavior: smooth; }
@@ -587,10 +603,12 @@ body {
 .panel select:focus { border-bottom-color: var(--md-primary); box-shadow: inset 0 -1px 0 var(--md-primary); }
 .panel select option { background: var(--md-surface-container-high, var(--surface2)); color: var(--md-on-surface); }
 .pg-size select { padding: 6px 10px; font-size: var(--md-type-label-m); }
-.cfg-row input[type="number"], .cfg-row input[type="text"], .cfg-row input[type="password"] { padding: 8px 10px; font-size: var(--md-type-label-m); width: 84px; }
-.cfg-row input[type="text"] { width: auto; flex: 1; }
-.cfg-row input[type="password"] { width: 84px; }
-.cfg-row select { width: 100%; }
+/* T3.1:cfg-row 内输入不再压成 84px —— 文本/密码随行自适应,数值定宽 130px(与 st-unit-wrap 对齐) */
+.cfg-row input[type="number"] { padding: 8px 10px; font-size: var(--md-type-label-m); width: 130px; }
+.cfg-row input[type="text"], .cfg-row input[type="password"] { padding: 8px 10px; font-size: var(--md-type-label-m); width: auto; flex: 1 1 120px; min-width: 0; }
+.cfg-row input[type="password"] { max-width: 280px; }
+.cfg-row select { width: 100%; flex: 1; }
+.cfg-row .md-field { flex: 1 1 140px; min-width: 0; margin-bottom: 0; }
 
 /* ================= Switch(配置开关) ================= */
 .cfg-row { display: flex; align-items: center; padding: 8px 0; font-size: var(--md-type-body-m); gap: 10px; }
@@ -728,6 +746,23 @@ tbody tr { transition: background var(--md-dur-short) var(--md-ease-standard); }
 tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transparent); }
 .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
 
+/* ---- T3.1 通用工具类(收敛各渲染器内联样式到 MD3 令牌) ---- */
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tbl-wrap table { margin-bottom: 0; }
+.mono { font-family: Consolas, Menlo, monospace; }
+.nowrap { white-space: nowrap; }
+.cell-1line { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.muted { font-size: var(--md-type-body-s); color: var(--md-on-surface-variant, var(--text3)); }
+.li-row { display: flex; align-items: center; gap: 8px; padding: 9px 2px; border-bottom: 1px solid var(--md-outline-variant, var(--border)); font-size: var(--md-type-body-s); }
+.li-row:last-child { border-bottom: none; }
+.status-on { color: var(--md-success, var(--success)); }
+.status-off { color: var(--md-on-surface-variant, var(--text3)); }
+.status-warn { color: var(--md-warn, var(--warn)); }
+.status-danger { color: var(--md-error, var(--danger)); }
+.link-accent { color: var(--md-primary, var(--accent)); cursor: pointer; }
+.md-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.md-pre { background: var(--md-surface-container-highest, var(--surface2)); border: 1px solid var(--md-outline-variant); border-radius: var(--md-shape-sm); padding: 14px; font-size: var(--md-type-body-s); overflow: auto; max-height: 50vh; color: var(--md-on-surface, var(--text)); white-space: pre-wrap; word-break: break-all; font-family: Consolas, Menlo, monospace; }
+
 /* ================= Snackbar(#toast) ================= */
 #toast {
     position: fixed; left: 50%; bottom: 24px; z-index: 9999;
@@ -742,13 +777,20 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
 #toast.ok { background: var(--md-success-container); color: var(--md-on-success-container); }
 #toast.err { background: var(--md-error-container); color: var(--md-on-error-container); }
 
-/* ================= 对话框(内联样式兜底 + .md-dialog 类) ================= */
-.md-dialog, div[style*="border-radius:14px"] {
-    background: var(--md-surface-container-high, var(--surface2)) !important;
-    border: 1px solid var(--md-outline-variant) !important;
-    border-radius: var(--md-shape-xl) !important;
-    box-shadow: var(--md-elev-3) !important;
-    padding: 24px !important;
+/* ================= 对话框(.md-dialog 显式类;T3.1 弃用 div[style*=border-radius:14px] 属性兜底,内联仅保留宽度) ================= */
+.md-dialog {
+    background: var(--md-surface-container-high, var(--surface2));
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--md-shape-xl);
+    box-shadow: var(--md-elev-3);
+    padding: 22px 24px;
+    max-height: 84vh;
+    overflow: auto;
+    animation: md-in .25s var(--md-ease-decelerated);
+}
+@media (max-width: 768px) {
+    /* 移动端近全屏;!important 用于压过各模态保留的内联桌面 width */
+    .md-dialog { width: calc(100vw - 24px) !important; max-width: none !important; max-height: calc(100vh - 48px); border-radius: var(--md-shape-lg); }
 }
 
 /* ================= 配置卡 ================= */
@@ -938,22 +980,52 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
 @keyframes md-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* ================= 移动端 ================= */
+/* ================= 移动端(T3.1 重构:抽屉侧栏 / 紧凑顶栏 / 触控目标) ================= */
 @media (max-width: 768px) {
-    #sidebar, #sidebar.rail { width: 88px; min-width: 88px; }
-    .side-brand h1, .side-nav .nav-item span:not(.icon), .side-footer .user, .nav-group-head { display: none; }
-    .side-brand { justify-content: center; padding: 8px 0 16px; }
-    .side-nav { padding: 4px 8px; }
-    .side-nav .nav-item { justify-content: center; padding: 12px 0; }
-    #mainPage { padding: 12px 16px 32px; }
-    .md-topbar { min-height: 56px; margin: -12px -16px 16px; padding: 6px 6px 6px 2px; gap: 4px; }
-    .md-topbar h2 { font-size: var(--md-type-title-m); margin-left: 4px; }
-    .md-seg-btn { padding: 0 12px; }
+    /* 侧栏 → 抽屉:默认移出视口,.drawer-open 滑出;rail 类由 T3 脚本在移动端摘除,此处再以 CSS 反制兜底 */
+    #sidebar, #sidebar.rail {
+        position: fixed; left: 0; top: 0; bottom: 0; z-index: 60;
+        width: 284px; min-width: 284px;
+        transform: translateX(-104%);
+        transition: transform var(--md-dur-med) var(--md-ease-emphasized);
+        box-shadow: none; overflow-y: auto;
+    }
+    #sidebar.drawer-open { transform: translateX(0); box-shadow: var(--md-elev-4); }
+    #sidebar.rail .side-brand { justify-content: flex-start; padding: 8px 20px 16px; }
+    #sidebar.rail .side-brand h1 { opacity: 1; width: auto; overflow: visible; }
+    #sidebar.rail .nav-group-head { display: flex; }
+    #sidebar.rail .side-nav .nav-item { justify-content: flex-start; padding: 10px 16px; }
+    #sidebar.rail .side-nav .nav-item span:not(.icon) { display: inline; }
+    #sidebar.rail .side-footer { justify-content: space-between; }
+    #sidebar.rail .side-footer .user { display: inline; }
+    .drawer-scrim { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,.48); opacity: 0; pointer-events: none; transition: opacity var(--md-dur-med) var(--md-ease-standard); }
+    .drawer-scrim.show { opacity: 1; pointer-events: auto; }
+    #mainPage { padding: 12px 12px 32px; }
+    /* 顶栏紧凑:标题可收缩、主题三段钮与图标钮触控可达(≥44px) */
+    .md-topbar { min-height: 56px; margin: -12px -12px 12px; padding: 6px 6px 6px 2px; gap: 4px; }
+    .md-topbar h2 { font-size: var(--md-type-title-m); margin-left: 4px; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .md-icon-btn { width: 44px; height: 44px; }
+    .md-seg { height: 44px; }
+    .md-seg-btn { height: 42px; padding: 0 14px; min-width: 44px; }
     .md-seg-btn .lbl { display: none; }
+    /* 触控目标与密度 */
+    .btn { min-height: 40px; }
+    .btn-sm { min-height: 36px; }
+    .pager button { min-width: 40px; min-height: 40px; }
     .cfg-grid { grid-template-columns: 1fr; }
     .dash-grid { grid-template-columns: repeat(2, 1fr); }
     .dm-input { width: 100% !important; flex: 1 1 100% !important; }
+    .row { flex-wrap: wrap; }
+    .card > h3 { flex-wrap: wrap; row-gap: 6px; }
+    th, td { padding: 10px 12px; }
 }
 @media (max-width: 1200px) { .dash-grid { grid-template-columns: repeat(3, 1fr); } }
+/* T3.1:平板次级断点 —— 收窄内容边距,配置卡降列 */
+@media (max-width: 1024px) {
+    #mainPage { padding: 16px 20px 32px; }
+    .md-topbar { margin: -16px -20px 16px; }
+    .cfg-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+}
 @media (max-width: 900px) { .dash-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 860px) {
     .km-wrap { flex-direction: column; }
@@ -974,6 +1046,10 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
     background: var(--md-surface-container-high, var(--surface));
     padding-bottom: 9px;
 }
+/* T3.1:动态字段间距(原内联 margin-bottom:8px)与密码显隐布局 */
+.init-step-body input[type="text"], .init-step-body .st-eye-wrap { margin-bottom: 8px; }
+.init-step-body .st-eye-wrap { width: 100%; }
+.init-step-body .st-eye-wrap input[type="password"] { padding-right: 36px; }
 .md-topbar .md-seg-btn svg { width: 18px; height: 18px; display: block; }
 .md-topbar .md-icon-btn svg { width: 20px; height: 20px; display: block; }
 .md-fab svg { width: 24px; height: 24px; display: block; }
@@ -1288,10 +1364,10 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                 <div class="pager" id="videoPager"></div>
             </div>
             <div id="codeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;align-items:center;justify-content:center" onclick="if(event.target===this)closeCodeModal()">
-                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:22px 24px;width:min(720px,92vw);max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.45)">
+                <div class="md-dialog" style="width:min(720px,92vw)">
                     <h3 style="margin-bottom:12px">快捷代码 <span id="codeModalTitle" style="font-weight:400;font-size:12px;color:var(--text3);margin-left:6px"></span></h3>
-                    <pre id="codeModalContent" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12px;overflow:auto;max-height:50vh;color:var(--text);white-space:pre-wrap;word-break:break-all"></pre>
-                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+                    <pre id="codeModalContent" class="md-pre"></pre>
+                    <div class="md-dialog-actions">
                         <button class="btn btn-sm" onclick="copyCodeModal()">复制代码</button>
                         <button class="btn btn-sm" onclick="closeCodeModal()">关闭</button>
                     </div>
@@ -1334,14 +1410,14 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                             </span>
                         </div>
                         <div class="cfg-row"><span>类型</span>
-                            <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="subNewType" value="url" checked onchange="subNewTypeChange()"> 链接</label>
-                            <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="subNewType" value="text" onchange="subNewTypeChange()"> 文本内容</label>
+                            <label><input type="radio" name="subNewType" value="url" checked onchange="subNewTypeChange()"> 链接</label>
+                            <label><input type="radio" name="subNewType" value="text" onchange="subNewTypeChange()"> 文本内容</label>
                             <label class="btn btn-sm" style="cursor:pointer">上传文件<input type="file" id="subNewFile" multiple accept=".srt,.vtt,.ass,.ssa,.webvtt" style="display:none" onchange="uploadSubtitleFiles()"></label>
                         </div>
                         <div id="subNewUrlRow"><div class="cfg-row"><span>链接</span><input type="text" id="subNewUrl" placeholder="https://..."></div>
                             <div class="cfg-row"><span>保存方式</span>
-                                <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="subNewLocalize" value="0" checked> 直接保存链接（播放时远程加载）</label>
-                                <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="subNewLocalize" value="1"> 立即下载到本地（本地化）</label>
+                                <label><input type="radio" name="subNewLocalize" value="0" checked> 直接保存链接（播放时远程加载）</label>
+                                <label><input type="radio" name="subNewLocalize" value="1"> 立即下载到本地（本地化）</label>
                             </div>
                         </div>
                         <div id="subNewTextRow" style="display:none"><textarea id="subNewText" rows="6" placeholder="WEBVTT / SRT 字幕内容..." style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:12px;outline:none"></textarea></div>
@@ -1364,10 +1440,10 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                 <div id="plList" style="font-size:12px">加载中...</div>
             </div>
             <div id="plConfigModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;align-items:center;justify-content:center" onclick="if(event.target===this)closePlConfig()">
-                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:22px 24px;width:min(460px,92vw);max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.45)">
+                <div class="md-dialog" style="width:min(460px,92vw)">
                     <h3 style="margin-bottom:14px">插件配置 <span id="plConfigTitle" style="font-weight:400;font-size:12px;color:var(--text3);margin-left:6px"></span></h3>
                     <div id="plConfigFields"></div>
-                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px">
+                    <div class="md-dialog-actions">
                         <button class="btn btn-sm" onclick="closePlConfig()">取消</button>
                         <button class="btn btn-sm btn-primary" onclick="savePluginConfig()">保存并热重载</button>
                     </div>
@@ -1419,7 +1495,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                 </div>
             </div>
             <div id="mktDetailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;align-items:center;justify-content:center" onclick="if(event.target===this)closeMarketDetail()">
-                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:22px 24px;width:min(560px,92vw);max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.45)">
+                <div class="md-dialog" style="width:min(560px,92vw)">
                     <div id="mktDetailBody"></div>
                 </div>
             </div>
@@ -1449,14 +1525,14 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                     <button class="btn btn-sm btn-primary" style="margin-left:10px" onclick="updateAllDeps()">更新全部</button>
                 </h3>
                 <div class="cfg-hint">npm 依赖版本检查（缓存 30 分钟）；更新在后台执行 npm install，完成后需重启服务生效</div>
-                <div style="overflow-x:auto"><table><thead><tr><th>依赖</th><th>当前版本</th><th>最新版本</th><th>状态</th><th>操作</th></tr></thead><tbody id="depsTbody"></tbody></table></div>
+                <div class="tbl-wrap"><table><thead><tr><th>依赖</th><th>当前版本</th><th>最新版本</th><th>状态</th><th>操作</th></tr></thead><tbody id="depsTbody"></tbody></table></div>
             </div>
             <div class="card">
                 <h3><span class="dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>插件更新
                     <button class="btn btn-sm" style="margin-left:10px" onclick="loadDeps(true)">刷新</button>
                 </h3>
                 <div class="cfg-hint">npm / URL 来源插件可一键按原来源更新；文件型插件请手动上传新版</div>
-                <div style="overflow-x:auto"><table><thead><tr><th>插件</th><th>版本</th><th>来源</th><th>状态</th><th>操作</th></tr></thead><tbody id="depsPluginsTbody"></tbody></table></div>
+                <div class="tbl-wrap"><table><thead><tr><th>插件</th><th>版本</th><th>来源</th><th>状态</th><th>操作</th></tr></thead><tbody id="depsPluginsTbody"></tbody></table></div>
             </div>
         </div>
 
@@ -1697,7 +1773,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                     <input type="text" id="dbBrowseSearch" placeholder="搜索..." style="flex:1;min-width:140px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;outline:none" onkeydown="if(event.key==='Enter')loadDbBrowse()">
                     <button class="btn btn-sm" onclick="loadDbBrowse()">查询</button>
                 </div>
-                <div style="overflow-x:auto"><table><thead id="dbBrowseHead"></thead><tbody id="dbBrowseBody"></tbody></table><div class="empty-state" id="dbBrowseEmpty" style="display:none">暂无数据</div></div>
+                <div class="tbl-wrap"><table><thead id="dbBrowseHead"></thead><tbody id="dbBrowseBody"></tbody></table><div class="empty-state" id="dbBrowseEmpty" style="display:none">暂无数据</div></div>
                 <div class="pager" id="dbBrowsePager"></div>
             </div>
         </div>
@@ -1729,43 +1805,43 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
             </div>
 
             <div id="backupModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;align-items:center;justify-content:center" onclick="if(event.target===this)closeBackupModal()">
-                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:22px 24px;width:min(430px,92vw);max-height:82vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.45)">
+                <div class="md-dialog" style="width:min(430px,92vw)">
                     <h3 style="margin-bottom:14px">添加备份</h3>
                     <div class="cfg-row"><span>备份内容</span>
-                        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="bmContentData" checked> 数据库数据</label>
-                        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="bmContentConfig" checked> 服务器配置</label>
+                        <label><input type="checkbox" id="bmContentData" checked> 数据库数据</label>
+                        <label><input type="checkbox" id="bmContentConfig" checked> 服务器配置</label>
                     </div>
                     <div class="cfg-row"><span>备份目标</span>
-                        <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="bmTarget" value="local" checked onchange="bmTargetChange()"> 本地</label>
-                        <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="bmTarget" value="cloud" onchange="bmTargetChange()"> 云端</label>
-                        <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="bmTarget" value="both" onchange="bmTargetChange()"> 本地 + 云端</label>
+                        <label><input type="radio" name="bmTarget" value="local" checked onchange="bmTargetChange()"> 本地</label>
+                        <label><input type="radio" name="bmTarget" value="cloud" onchange="bmTargetChange()"> 云端</label>
+                        <label><input type="radio" name="bmTarget" value="both" onchange="bmTargetChange()"> 本地 + 云端</label>
                     </div>
-                    <div id="bmCloudHint" style="font-size:11px;color:var(--warn);margin-top:4px;display:none"></div>
-                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px"><button class="btn btn-sm" onclick="closeBackupModal()">取消</button><button class="btn btn-sm btn-primary" onclick="createBackupFlow()">开始备份</button></div>
+                    <div id="bmCloudHint" class="muted status-warn" style="margin-top:4px;display:none"></div>
+                    <div class="md-dialog-actions"><button class="btn btn-sm" onclick="closeBackupModal()">取消</button><button class="btn btn-sm btn-primary" onclick="createBackupFlow()">开始备份</button></div>
                 </div>
             </div>
             <div id="bkConfigModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;align-items:center;justify-content:center" onclick="if(event.target===this)closeBkConfigModal()">
-                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:22px 24px;width:min(480px,92vw);max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.45)">
+                <div class="md-dialog" style="width:min(480px,92vw)">
                     <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border)">
                         <button class="bk-cfg-tab active" data-tab="bk" onclick="bkCfgSwitch('bk')">定时备份</button>
                         <button class="bk-cfg-tab" data-tab="cl" onclick="bkCfgSwitch('cl')">云端同步</button>
                     </div>
                     <div id="bkCfgTabBk">
-                        <div class="cfg-row"><span>启用</span><label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="cfgBkEnabled"> 自动定时备份</label></div>
+                        <div class="cfg-row"><span>启用</span><label><input type="checkbox" id="cfgBkEnabled"> 自动定时备份</label></div>
                         <div class="cfg-row"><span>间隔（小时）</span><input type="number" id="cfgBkInterval" min="1" max="720"></div>
                         <div class="cfg-row"><span>保留份数</span><input type="number" id="cfgBkMaxKeep" min="1" max="100"></div>
                         <div class="cfg-row"><span>备份内容</span>
-                            <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="cfgBkContentData" checked> 数据库数据</label>
-                            <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="cfgBkContentConfig" checked> 服务器配置</label>
+                            <label><input type="checkbox" id="cfgBkContentData" checked> 数据库数据</label>
+                            <label><input type="checkbox" id="cfgBkContentConfig" checked> 服务器配置</label>
                         </div>
-                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="btn btn-sm" onclick="closeBkConfigModal()">取消</button><button class="btn btn-sm btn-primary" onclick="saveBkCfgFromModal()">保存定时备份配置</button></div>
+                        <div class="md-dialog-actions"><button class="btn btn-sm" onclick="closeBkConfigModal()">取消</button><button class="btn btn-sm btn-primary" onclick="saveBkCfgFromModal()">保存定时备份配置</button></div>
                     </div>
                     <div id="bkCfgTabCl" style="display:none">
                         <div id="cloudCfgList"></div>
                         <div id="cloudCfgForm" style="display:none">
-                            <div class="cfg-row"><span>启用</span><label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="cfgClEnabled"> 本地备份后自动同步到云端</label></div>
+                            <div class="cfg-row"><span>启用</span><label><input type="checkbox" id="cfgClEnabled"> 本地备份后自动同步到云端</label></div>
                             <div class="cfg-row"><span>类型</span>
-                                <select id="cfgClType" onchange="cfgCloudTypeChange()" style="flex:1">
+                                <select id="cfgClType" onchange="cfgCloudTypeChange()">
                                     <option value="ftp">FTP / FTPS</option>
                                     <option value="sftp">SFTP (SSH)</option>
                                     <option value="webdav">WebDAV</option>
@@ -1773,7 +1849,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                                 </select>
                             </div>
                             <div id="cfgClFields"></div>
-                            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+                            <div class="md-dialog-actions">
                                 <button class="btn btn-sm" onclick="testCloudCfgConn()">测试连接</button>
                                 <button class="btn btn-sm" onclick="cancelCloudCfgEdit()">取消</button>
                                 <button class="btn btn-sm btn-primary" onclick="saveCloudCfgFromModal()">保存云端配置</button>
@@ -1824,9 +1900,9 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                     <div id="upNotes" style="display:none;font-size:11px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;max-height:160px;overflow:auto;white-space:pre-wrap;text-align:left"></div>
                     <div id="upSourceRow" style="display:none;justify-content:center;gap:12px;font-size:12px;color:var(--text2);margin-bottom:10px">
                         <span>更新来源</span>
-                        <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="upSource" value="auto" checked> 自动</label>
-                        <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="upSource" value="git"> Git</label>
-                        <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="upSource" value="npm"> npm</label>
+                        <label><input type="radio" name="upSource" value="auto" checked> 自动</label>
+                        <label><input type="radio" name="upSource" value="git"> Git</label>
+                        <label><input type="radio" name="upSource" value="npm"> npm</label>
                     </div>
                     <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
                         <button class="btn btn-sm" onclick="checkUpdate(true)">检查更新</button>
@@ -2894,7 +2970,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                 if (d.code !== 0) return;
                 document.getElementById('secAnomalyCount').textContent = `共 ${d.data.length} 个`;
                 const c = document.getElementById('secAnomalyList');
-                c.innerHTML = d.data.length ? '<div style="overflow-x:auto"><table><thead><tr><th>IP</th><th>地区</th><th>运营商</th><th>原因</th><th>操作</th></tr></thead><tbody>' +
+                c.innerHTML = d.data.length ? '<div class="tbl-wrap"><table><thead><tr><th>IP</th><th>地区</th><th>运营商</th><th>原因</th><th>操作</th></tr></thead><tbody>' +
                     d.data.map(a => `<tr>
                         <td style="color:var(--danger);font-weight:600">${esc2(a.ip)}</td>
                         <td>${esc2(a.region)}</td>
@@ -3796,11 +3872,12 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         function dbTypeChange() {
             const t = document.getElementById('dbType').value;
             const f = document.getElementById('dbConnFields');
-            const mk = (id, ph, def) => `<input type="text" id="${id}" placeholder="${ph}" value="${def}" style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;outline:none">`;
+            /* T3.1:样式收敛到 .panel input / .cfg-row 规则,不再内联旧变量 */
+            const mk = (id, ph, def) => `<input type="text" id="${id}" placeholder="${ph}" value="${def}">`;
             if (t === 'json') f.innerHTML = '<div class="cfg-hint">JSON 文件存储（data/*.json），零配置</div>';
             else if (t === 'sqlite') f.innerHTML = `<div class="cfg-row"><span>文件路径</span>${mk('dbSqliteFile', '如 data/app.db', 'data/app.db')}</div>`;
-            else if (t === 'mongodb') f.innerHTML = `<div class="cfg-row"><span>主机</span>${mk('dbHost', '127.0.0.1', '127.0.0.1')}</div><div class="cfg-row"><span>端口</span>${mk('dbPort', '27017', '27017')}</div><div class="cfg-row"><span>用户</span>${mk('dbUser', '', '')}</div><div class="cfg-row"><span>密码</span><span class="st-eye-wrap" style="flex:1;position:relative;display:flex;align-items:center"><input type="password" id="dbPass" placeholder="password" style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 32px 7px 10px;font-size:12px;outline:none"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span></div><div class="cfg-row"><span>数据库</span>${mk('dbName', 'artplayer', 'artplayer')}</div>`;
-            else f.innerHTML = `<div class="cfg-row"><span>主机</span>${mk('dbHost', '127.0.0.1', '127.0.0.1')}</div><div class="cfg-row"><span>端口</span>${mk('dbPort', t === 'postgres' ? '5432' : '3306', t === 'postgres' ? '5432' : '3306')}</div><div class="cfg-row"><span>用户</span>${mk('dbUser', 'root', 'root')}</div><div class="cfg-row"><span>密码</span><span class="st-eye-wrap" style="flex:1;position:relative;display:flex;align-items:center"><input type="password" id="dbPass" placeholder="password" style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 32px 7px 10px;font-size:12px;outline:none"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span></div><div class="cfg-row"><span>数据库</span>${mk('dbName', 'artplayer', 'artplayer')}</div>`;
+            else if (t === 'mongodb') f.innerHTML = `<div class="cfg-row"><span>主机</span>${mk('dbHost', '127.0.0.1', '127.0.0.1')}</div><div class="cfg-row"><span>端口</span>${mk('dbPort', '27017', '27017')}</div><div class="cfg-row"><span>用户</span>${mk('dbUser', '', '')}</div><div class="cfg-row"><span>密码</span><span class="st-eye-wrap"><input type="password" id="dbPass"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span></div><div class="cfg-row"><span>数据库</span>${mk('dbName', 'artplayer', 'artplayer')}</div>`;
+            else f.innerHTML = `<div class="cfg-row"><span>主机</span>${mk('dbHost', '127.0.0.1', '127.0.0.1')}</div><div class="cfg-row"><span>端口</span>${mk('dbPort', t === 'postgres' ? '5432' : '3306', t === 'postgres' ? '5432' : '3306')}</div><div class="cfg-row"><span>用户</span>${mk('dbUser', 'root', 'root')}</div><div class="cfg-row"><span>密码</span><span class="st-eye-wrap"><input type="password" id="dbPass"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span></div><div class="cfg-row"><span>数据库</span>${mk('dbName', 'artplayer', 'artplayer')}</div>`;
         }
         function dbConnBody(type) {
             if (type === 'sqlite') return { type, sqlite: { file: document.getElementById('dbSqliteFile').value } };
@@ -4006,15 +4083,15 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         function cfgCloudTypeChange() {
             const t = document.getElementById('cfgClType').value;
             document.getElementById('cfgClFields').innerHTML = t === 'openlist'
-                ? `<div class="cfg-row"><span>地址</span><input type="text" id="cfgClBaseUrl" placeholder="https://pan.example.com" style="flex:1"></div>
-                   <div class="cfg-row"><span>路径</span><input type="text" id="cfgClPath" placeholder="/backups" style="flex:1"></div>
-                   <div class="cfg-row"><span>账号</span><input type="text" id="cfgClUser" style="flex:1"></div>
-                   <div class="cfg-row"><span>密码</span><input type="password" id="cfgClPass" style="flex:1"></div>`
-                : `<div class="cfg-row"><span>主机</span><input type="text" id="cfgClHost" placeholder="ftp.example.com" style="flex:1"></div>
-                   <div class="cfg-row"><span>端口</span><input type="number" id="cfgClPort" style="flex:1"></div>
-                   <div class="cfg-row"><span>账号</span><input type="text" id="cfgClUser" style="flex:1"></div>
-                   <div class="cfg-row"><span>密码</span><input type="password" id="cfgClPass" style="flex:1"></div>
-                   <div class="cfg-row"><span>路径</span><input type="text" id="cfgClPath" placeholder="/backups" style="flex:1"></div>
+                ? `<div class="cfg-row"><span>地址</span><input type="text" id="cfgClBaseUrl" placeholder="https://pan.example.com"></div>
+                   <div class="cfg-row"><span>路径</span><input type="text" id="cfgClPath" placeholder="/backups"></div>
+                   <div class="cfg-row"><span>账号</span><input type="text" id="cfgClUser"></div>
+                   <div class="cfg-row"><span>密码</span><span class="st-eye-wrap"><input type="password" id="cfgClPass"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span></div>`
+                : `<div class="cfg-row"><span>主机</span><input type="text" id="cfgClHost" placeholder="ftp.example.com"></div>
+                   <div class="cfg-row"><span>端口</span><input type="number" id="cfgClPort"></div>
+                   <div class="cfg-row"><span>账号</span><input type="text" id="cfgClUser"></div>
+                   <div class="cfg-row"><span>密码</span><span class="st-eye-wrap"><input type="password" id="cfgClPass"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span></div>
+                   <div class="cfg-row"><span>路径</span><input type="text" id="cfgClPath" placeholder="/backups"></div>
                    ${t === 'ftp' ? `<div class="cfg-row"><label><input type="checkbox" id="cfgClSecure"> FTPS 加密</label></div>` : ''}`;
         }
         function cloudCfgBody() {
@@ -4138,7 +4215,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                     const c = document.getElementById('svSubs');
                     const list = d.data.list || [];
                     if (!list.length) { c.innerHTML = '<div class="empty-state">该视频暂无字幕，可在右侧添加</div>'; document.getElementById('subPager').innerHTML = ''; return; }
-                    c.innerHTML = '<div style="overflow-x:auto"><table><thead><tr><th>名称</th><th>语言</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>' + list.map(s => `<tr>
+                    c.innerHTML = '<div class="tbl-wrap"><table><thead><tr><th>名称</th><th>语言</th><th>类型</th><th>状态</th><th>操作</th></tr></thead><tbody>' + list.map(s => `<tr>
                         <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(s.name)}">${esc(s.name)}</td>
                         <td>${(s.langs && s.langs.length > 1) ? `<span class="pl-chip" style="color:var(--warn)" title="双语字幕">${esc(s.langs.map(l => l).join(' + '))}</span>` : `<span style="font-size:12px;color:var(--text3)">${esc(s.langName || s.lang || '—')}</span>`}</td>
                         <td style="font-size:12px;color:var(--text3)">${esc(s.type)}</td>
@@ -4267,11 +4344,12 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         function initDbTypeChange() {
             const t = document.getElementById('initDbType').value;
             const f = document.getElementById('initDbFields');
-            const mk = (id, ph) => `<input type="text" id="${id}" placeholder="${ph}" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;outline:none;margin-bottom:8px">`;
+            /* T3.1:样式收敛到 .init-step-body 规则(间距由 CSS 提供) */
+            const mk = (id, ph) => `<input type="text" id="${id}" placeholder="${ph}">`;
             if (t === 'json') f.innerHTML = '<div class="cfg-hint">JSON 文件存储（data/*.json），零配置</div>';
             else if (t === 'sqlite') f.innerHTML = mk('initSqliteFile', '文件路径（默认 data/app.db）');
-            else if (t === 'mongodb') f.innerHTML = mk('initDbHost', '主机 127.0.0.1') + mk('initDbPort', '端口 27017') + mk('initDbUser', '用户（可空）') + '<input type="password" id="initDbPass" placeholder="密码" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;outline:none;margin-bottom:8px">' + mk('initDbName', '数据库 artplayer');
-            else f.innerHTML = mk('initDbHost', '主机 127.0.0.1') + mk('initDbPort', '端口 ' + (t === 'postgres' ? '5432' : '3306')) + mk('initDbUser', '用户 root') + '<input type="password" id="initDbPass" placeholder="密码" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;outline:none;margin-bottom:8px">' + mk('initDbName', '数据库 artplayer');
+            else if (t === 'mongodb') f.innerHTML = mk('initDbHost', '主机 127.0.0.1') + mk('initDbPort', '端口 27017') + mk('initDbUser', '用户（可空）') + '<span class="st-eye-wrap"><input type="password" id="initDbPass" placeholder="密码"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span>' + mk('initDbName', '数据库 artplayer');
+            else f.innerHTML = mk('initDbHost', '主机 127.0.0.1') + mk('initDbPort', '端口 ' + (t === 'postgres' ? '5432' : '3306')) + mk('initDbUser', '用户 root') + '<span class="st-eye-wrap"><input type="password" id="initDbPass" placeholder="密码"><button type="button" class="st-eye" data-eye tabindex="-1" aria-label="显示或隐藏密码" title="显示或隐藏密码"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zM12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button></span>' + mk('initDbName', '数据库 artplayer');
         }
         function initDbBody() {
             const t = document.getElementById('initDbType').value;
@@ -4404,10 +4482,32 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         try { localStorage.setItem(RAIL_KEY, on ? '1' : '0'); } catch (e) {}
         refreshTips();
     }
+    /* T3.1 移动端抽屉:≤768px 时汉堡开合侧栏 + 遮罩;桌面端仍为 Navigation Rail 收展 */
+    var mq = window.matchMedia ? window.matchMedia('(max-width: 768px)') : null;
+    function isMobile() { return !!(mq && mq.matches); }
+    var scrim = document.createElement('div');
+    scrim.className = 'drawer-scrim';
+    document.body.appendChild(scrim);
+    function openDrawer() { if (sidebar) sidebar.classList.add('drawer-open'); scrim.classList.add('show'); }
+    function closeDrawer() { if (sidebar) sidebar.classList.remove('drawer-open'); scrim.classList.remove('show'); }
+    function drawerOpen() { return !!(sidebar && sidebar.classList.contains('drawer-open')); }
+    if (mq) {
+        var onMq = function (e) { if (e.matches && sidebar) sidebar.classList.remove('rail'); closeDrawer(); };
+        if (mq.addEventListener) mq.addEventListener('change', onMq);
+        else if (mq.addListener) mq.addListener(onMq);
+    }
     if (railBtn) railBtn.addEventListener('click', function () {
-        applyRail(sidebar ? !sidebar.classList.contains('rail') : false);
+        if (isMobile()) { if (drawerOpen()) closeDrawer(); else openDrawer(); }
+        else applyRail(sidebar ? !sidebar.classList.contains('rail') : false);
+    });
+    scrim.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drawerOpen()) closeDrawer(); });
+    /* 抽屉内点选导航后自动收起 */
+    if (sidebar) sidebar.addEventListener('click', function (e) {
+        if (drawerOpen() && e.target.closest && e.target.closest('.nav-item')) closeDrawer();
     });
     try { if (localStorage.getItem(RAIL_KEY) === '1') applyRail(true); } catch (e) {}
+    if (isMobile() && sidebar) sidebar.classList.remove('rail');
     if (window.I18N && I18N.apply) {
         var _apply = I18N.apply;
         I18N.apply = function (root) { _apply(root); try { refreshTips(); } catch (e) {} };
@@ -4440,7 +4540,54 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         sp.addEventListener('animationend', function () { sp.remove(); });
     });
 
+    /* T3.1:.md-field 输入兜底 —— 插件/个别浏览器填充不更新 :placeholder-shown 时,
+       以 .filled 类强制浮动标签;登录页程序化回填由 CSS :not(:placeholder-shown) 原生覆盖 */
+    document.addEventListener('input', function (e) {
+        var tgt = e.target, f = tgt && tgt.closest && tgt.closest('.md-field');
+        if (f) f.classList.toggle('filled', !!tgt.value);
+    }, true);
+    var mdFieldInputs = document.querySelectorAll('.md-field input');
+    for (var fi = 0; fi < mdFieldInputs.length; fi++) {
+        var ff = mdFieldInputs[fi].closest('.md-field');
+        if (ff) ff.classList.toggle('filled', !!mdFieldInputs[fi].value);
+    }
+
     __mdOnTab();
+})();
+
+/* ================= T3.1 收尾(Lead):密码显隐 document 级兜底 + 表格横滚自动包裹 ================= */
+(function () {
+    /* 模态/向导里的 [data-eye]:settings.js 的处理器只挂 #stSections,
+       文档级兜底覆盖其余位置;#stSections 内的交由 settings.js,防双触发 */
+    document.addEventListener('click', function (e) {
+        var eye = e.target && e.target.closest ? e.target.closest('[data-eye]') : null;
+        if (!eye) return;
+        if (eye.closest && eye.closest('#stSections')) return;
+        var inp = eye.parentElement && eye.parentElement.querySelector('input');
+        if (inp) {
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            eye.classList.toggle('st-eye-on');
+        }
+    });
+    /* 裸 table(静态与动态渲染)自动包入 .tbl-wrap,窄屏横向滚动兜底 */
+    function wrapTables(scope) {
+        var ts = scope.querySelectorAll('table');
+        for (var i = 0; i < ts.length; i++) {
+            var t = ts[i];
+            if (t.closest && t.closest('.tbl-wrap')) continue;
+            var w = document.createElement('div');
+            w.className = 'tbl-wrap';
+            t.parentNode.insertBefore(w, t);
+            w.appendChild(t);
+        }
+    }
+    var mp = document.getElementById('mainPage');
+    if (mp) {
+        wrapTables(mp);
+        if (window.MutationObserver) {
+            new MutationObserver(function () { wrapTables(mp); }).observe(mp, { childList: true, subtree: true });
+        }
+    }
 })();
 </script>
 </body>
