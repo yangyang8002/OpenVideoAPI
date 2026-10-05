@@ -427,7 +427,9 @@ body {
 .side-brand .mark { line-height: 0; flex-shrink: 0; }
 .side-brand h1 { font-size: var(--md-type-title-m); font-weight: 600; white-space: nowrap; opacity: 1; transition: opacity var(--md-dur-short); }
 #sidebar.rail .side-brand h1 { opacity: 0; width: 0; overflow: hidden; }
-.side-nav { flex: 1; min-height: 0; padding: 4px 12px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+.side-nav { flex: 1; min-height: 0; padding: 4px 12px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+.side-nav::-webkit-scrollbar, #sidebar::-webkit-scrollbar { display: none; width: 0; }
+#sidebar { scrollbar-width: none; }
 .nav-group { display: flex; flex-direction: column; gap: 2px; }
 .nav-group-head {
     width: 100%; display: flex; align-items: center; justify-content: space-between;
