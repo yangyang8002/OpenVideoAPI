@@ -189,5 +189,25 @@ module.exports = {
             res.status(404).json({ code: 1, msg: safeErrMsg(e) });
         }
     });
+
+    /* ── v2（T5，additive）插件 i18n 词条（公开只读；locale 缺省 zh，plugin 可选过滤） ── */
+    app.get('/api/plugins/i18n', (req, res) => {
+        try {
+            const locale = String(req.query.locale || 'zh');
+            const plugin = req.query.plugin ? String(req.query.plugin) : null;
+            res.json({ code: 0, data: { locale, terms: S.pluginManager.mergedI18n(locale, plugin), manifest: S.pluginManager.i18nManifest() } });
+        } catch (e) {
+            res.status(500).json({ code: 1, msg: safeErrMsg(e) });
+        }
+    });
+
+    /* ── v2（T5，additive）插件自定义页面清单（公开只读；auth 页面由服务端 302 跳登录） ── */
+    app.get('/api/plugins/pages', (req, res) => {
+        try {
+            res.json({ code: 0, data: { pages: S.pluginManager.pagesList() } });
+        } catch (e) {
+            res.status(500).json({ code: 1, msg: safeErrMsg(e) });
+        }
+    });
     },
 };

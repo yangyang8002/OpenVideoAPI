@@ -12,7 +12,9 @@ module.exports = {
         const { vid, url } = req.body || {};
         if (!isValidVid(vid) || !isValidVideoUrl(url)) return res.status(400).json({ code: 1, msg: '参数不合法' });
         try {
-            await S.store.videoSet(vid, normalizeOpenlistUrl(url));
+            const key = normalizeOpenlistUrl(url);
+            await S.store.videoSet(vid, key);
+            if (S.pluginManager) S.pluginManager.emit('video:created', { vid, url: key, source: 'map' });
             res.json({ code: 0, msg: '已记录' });
         } catch (e) {
             res.status(e.code || 500).json({ code: 1, msg: e.code === 507 ? '映射表已满' : '保存失败' });
@@ -30,18 +32,23 @@ module.exports = {
         for (const [vid, u] of Object.entries(videos)) {
             if (u === key) { existing = vid; break; }
         }
-        if (existing) return res.json({ code: 0, data: { vid: existing, source: 'map' } });
+        if (existing) {
+            if (S.pluginManager) S.pluginManager.emit('video:created', { vid: existing, url: key, source: 'map' });
+            return res.json({ code: 0, data: { vid: existing, source: 'map' } });
+        }
         // 旧散列算法兼容：该 URL 已有历史弹幕 → 继承旧 ID，弹幕不丢
         const legacyId = legacyVideoId(key);
         if (await hasDanmuForVid(legacyId)) {
             try {
                 await S.store.videoSet(legacyId, key);
+                if (S.pluginManager) S.pluginManager.emit('video:created', { vid: legacyId, url: key, source: 'legacy' });
                 return res.json({ code: 0, data: { vid: legacyId, source: 'legacy' } });
             } catch (e) { return res.status(507).json({ code: 1, msg: '映射表已满' }); }
         }
         const vid = await genVideoId();
         try {
             await S.store.videoSet(vid, key);
+            if (S.pluginManager) S.pluginManager.emit('video:created', { vid, url: key, source: 'new' });
             res.json({ code: 0, data: { vid, source: 'new' } });
         } catch (e) {
             res.status(507).json({ code: 1, msg: '映射表已满' });
@@ -60,6 +67,10 @@ module.exports = {
         const { vid, url } = req.body;
         if (!vid || !url) return res.status(400).json({ code: 1, msg: '参数不完整' });
         await S.store.videoSet(vid, url);
+        if (S.pluginManager) {
+            S.pluginManager.emit('video:saved', { vid, url, source: 'admin' });
+            S.pluginManager.emit('video:created', { vid, url, source: 'admin' });
+        }
         res.json({ code: 0, msg: '已保存', data: { vid, url } });
     });
 
@@ -68,6 +79,7 @@ module.exports = {
         const { vid } = req.body;
         const ok = await S.store.videoDelete(vid);
         if (!ok) return res.status(404).json({ code: 1, msg: '不存在' });
+        if (S.pluginManager) S.pluginManager.emit('video:deleted', { vid });
         res.json({ code: 0, msg: '已删除' });
     });
 

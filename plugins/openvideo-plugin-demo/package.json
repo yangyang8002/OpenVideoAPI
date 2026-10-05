@@ -1,19 +1,28 @@
 {
   "name": "openvideo-plugin-demo",
-  "version": "1.0.0",
-  "description": "OpenVideoAPI 示例插件：服务层 / 动态表 / 事件总线 / 前端扩展（调试 tab + 播放器浮层）",
+  "version": "1.1.0",
+  "description": "OpenVideoAPI 示例插件：v1 契约（服务/动态表/事件/前端扩展）+ v2 新能力（命名空间表/私有设置/定时任务/事件总线扩展/i18n/静态资源/自定义页面/生命周期钩子/错误隔离演示）",
   "main": "lib/index.js",
   "license": "MIT",
   "keywords": ["openvideo", "plugin", "demo"],
   "openvideoPlugin": {
     "name": "demo",
-    "description": "演示服务注入、ctx.model 动态表、事件总线、ctx.app 与前端扩展（后台调试 tab + 播放器浮层）",
+    "description": "演示 v1 全部能力 + v2 新能力：ctx.model 命名空间、ctx.settings、ctx.cron、ctx.bus、ctx.i18n、ctx.static、ctx.pages、生命周期钩子、依赖声明与错误隔离",
     "inject": ["store", "model", "app", "logger", "http"],
     "provide": ["stats"],
+    "deps": { "openvideo": ">=26.0.0" },
+    "hooks": {
+      "install": "onInstall",
+      "enable": "onEnable",
+      "disable": "onDisable",
+      "uninstall": "onUninstall",
+      "update": "onUpdate"
+    },
     "schema": [
       { "key": "logDanmu", "label": "记录弹幕", "type": "boolean", "default": true, "hint": "监听 danmu:send 事件并写入插件日志" },
       { "key": "showOverlay", "label": "播放器浮层", "type": "boolean", "default": true, "hint": "在播放器左上角显示插件浮层" },
-      { "key": "interval", "label": "心跳间隔（秒）", "type": "number", "default": 60, "hint": "定时写入日志的间隔" }
+      { "key": "interval", "label": "心跳间隔（秒）", "type": "number", "default": 60, "hint": "定时写入日志的间隔" },
+      { "key": "featuresV2", "label": "启用 v2 新能力", "type": "boolean", "default": true, "hint": "命名空间表 / 私有设置 / 定时任务 / 事件总线扩展 / i18n / 静态资源 / 自定义页面 / 错误隔离演示端点" }
     ],
     "client": {
       "admin": {

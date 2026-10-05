@@ -65,10 +65,12 @@ module.exports = {
                 f.count = 0;
                 await writeLoginFails(fails);
                 await logLogin(ip, username, false, 'lock:' + g.lockMin);
+                if (S.pluginManager) S.pluginManager.emit('admin:login-fail', { username, ip, reason: 'lock' });
                 return res.status(429).json({ code: 429, msg: '登录失败次数过多，已锁定' + g.lockMin + '分钟' });
             }
             await writeLoginFails(fails);
             await logLogin(ip, username, false, 'fail');
+            if (S.pluginManager) S.pluginManager.emit('admin:login-fail', { username, ip, reason: 'fail' });
             return res.status(401).json({ code: 2, msg: '账号或密码错误' });
         }
         /* 旧 sha256 哈希自动升级为 scrypt */
@@ -79,6 +81,7 @@ module.exports = {
         delete g.fails[ip];
         await writeLoginFails(g.fails);
         await logLogin(ip, username, true, 'ok');
+        if (S.pluginManager) S.pluginManager.emit('admin:login-ok', { username, ip });
         const token = generateToken(username);
         res.json({ code: 0, msg: '登录成功', data: { token, username, name: account.name || username, firstRun: !!(readConfig().security || {}).firstRun } });
     });

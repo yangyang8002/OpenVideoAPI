@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo 插件页面</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0f1115; color: #e8e8ea; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+  .card { background: #171a21; border: 1px solid #2a2f3a; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+  h1 { font-size: 18px; margin-bottom: 4px; }
+  h2 { font-size: 12px; color: #9aa3b2; margin-top: 0; font-weight: normal; }
+  pre { font-size: 12px; background: #0c0e12; border: 1px solid #2a2f3a; border-radius: 8px; padding: 12px; overflow: auto; }
+</style>
+</head>
+<body>
+<h1>demo 插件 · 自定义页面（公开）</h1>
+<h2>由 ctx.pages.register({ route: '/plugin/demo/hello', file: 'lib/client/page.html', auth: false }) 注册 —— 无需登录即可访问</h2>
+<div class="card"><h2>capabilities（GET /api/plugin/demo/capabilities）</h2><pre id="caps">加载中...</pre></div>
+<div class="card"><h2>i18n 词条（GET /api/plugins/i18n?locale=zh&amp;plugin=demo）</h2><pre id="i18n">加载中...</pre></div>
+<div class="card"><h2>静态资源（ctx.static → /plugins/demo-assets/logo.txt）</h2><pre id="asset">加载中...</pre></div>
+<script>
+  fetch('/api/plugin/demo/capabilities').then(r => r.json()).then(d => {
+    document.getElementById('caps').textContent = d.code === 0 ? JSON.stringify(d.data, null, 2) : '加载失败';
+  }).catch(() => { document.getElementById('caps').textContent = '加载失败'; });
+  fetch('/api/plugins/i18n?locale=zh&plugin=demo').then(r => r.json()).then(d => {
+    document.getElementById('i18n').textContent = d.code === 0 ? JSON.stringify(d.data, null, 2) : '加载失败';
+  }).catch(() => { document.getElementById('i18n').textContent = '加载失败'; });
+  fetch('/plugins/demo-assets/logo.txt').then(r => r.text()).then(t => {
+    document.getElementById('asset').textContent = t || '(空)';
+  }).catch(() => { document.getElementById('asset').textContent = '加载失败'; });
+</script>
+</body>
+</html>

@@ -27,6 +27,13 @@
                         </div>
                     </h3>
                     <div id="demoNotes" style="font-size:12px;margin-top:10px;color:var(--text2)">加载中...</div>
+                </div>
+                <div class="card">
+                    <h3><span class="dot" style="background:var(--success);box-shadow:0 0 6px var(--success)"></span>v2 新能力（capabilities）
+                        <button class="btn btn-sm" style="margin-left:8px" onclick="OpenVideoAdmin._demoLoadCaps()">刷新</button>
+                        <button class="btn btn-sm" style="border-color:var(--danger);color:var(--danger);margin-left:6px" onclick="OpenVideoAdmin._demoBoom()">演示错误隔离 (boom)</button>
+                    </h3>
+                    <pre id="demoCaps" style="font-size:11px;font-family:monospace;max-height:240px;overflow:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.7">加载中...</pre>
                 </div>`;
             const refresh = document.getElementById('demoRefresh');
             refresh.onclick = () => OpenVideoAdmin._demoLoadAll();
@@ -45,6 +52,7 @@
         OpenVideoAdmin._demoLoadStats();
         OpenVideoAdmin._demoLoadLogs();
         OpenVideoAdmin._demoLoadNotes();
+        OpenVideoAdmin._demoLoadCaps();
     };
     OpenVideoAdmin._demoLoadStats = function () {
         OpenVideoAdmin.api('/api/plugin/demo/stats').then(d => {
@@ -87,5 +95,18 @@
         OpenVideoAdmin.api('/api/plugin/demo/note', { method: 'DELETE', body: JSON.stringify({ id }) })
             .then(d => { if (d.code === 0) OpenVideoAdmin._demoLoadNotes(); })
             .catch(() => {});
+    };
+    /* v2：capabilities 面板 + 错误隔离演示 */
+    OpenVideoAdmin._demoLoadCaps = function () {
+        OpenVideoAdmin.api('/api/plugin/demo/capabilities').then(d => {
+            if (d.code !== 0) return;
+            document.getElementById('demoCaps').textContent = JSON.stringify(d.data, null, 2);
+        }).catch(() => {});
+    };
+    OpenVideoAdmin._demoBoom = function () {
+        OpenVideoAdmin.api('/api/plugin/demo/boom').then(d => {
+            alert('boom 端点返回: ' + JSON.stringify(d) + '\n服务进程不受影响（capabilities 仍可刷新）');
+            OpenVideoAdmin._demoLoadCaps();
+        }).catch(() => { OpenVideoAdmin._demoLoadCaps(); });
     };
 })();
