@@ -32,7 +32,7 @@
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
   <file path="package-lock.json" sha256="4d09dbb2bd4e165d6ccb31cd9406306521352992d58e89a2310e1c0a75c29138" size="86521"/>
   <file path="package.json" sha256="cbf006444281ab26d1c69f699a7cf34d03a8acf63dad5f6d40ef4059f9b169a8" size="1577"/>
-  <file path="plugin-registry.json" sha256="a0bdb80f5b87876634ddc55d5b3dfca5a7790e9c6384ab7b45ac4b765786401a" size="2995"/>
+  <file path="plugin-registry.json" sha256="a0fe30bbe83ccb82da5df638ae6bdb356ad75c5ade1963e48ea1a3bcb7fb0931" size="3099"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/admin/debug.js" sha256="ad584bc21dbc33d4b5f8da48c8d83f5df7617041c7b2cbac7f9360b721f03821" size="7563"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/assets/logo.txt" sha256="532fd10c98a7be16fd64edfabf6fcd6cfa8f81e01c234b45868a5e8a70352dd9" size="223"/>
   <file path="plugins/openvideo-plugin-demo/lib/client/page.html" sha256="83f3da77dd0529cb365381cdfab91a99ce58705aa4465fcdc4e4118f5715f909" size="2100"/>
