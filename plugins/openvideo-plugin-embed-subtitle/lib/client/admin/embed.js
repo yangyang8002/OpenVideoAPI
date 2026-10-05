@@ -11,6 +11,7 @@
             extractSel: '提取所选轨道到字幕库', extracting: '提取中...', done: '已提取 N 条字幕并加入字幕库',
             vid: '关联视频码（可选）', needFile: '请输入视频文件路径', needTrack: '请勾选至少一条文本字幕轨道',
             notFound: 'ffprobe 执行失败：请确认服务器已安装 ffmpeg，或在插件配置中指定 ffprobePath / ffmpegPath',
+            scanAll: '扫描全部视频', scanning: '全量扫描中…（视频较多时可能耗时）', scanDone: '已检测 N1 个视频，提取 N2 条字幕',
             empty: '暂无'
         },
         en: {
@@ -20,6 +21,7 @@
             extractSel: 'Extract selected tracks to library', extracting: 'Extracting...', done: 'N subtitles extracted and added to the library',
             vid: 'Video ID to link (optional)', needFile: 'Enter the video file path', needTrack: 'Select at least one text subtitle track',
             notFound: 'ffprobe failed: make sure ffmpeg is installed on the server, or set ffprobePath / ffmpegPath in the plugin config',
+            scanAll: 'Scan all videos', scanning: 'Scanning all… (may take a while)', scanDone: 'Scanned N1 videos, extracted N2 subtitles',
             empty: 'none'
         },
         zhHant: {
@@ -29,6 +31,7 @@
             extractSel: '提取所選軌道到字幕庫', extracting: '提取中...', done: '已提取 N 條字幕並加入字幕庫',
             vid: '關聯視頻碼（可選）', needFile: '請輸入視頻文件路徑', needTrack: '請勾選至少一條文本字幕軌道',
             notFound: 'ffprobe 執行失敗：請確認服務器已安裝 ffmpeg，或在插件配置中指定 ffprobePath / ffmpegPath',
+            scanAll: '掃描全部視頻', scanning: '全量掃描中…（影片較多時可能耗時）', scanDone: '已檢測 N1 個視頻，提取 N2 條字幕',
             empty: '暫無'
         },
         wyw: {
@@ -38,6 +41,7 @@
             extractSel: '取所選軌入字幕庫', extracting: '取中...', done: '已取 N 條字幕入字幕庫',
             vid: '關聯視頻碼（可選）', needFile: '請入視頻文徑', needTrack: '請勾至少一文字幕軌',
             notFound: 'ffprobe 行未成：請察伺服已裝 ffmpeg，或於插件之設指 ffprobePath / ffmpegPath',
+            scanAll: '遍察諸視', scanning: '遍察中…', scanDone: '已察 N1 視，取 N2 幕',
             empty: '暫無'
         },
         ja: {
@@ -47,6 +51,7 @@
             extractSel: '選択したトラックをライブラリに抽出', extracting: '抽出中...', done: 'N 件の字幕を抽出してライブラリに追加しました',
             vid: '関連付ける動画ID（任意）', needFile: '動画ファイルパスを入力してください', needTrack: 'テキスト字幕トラックを1つ以上選択してください',
             notFound: 'ffprobe の実行に失敗：サーバーに ffmpeg がインストールされているか、プラグイン設定で ffprobePath / ffmpegPath を指定してください',
+            scanAll: '全動画をスキャン', scanning: 'スキャン中…（時間がかかる場合があります）', scanDone: 'N1 件の動画を検査し、N2 件の字幕を抽出しました',
             empty: 'なし'
         },
         fr: {
@@ -56,6 +61,7 @@
             extractSel: 'Extraire les pistes sélectionnées', extracting: 'Extraction...', done: 'N sous-titres extraits et ajoutés à la bibliothèque',
             vid: 'ID vidéo à lier (optionnel)', needFile: 'Saisissez le chemin du fichier vidéo', needTrack: 'Sélectionnez au moins une piste de sous-titres texte',
             notFound: 'ffprobe a échoué : vérifiez que ffmpeg est installé sur le serveur, ou définissez ffprobePath / ffmpegPath dans la configuration du plugin',
+            scanAll: 'Scanner toutes les vidéos', scanning: 'Analyse en cours… (peut prendre du temps)', scanDone: 'N1 vidéos analysées, N2 sous-titres extraits',
             empty: 'aucun'
         }
     };
@@ -82,6 +88,7 @@
                     </div>
                     <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                         <button class="btn btn-sm btn-primary" id="esDetectBtn">${esc2(T('detect'))}</button>
+                        <button class="btn btn-sm" id="esScanAllBtn">${esc2(T('scanAll'))}</button>
                         <button class="btn btn-sm" id="esExtractBtn" style="display:none">${esc2(T('extractSel'))}</button>
                         <span id="esMsg" style="font-size:12px;color:var(--text3)"></span>
                     </div>
@@ -125,6 +132,19 @@
                         setMsg(T('done').replace('N', items.length) + linked, true);
                     })
                     .catch(function () { extractBtn.disabled = false; setMsg(T('notFound'), false); });
+            });
+
+            document.getElementById('esScanAllBtn').addEventListener('click', function () {
+                var btn = this;
+                btn.disabled = true; setMsg(T('scanning'), true);
+                OpenVideoAdmin.api('/api/plugin/embed-sub/scan-all', { method: 'POST', body: '{}' })
+                    .then(function (d) {
+                        btn.disabled = false;
+                        if (d.code !== 0) return setMsg(d.msg || T('notFound'), false);
+                        var s = d.data || {};
+                        setMsg(T('scanDone').replace('N1', s.scanned || 0).replace('N2', s.extracted || 0), true);
+                    })
+                    .catch(function () { btn.disabled = false; setMsg(T('notFound'), false); });
             });
 
             function renderTracks() {

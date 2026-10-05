@@ -434,6 +434,69 @@ module.exports = {
             return item;
         }
 
+        /* ===== 自动扫描：视频注册/解析时后台检测内封字幕并自动提取文本轨 =====
+         * 去重两层：进程内 Set（同一 vid 的重复 video:created 事件）+ 持久检查（该 vid 已有 embed:* 来源字幕则跳过，重启后依然生效） */
+        const autoScanned = new Set();
+        async function alreadyHasEmbedSubs(vid) {
+            try {
+                const subsMap = await ctx.store.videoSubsAll();
+                const ids = new Set(subsMap[vid] || []);
+                if (!ids.size) return false;
+                const all = await ctx.store.subtitleAll();
+                return all.some(it => ids.has(it.id) && String(it.source || '').startsWith('embed:'));
+            } catch (e) { return false; }
+        }
+        async function scanOne(vid, url) {
+            if (await alreadyHasEmbedSubs(vid)) return { skipped: true };
+            const fm = await ensureFfmpeg();
+            if (!fm.ok) return { error: 'ffmpeg 不可用' };
+            const fp = ffprobeBin();
+            if (!fp.ok) return { error: 'ffprobe 不可用' };
+            const source = parseSource(url);
+            if (!source) return { skipped: true };
+            if (source.type === 'url' && !(await isSafeUrl(source.url))) return { skipped: true };
+            const streams = await detectStreams(fp.bin, source);
+            const textStreams = streams.filter(s => s.text);
+            if (!textStreams.length) return { clean: true };
+            for (const st of textStreams) {
+                await extractOne(source, st, '', '', vid, fm.bin);
+            }
+            return { extracted: textStreams.length };
+        }
+        ctx.on('video:created', (p) => {
+            if (!p || !p.vid || !p.url) return;
+            if (autoScanned.has(p.vid)) return;
+            autoScanned.add(p.vid);
+            setTimeout(() => {
+                scanOne(p.vid, p.url)
+                    .then((r) => {
+                        if (r.extracted) ctx.logger.info('embed-sub', '自动扫描: ' + p.url + ' 提取 ' + r.extracted + ' 条内封字幕入字幕库（vid=' + p.vid + '）');
+                        else if (r.error) ctx.logger.error('embed-sub', '自动扫描跳过: ' + r.error);
+                    })
+                    .catch((e) => ctx.logger.error('embed-sub', '自动扫描失败: ' + (e.message || e)));
+            }, 1500);
+        });
+
+        /* 全量扫描：遍历已注册视频，逐个检测并自动提取（去重同上） */
+        ctx.router.post('/api/plugin/embed-sub/scan-all', wrap(async (req, res) => {
+            const fm = await ensureFfmpeg();
+            if (!fm.ok) { const e = new Error(binErrMsg('ffmpeg', fm)); e.status = 503; throw e; }
+            const fp = ffprobeBin();
+            if (!fp.ok) { const e = new Error(binErrMsg('ffprobe', fp)); e.status = 503; throw e; }
+            const videos = await ctx.store.videosAll();
+            let scanned = 0, extracted = 0, skipped = 0, failed = 0;
+            for (const [vid, url] of Object.entries(videos)) {
+                try {
+                    const r = await scanOne(vid, url);
+                    scanned++;
+                    if (r.extracted) extracted += r.extracted;
+                    else if (r.skipped || r.clean) skipped++;
+                } catch (e) { failed++; }
+            }
+            ctx.logger.info('embed-sub', '全量扫描完成: 检测 ' + scanned + ' · 提取 ' + extracted + ' · 无字幕/跳过 ' + skipped + ' · 失败 ' + failed);
+            res.json({ code: 0, msg: '全量扫描完成', data: { scanned, extracted, skipped, failed } });
+        }));
+
         /* 后台预检：若 ffmpeg 缺失则立即启动懒下载（不阻塞服务，首次调用前完成即可） */
         if (!resolveBinary('ffmpeg') || !fs.existsSync(resolveBinary('ffmpeg'))) {
             ensureFfmpeg().catch(() => {});
