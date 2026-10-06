@@ -128,23 +128,40 @@ module.exports = {
                 }
             } catch (e) {}
         }
-        /* 服务端依赖：后台 npm install */
+        /* 服务端依赖：每个依赖一条任务，顺序后台 npm install（输出落 logs/deps-update.log，失败可追溯） */
         let bgMsg = '';
         if (backNames.length) {
-            const child = require('child_process').spawn('npm', ['install', '--no-audit', '--no-fund', '--package-lock=false', ...backNames.map(n => n + '@latest'), ...(npmRegistryArg() ? [npmRegistryArg()] : [])], {
-                cwd: ROOT_DIR,
-                detached: true,
-                stdio: 'ignore'
-            });
-            child.unref();
-            const task = addUpdateTask('dep', backNames.join(', '), 'npm install ' + backNames.length + ' 个依赖（后台）');
-            child.on('exit', (code) => finishUpdateTask(task.id, code === 0 ? 'done' : 'failed', 'npm 退出码 ' + code));
+            const depTasks = {};
+            for (const n of backNames) depTasks[n] = addUpdateTask('dep', n, 'npm install ' + n + '@latest（后台执行）');
+            let nl = 'ignore';
+            try { fs.mkdirSync(path.join(ROOT_DIR, 'logs'), { recursive: true }); } catch (e) {}
+            try { nl = fs.openSync(path.join(ROOT_DIR, 'logs', 'deps-update.log'), 'a'); } catch (e) {}
+            (async () => {
+                for (const n of backNames) {
+                    try {
+                        const code = await new Promise((resolve) => {
+                            const child = require('child_process').spawn('npm', ['install', '--no-audit', '--no-fund', '--package-lock=false', '--no-save', n + '@latest', ...(npmRegistryArg() ? [npmRegistryArg()] : [])], {
+                                cwd: ROOT_DIR,
+                                detached: true,
+                                stdio: ['ignore', nl, nl]
+                            });
+                            child.unref();
+                            child.on('exit', (c) => resolve(c));
+                            child.on('error', () => resolve(-1));
+                        });
+                        finishUpdateTask(depTasks[n].id, code === 0 ? 'done' : 'failed', code === 0 ? '安装成功' : 'npm 退出码 ' + code);
+                    } catch (e) { finishUpdateTask(depTasks[n].id, 'failed', e.message); }
+                }
+                console.log('[依赖] 后台更新任务全部结束: ' + backNames.join(', '));
+            })();
             console.log('[依赖] 更新进程已启动: ' + backNames.join(', '));
-            bgMsg = '服务端依赖更新已在后台执行（' + backNames.length + ' 个），完成后需重启服务生效（顶栏任务列表可查看进度）';
+            bgMsg = '服务端依赖已在后台逐个更新（' + backNames.length + ' 个），完成后需重启服务生效（顶栏任务列表可查看每个依赖的实时进度）';
         }
         if (updated.length) {
-            const ft = addUpdateTask('dep', updated.join(', '), '前端 CDN 依赖版本已改写');
-            finishUpdateTask(ft.id, 'done', '已更新: ' + updated.join(', ') + '（刷新页面生效）');
+            for (const u of updated) {
+                const ft = addUpdateTask('dep', u, '前端 CDN 依赖版本已改写');
+                finishUpdateTask(ft.id, 'done', u + '（刷新页面生效）');
+            }
         }
         const parts = [];
         if (updated.length) parts.push('前端依赖已更新: ' + updated.join(', ') + '（刷新页面生效）');
