@@ -330,6 +330,32 @@ module.exports = {
     /* ── 原 server.js L3225-3225 ── */
     /* 播放器按 ID 加载字幕内容 */
 
+    /* 内封字幕提取进度查询：该 vid（含同身份签名实例）已入库的插件内封字幕数量与语言（播放器轮询弹窗用） */
+    app.get('/api/subtitle/has', writeRateLimit(120, 60000), async (req, res) => {
+        const vid = String(req.query.vid || '').trim();
+        if (!vid) return res.status(400).json({ code: 1, msg: '缺少 vid' });
+        try {
+            const videos = await S.store.videosAll();
+            const url = videos[vid];
+            const nid = url ? signFreeId(url) : null;
+            const subsMap = await S.store.videoSubsAll();
+            const all = await S.store.subtitleAll();
+            const seen = new Set(); const langs = new Set(); let count = 0;
+            for (const [v, u] of Object.entries(videos)) {
+                if (v !== vid && (!nid || signFreeId(u) !== nid)) continue;
+                for (const id of (Array.isArray(subsMap[v]) ? subsMap[v] : [])) {
+                    if (seen.has(id)) continue;
+                    const s = all.find(x => x.id === id);
+                    if (!s || !String(s.source || '').startsWith('embed:')) continue;
+                    seen.add(id); count++;
+                    const nm = s.langName || langsName(s.langs && s.langs.length ? s.langs : (s.lang ? [s.lang] : []));
+                    if (nm) langs.add(nm);
+                }
+            }
+            res.json({ code: 0, data: { count, langs: Array.from(langs) } });
+        } catch (e) { res.status(500).json({ code: 1, msg: '查询失败' }); }
+    });
+
     /* ── 原 server.js L3226-3236 ── */
     app.get('/api/subtitle/by-id', async (req, res) => {
         const id = String(req.query.id || '');
