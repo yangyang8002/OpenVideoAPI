@@ -466,14 +466,16 @@ module.exports = {
         ctx.on('video:created', (p) => {
             if (!p || !p.vid || !p.url) return;
             if (autoScanned.has(p.vid)) return;
-            autoScanned.add(p.vid);
+            autoScanned.add(p.vid); /* 先占位防并发重复扫描；失败时下方释放，下次访问自动重试 */
             setTimeout(() => {
                 scanOne(p.vid, p.url)
                     .then((r) => {
                         if (r.extracted) ctx.logger.info('embed-sub', '自动扫描: ' + p.url + ' 提取 ' + r.extracted + ' 条内封字幕入字幕库（vid=' + p.vid + '）');
-                        else if (r.error) ctx.logger.error('embed-sub', '自动扫描跳过: ' + r.error);
+                        else if (r.clean) ctx.logger.info('embed-sub', '自动扫描: ' + p.url + ' 无内封文本字幕（vid=' + p.vid + '）');
+                        else if (r.skipped) ctx.logger.info('embed-sub', '自动扫描跳过: vid=' + p.vid + '（已有内封字幕或链接不安全）');
+                        else if (r.error) { autoScanned.delete(p.vid); ctx.logger.error('embed-sub', '自动扫描失败(下次访问重试): ' + r.error); }
                     })
-                    .catch((e) => ctx.logger.error('embed-sub', '自动扫描失败: ' + (e.message || e)));
+                    .catch((e) => { autoScanned.delete(p.vid); ctx.logger.error('embed-sub', '自动扫描异常(下次访问重试): ' + (e.message || e)); });
             }, 1500);
         });
 
