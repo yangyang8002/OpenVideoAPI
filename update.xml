@@ -86,7 +86,7 @@
   <file path="src/routes/banned.js" sha256="d9d006fd946199862e0581b3c0faeaf97ff88a74bfdbf377c12aee1e10dde80b" size="5404"/>
   <file path="src/routes/danmu.js" sha256="e4c96d5514b5d0c5d3783d5e8d22596354f6457728420157859500cb48054ebd" size="8689"/>
   <file path="src/routes/db.js" sha256="7a20f0323a24c958cbde47d197c1a36f11bab2a5457174ba4fd7f80b185763c2" size="6566"/>
-  <file path="src/routes/deps.js" sha256="2561972446b9f08fe8c0900f2aaabea87d0a4179b6e665e9fd9426afef886144" size="9900"/>
+  <file path="src/routes/deps.js" sha256="d2a7d6a4c88b91f8ce4c9565b1a0b6d9c6c6125286161d7c4519c55b35d6574c" size="10417"/>
   <file path="src/routes/files.js" sha256="3db48b250b2fe56562ad943752456a3124f87dec4364cbcb012a58c5498f7c61" size="11421"/>
   <file path="src/routes/plugins.js" sha256="b3c694d9acdedccdb8bb1f017567b2f38bf290545e11b87b8f0ea95c90c7e8af" size="10977"/>
   <file path="src/routes/public.js" sha256="ea811430046f66b000036f3e64ca035ee87e0a771a3d1dfc9897e2d53e798b28" size="4187"/>
