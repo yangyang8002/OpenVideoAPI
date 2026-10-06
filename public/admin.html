@@ -1377,6 +1377,8 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                 <h3><span class="dot" style="background:var(--accent)"></span>视频列表 <span id="videoCount" style="font-weight:400;font-size:12px;color:var(--text3);margin-left:6px"></span>
                     <span style="font-weight:400;font-size:12px;color:var(--text3);margin-left:8px"><label style="cursor:pointer"><input type="checkbox" id="videoSelectAll" onchange="videoToggleSelectAll()"> 全选</label></span>
                     <button class="btn btn-sm" style="margin-left:6px" onclick="videoBatchDelete()">删除所选</button>
+                    <label style="cursor:pointer;font-weight:400;font-size:12px;color:var(--text3);margin-left:10px"><input type="checkbox" id="videoColUrl" onchange="videoColToggle('url', this.checked)"> 链接</label>
+                    <label style="cursor:pointer;font-weight:400;font-size:12px;color:var(--text3);margin-left:6px"><input type="checkbox" id="videoColNote" onchange="videoColToggle('note', this.checked)"> 备注</label>
                     <button class="btn btn-sm" onclick="videoCopyCodes('html')">复制 HTML</button>
                     <button class="btn btn-sm" onclick="videoCopyCodes('md')">复制 MD</button>
                     <button class="btn btn-sm" onclick="videoCopyCodes('js')">复制 JS</button>
@@ -2698,6 +2700,21 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         }
 
         let allVideos = [], videoState = { page: 1, total: 0, limit: 50 };
+        /* v26.10：视频列表列显隐（链接/备注），偏好存 localStorage */
+        const videoCols = (function () {
+            try { const s = JSON.parse(localStorage.getItem('videoCols') || '{}'); if (s && typeof s === 'object') return { url: s.url !== false, note: s.note !== false }; } catch (e) {}
+            return { url: true, note: true };
+        })();
+        function videoColToggle(k, on) {
+            videoCols[k] = !!on;
+            try { localStorage.setItem('videoCols', JSON.stringify(videoCols)); } catch (e) {}
+            renderVideos();
+        }
+        function syncVideoColBoxes() {
+            const a = document.getElementById('videoColUrl'), b = document.getElementById('videoColNote');
+            if (a) a.checked = videoCols.url;
+            if (b) b.checked = videoCols.note;
+        }
         function loadVideos() {
             fetch('/api/admin/videos', { headers: authHeaders() }).then(r => r.json()).then(d => {
                 if (d.code === 0) { allVideos = d.data || []; videoState.total = allVideos.length; renderVideos(); }
@@ -2709,7 +2726,8 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
             if (!allVideos.length) { c.innerHTML = '<div class="empty-state">暂无映射，播放视频时会自动记录</div>'; document.getElementById('videoPager').innerHTML = ''; return; }
             const start = (videoState.page - 1) * videoState.limit;
             const list = allVideos.slice(start, start + videoState.limit);
-            c.innerHTML = `<table><thead><tr><th style="width:32px"><input type="checkbox" id="videoSelectAllTop" onclick="videoToggleSelectAll()" style="accent-color:var(--primary)"></th><th>视频码</th><th>链接</th><th>操作</th></tr></thead><tbody>${list.map(v=>`<tr><td><input type="checkbox" class="video-cb" value="${esc(v.vid)}" style="accent-color:var(--primary)"></td><td data-i18n-skip style="font-size:12px;font-family:monospace;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(v.vid)}">${esc(v.vid)}</td><td data-i18n-skip style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="${esc(v.url)}" target="_blank" style="color:var(--accent);font-size:12px">${esc(v.url)}</a></td><td><button class="btn btn-danger" onclick="deleteVideo('${esc(v.vid)}')">删除</button></td></tr>`).join('')}</tbody></table>`;
+            syncVideoColBoxes();
+            c.innerHTML = `<table><thead><tr><th style="width:32px"><input type="checkbox" id="videoSelectAllTop" onclick="videoToggleSelectAll()" style="accent-color:var(--primary)"></th><th>视频码</th><th>名称</th>${videoCols.url ? '<th>链接</th>' : ''}${videoCols.note ? '<th>备注</th>' : ''}<th>操作</th></tr></thead><tbody>${list.map(v=>`<tr><td><input type="checkbox" class="video-cb" value="${esc(v.vid)}" style="accent-color:var(--primary)"></td><td data-i18n-skip style="font-size:12px;font-family:monospace;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(v.vid)}">${esc(v.vid)}</td><td data-i18n-skip style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(v.name || '')}">${esc(v.name || '—')}</td>${videoCols.url ? `<td data-i18n-skip style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="${esc(v.url)}" target="_blank" style="color:var(--accent);font-size:12px">${esc(v.url)}</a></td>` : ''}${videoCols.note ? `<td data-i18n-skip style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--text3)" title="${esc(v.note || '')}">${esc(v.note || '—')}</td>` : ''}<td><button class="btn btn-danger" onclick="deleteVideo('${esc(v.vid)}')">删除</button></td></tr>`).join('')}</tbody></table>`;
             document.getElementById('videoPager').innerHTML = pagerHTML('videos', videoState, renderVideos);
         }
         function addVideo() {

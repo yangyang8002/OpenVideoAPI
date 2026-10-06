@@ -247,6 +247,12 @@ module.exports = {
                     if (manualStop) break;
                     if (ok) {
                         scan.ok++;
+                        /* m01421：备注项写入该视频在网盘所处的目录路径（后台视频列表展示） */
+                        try {
+                            const ndir = fp.slice(0, fp.lastIndexOf('/')) || '/';
+                            const notes = (await ctx.store.kvGet('video_notes')) || {};
+                            if (notes[newVid] !== ndir) { notes[newVid] = ndir; await ctx.store.kvSet('video_notes', notes); }
+                        } catch (e) { ctx.logger.warn('openlist', '备注写入失败: ' + fp + ' — ' + (e.message || e)); }
                         try { scan.subs += await mountSubs(newVid, fp, subMap); }
                         catch (e) { ctx.logger.warn('openlist', '字幕挂载失败: ' + fp + ' — ' + (e.message || e)); }
                     } else { scan.fail++; ctx.logger.warn('openlist', '注册失败: ' + fp + ' — ' + why); }

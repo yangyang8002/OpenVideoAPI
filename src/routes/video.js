@@ -106,9 +106,18 @@ module.exports = {
     });
 
     /* ── 原 server.js L1310-1314 ── */
+    /* 从链接取文件名（OpenList /d/<路径> 最后一段；decode 失败回退原文段） */
+    function fileNameOf(url) {
+        const raw = String(url || '').split('?')[0].split('#')[0];
+        const seg = raw.split('/').filter(Boolean).pop() || '';
+        try { return decodeURIComponent(seg) || seg; } catch (e) { return seg; }
+    }
+
+    /* v26.10：视频管理列表返回 name(文件名)+note(备注，openlist 扫描写入网盘目录) */
     app.get('/api/admin/videos', checkAdmin, async (req, res) => {
         const videos = await S.store.videosAll();
-        const list = Object.entries(videos).map(([vid, url]) => ({ vid, url }));
+        const notes = (await S.store.kvGet('video_notes')) || {};
+        const list = Object.entries(videos).map(([vid, url]) => ({ vid, url, name: fileNameOf(url), note: String(notes[vid] || '') }));
         res.json({ code: 0, data: list });
     });
 
