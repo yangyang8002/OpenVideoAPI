@@ -26,7 +26,7 @@
   <file path="lib/backends/sqlite.js" sha256="625b1d8600c2a0f25a243e4f42d3d929e57a44e11e11e03f9f2f9d003b667735" size="2453"/>
   <file path="lib/cloud.js" sha256="308b1af14d7dc73bd24d83e7e438af38db87c4636662b4e423596c98e777dc56" size="10419"/>
   <file path="lib/model.js" sha256="a14168580c90f41cf496e1bcd27e07eb6cd749478f4b3e21ffdf99372395e586" size="6161"/>
-  <file path="lib/plugin.js" sha256="578eb46f02b04bfa0e5f4afa4f3ba2baa4465320de1b1d09d54ec09e9040dccb" size="56674"/>
+  <file path="lib/plugin.js" sha256="f1384c9e761f51ad72c2563997a8f003524666410afdbf1cd7093673d9e773f1" size="56875"/>
   <file path="lib/proxy.js" sha256="52a453c81a8c6c7acfd4a625baba397feddd9ba46e635a558840647b5f893ebe" size="5032"/>
   <file path="lib/store.js" sha256="3faea07157f49e97fde41da68aa4974ff614a1bfa88e42078bef83fb0bc58f1c" size="32608"/>
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
@@ -51,9 +51,9 @@
   <file path="plugins/openvideo-plugin-ip-ban/lib/index.js" sha256="d50759b8df550261b7a817e4a825d7dfc03134ec2b54f5728644de5dbb3f865c" size="15967"/>
   <file path="plugins/openvideo-plugin-ip-ban/package.json" sha256="88fdf060f9903b5b425b4697763f097990f0bcee0b73b0a4c2d7233a77da5554" size="3396"/>
   <file path="plugins/openvideo-plugin-openlist/README.md" sha256="71f365442e6e5dbfff8a2a0408bdc9ad3debddc716f560577956ccd5d98d8a58" size="655"/>
-  <file path="plugins/openvideo-plugin-openlist/lib/client/panel.html" sha256="c580febdbc0ebf4c5d3350e8d80aac8f4cb5951ce24c1f78f53116cd6b7a9a3e" size="6756"/>
-  <file path="plugins/openvideo-plugin-openlist/lib/index.js" sha256="6eafeed591976e4de564c5019ca72d83b74386b3fefce8f126a3c36e86ad581b" size="3693"/>
-  <file path="plugins/openvideo-plugin-openlist/package.json" sha256="e333533407feff3fb5ace062e6e6f74e5fdce718d3388341ce72f09ec059038a" size="1083"/>
+  <file path="plugins/openvideo-plugin-openlist/lib/client/panel.html" sha256="9dbfd555010c535ccb43ecd283a324d8a21ae907593c22671f8b5a17a8c4580b" size="9632"/>
+  <file path="plugins/openvideo-plugin-openlist/lib/index.js" sha256="9d3c0e0dabd6cc023ed27c4c71a8b72a2946112127c75d9294ec030b2abbd526" size="13303"/>
+  <file path="plugins/openvideo-plugin-openlist/package.json" sha256="476e03bc6df134f4ea4c6ed038cce3e76cce29b74bd388331192e299407c11ad" size="1092"/>
   <file path="plugins/openvideo-plugin-otp/README.md" sha256="842425470e92812f21be21b067ca53fb3d93c867ee035596d613b6a007e39b14" size="3940"/>
   <file path="plugins/openvideo-plugin-otp/lib/client/admin/otp.js" sha256="3780f7e10380ae3877fca9dc9655d4d25085a02ce0d175fed95d40ccd88414be" size="28258"/>
   <file path="plugins/openvideo-plugin-otp/lib/client/login/otp.js" sha256="46d3bc1d6053f6ba96b7edc9d67cf48ac49b8932f44b76904ef213efa8886da5" size="5031"/>
@@ -82,7 +82,7 @@
   <file path="src/middleware/first-run.js" sha256="c7005da0bc271016f529b113728f18f514f51d60008608cadd1a57c1a2f39a11" size="1022"/>
   <file path="src/middleware/headers.js" sha256="4b5a98dbece755f8b0bfee3c23398d72231270624d4092e1ac754c0c726e07b3" size="1753"/>
   <file path="src/middleware/pow.js" sha256="fcec6c81381571e7389ebe8dfcceb3f0cdc224a8d0caec1b38b51c3ea9bfa71e" size="7123"/>
-  <file path="src/middleware/rate-limit.js" sha256="cb78ff58c567792e182c71af11228fac04d36a0568151cf6265d4760ae3ea902" size="2748"/>
+  <file path="src/middleware/rate-limit.js" sha256="63670eef58ca5c8c13ae67c9164005f5124eb5e365bca6c8e220455c362a59ed" size="3083"/>
   <file path="src/middleware/request-log.js" sha256="3a0e86e9e764fee37c1cf0df4621a44981402185f20981778934543f05a593b1" size="1194"/>
   <file path="src/middleware/security.js" sha256="10832a3f5d5c4cf0c95a25b90ac56059c3815ac06ecd6d4ed268596ccf365a84" size="12647"/>
   <file path="src/routes/admin.js" sha256="fbce647eb96881aeb50c60f4a196790986e3f6624bd51d8b308aab8e9f76b66d" size="31356"/>
@@ -106,7 +106,7 @@
   <file path="src/services/danmu.js" sha256="b7ef6943276612a4e2f8b34ad5445ac4d79e4d7594e8b65f2b3634261282aabc" size="1410"/>
   <file path="src/services/db.js" sha256="fba2a44c4447998ae86438fd71f7240a1146a7027614f7e682482f90c2c8a389" size="4782"/>
   <file path="src/services/geo.js" sha256="8c6aa13e6c82747730eda2101db6da8684a489b30264c2eb424dab5f01fc6623" size="13712"/>
-  <file path="src/services/init.js" sha256="f65ec365cf6d64608ce4efaa2af770e639d44fb4f5d02d80dbad17ba6194818c" size="5617"/>
+  <file path="src/services/init.js" sha256="33187eb1a885585d3a2db0fa9456c4041e49bd6b9b08fc8c8442f20ac3a7598f" size="5754"/>
   <file path="src/services/plugins.js" sha256="5273efdaaf91bfaa1d4ab8745e4f55cd9fd8c13b6c2f3eccd1f6eb4e4ef5faaf" size="7270"/>
   <file path="src/services/subtitles.js" sha256="446a38dca03b03f59ff91eea780d90e8e21d9e1e49080dc8e241eecafb91b4d2" size="11496"/>
   <file path="src/services/update-check.js" sha256="99ff2fbba385abf2e6fbe4498ccd7871a6c1955b5a856e5581f53408a92a967c" size="5661"/>
