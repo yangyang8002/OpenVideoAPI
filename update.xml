@@ -26,7 +26,7 @@
   <file path="lib/backends/sqlite.js" sha256="625b1d8600c2a0f25a243e4f42d3d929e57a44e11e11e03f9f2f9d003b667735" size="2453"/>
   <file path="lib/cloud.js" sha256="308b1af14d7dc73bd24d83e7e438af38db87c4636662b4e423596c98e777dc56" size="10419"/>
   <file path="lib/model.js" sha256="a14168580c90f41cf496e1bcd27e07eb6cd749478f4b3e21ffdf99372395e586" size="6161"/>
-  <file path="lib/plugin.js" sha256="7c34366e91dd6ab84301093756f9942f2d8946b25a1167fab07b37878cf811ff" size="55654"/>
+  <file path="lib/plugin.js" sha256="578eb46f02b04bfa0e5f4afa4f3ba2baa4465320de1b1d09d54ec09e9040dccb" size="56674"/>
   <file path="lib/proxy.js" sha256="52a453c81a8c6c7acfd4a625baba397feddd9ba46e635a558840647b5f893ebe" size="5032"/>
   <file path="lib/store.js" sha256="3faea07157f49e97fde41da68aa4974ff614a1bfa88e42078bef83fb0bc58f1c" size="32608"/>
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
