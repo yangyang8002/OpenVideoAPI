@@ -5,6 +5,8 @@
 /* 1.4 扫描增强：上限可在插件设置调整（scanCap，默认 5000）；扫描时把目录下同名外挂字幕文件
  * （Movie.srt / Movie.zh.srt / Movie.zh-CN.ass…多语言可多份）下载进本地字幕库并挂载到视频 */
 /* 1.7 失败重试：扫描失败项留存清单（路径+原因），面板「重试失败项」一键只重扫失败文件 */
+/* 1.8 字幕挂载修复：fileLink 自 1.6 起返回 {link,hashes}，mountSubs 曾仍把返回对象当 URL 用，
+ *     导致外挂字幕全部下载失败；改为取 link 字段，且逐字幕并行下载、单个失败不再中断其余 */
 
 const fs = require('fs');
 const path = require('path');
@@ -161,7 +163,8 @@ module.exports = {
             if (!lang) return null; /* 中缀不是语言标记（如 chs&eng、default）→ 跳过防误挂 */
             return { lang, tag: m[1], ext: m[2].toLowerCase() };
         };
-        /* 下载字幕进本地字幕库（type=local，source=openlist:<网盘路径> 持久去重）并关联 vid；返回新下载数 */
+        /* 下载字幕进本地字幕库（type=local，source=openlist:<网盘路径> 持久去重）并关联 vid；返回新下载数
+         * v1.8：逐字幕并行下载，单个失败仅告警不中断其余（原先一个失败 throw → 该视频其余字幕全跳过） */
         const mountSubs = async (vid, fp, subMap) => {
             if (!vid || config.mountSubs === false) return 0;
             const dir = fp.slice(0, fp.lastIndexOf('/')) || '/';
@@ -179,24 +182,26 @@ module.exports = {
             const bySrc = new Map();
             for (const s of (all || [])) bySrc.set(String(s.source || ''), s);
             if (!Array.isArray(subsMap[vid])) subsMap[vid] = subsMap[vid] || [];
-            let added = 0, linked = 0;
-            for (const c of cands) {
+            let added = 0, linked = 0, failed = 0;
+            await Promise.all(cands.map(async (c) => {
                 const src = 'openlist:' + c.path;
-                let item = bySrc.get(src);
-                if (!item) {
-                    const link = await fileLink(c.path);
-                    const r = await ctx.http.get(link, { timeout: 30000 });
-                    const text = await r.text();
-                    if (!text || text.length > 20 * 1024 * 1024 || /^s*</.test(text)) throw new Error('字幕下载失败: ' + c.name);
-                    const safe = base.replace(/[^w.一-鿿-]+/g, '_').slice(0, 60);
-                    const saveName = 'ol' + Date.now().toString(36) + '-' + safe + '.' + (c.lang || c.tag || 'sub') + '.' + c.ext;
-                    fs.writeFileSync(path.join(SUB_DIR, saveName), text);
-                    item = { id: genSubId(), name: (base + '.' + (c.tag || c.lang || c.ext)).slice(0, 100), lang: c.lang, langs: c.lang ? [c.lang] : [], langName: '', type: 'local', url: '', content: '', file: saveName, localized: true, createdAt: Date.now(), source: src };
-                    await ctx.store.subtitleAdd(item);
-                    added++;
-                }
-                if (!subsMap[vid].includes(item.id)) { subsMap[vid].push(item.id); linked++; }
-            }
+                try {
+                    let item = bySrc.get(src);
+                    if (!item) {
+                        const fl = await fileLink(c.path);
+                        const r = await ctx.http.get(fl.link, { timeout: 30000 });
+                        const text = await r.text();
+                        if (!text || text.length > 20 * 1024 * 1024 || /^s*</.test(text)) throw new Error('字幕下载失败: ' + c.name);
+                        const safe = base.replace(/[^\w.一-鿿-]+/g, '_').slice(0, 60);
+                        const saveName = 'ol' + Date.now().toString(36) + '-' + safe + '.' + (c.lang || c.tag || 'sub') + '.' + c.ext;
+                        fs.writeFileSync(path.join(SUB_DIR, saveName), text);
+                        item = { id: genSubId(), name: (base + '.' + (c.tag || c.lang || c.ext)).slice(0, 100), lang: c.lang, langs: c.lang ? [c.lang] : [], langName: '', type: 'local', url: '', content: '', file: saveName, localized: true, createdAt: Date.now(), source: src };
+                        await ctx.store.subtitleAdd(item);
+                        added++;
+                    }
+                    if (!subsMap[vid].includes(item.id)) { subsMap[vid].push(item.id); linked++; }
+                } catch (e) { failed++; ctx.logger.warn('openlist', '字幕挂载失败: ' + c.path + ' — ' + (e.message || e)); }
+            }));
             if (linked) await ctx.store.videoSubsWrite(subsMap);
             return added;
         };

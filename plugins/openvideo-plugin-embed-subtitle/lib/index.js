@@ -19,6 +19,9 @@
  * 前置：服务器需安装 ffmpeg（含 ffprobe），可在插件配置中指定路径。
  * 安全：本地路径仅允许项目根目录内；URL 拒绝内网/保留/元数据地址（DNS 解析后二次校验）；
  *       ffprobe/ffmpeg 子进程带超时与强制终止。
+ * v1.4.0：自动扫描改并发受控队列（autoConcurrency，默认 2）——无上限的并发远程探测/提取
+ *       会打满网盘出口带宽，反噬扫描注册与字幕下载；单次 ffprobe 合并字幕轨+指纹元数据
+ *       （远程读减半）；clean 结果持久化（kv embedsub_clean），重启/重扫不再全量重探测。
  * ========================================================================== */
 const fs = require('fs');
 const path = require('path');
@@ -219,30 +222,38 @@ async function detectStreams(ffprobe, source) {
     return streams;
 }
 
-/* ---------- v1.3.0：指纹元数据探测（format.size/duration + 首个视频流宽高/编码/帧率） ---------- */
-async function probeMeta(ffprobe, source) {
-    const args = ['-v', 'error', '-select_streams', 'v:0',
-        '-show_entries', 'stream=codec_name,width,height,avg_frame_rate:format=size,duration', '-of', 'json'];
+/* ---------- v1.4.0：单次合并探测（字幕轨道 + 指纹元数据一次 ffprobe 出，远程读减半） ---------- */
+async function probeAll(ffprobe, source) {
+    const args = ['-v', 'error', '-show_entries',
+        'stream=index,codec_name,codec_type,width,height,avg_frame_rate:stream_tags=language,title:stream_disposition=default,forced:format=size,duration',
+        '-of', 'json'];
     if (source.type === 'url') args.push('-rw_timeout', '30000000');
     args.push(source.type === 'url' ? source.url : source.path);
     const r = await run(ffprobe, args, 30000);
-    if (!r.ok) return null;
-    try {
-        const j = JSON.parse(r.out);
-        const st = (j.streams || [])[0] || {};
-        let fps = null;
-        const fr = String(st.avg_frame_rate || '');
-        const m = fr.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
-        if (m && Number(m[2]) > 0) fps = Number(m[1]) / Number(m[2]);
-        return {
-            size: Number(j.format && j.format.size) || 0,
-            durationMs: Math.round((Number(j.format && j.format.duration) || 0) * 1000),
-            w: Number(st.width) || 0,
-            h: Number(st.height) || 0,
-            vcodec: String(st.codec_name || ''),
-            fps
-        };
-    } catch (e) { return null; }
+    if (!r.ok) throw new Error('ffprobe 执行失败: ' + (r.err || r.out || 'code ' + r.code).slice(-300));
+    let j;
+    try { j = JSON.parse(r.out); } catch (e) { throw new Error('ffprobe 输出解析失败'); }
+    const subs = (j.streams || []).filter(s => s.codec_type === 'subtitle').map(s => ({
+        index: s.index,
+        codec: s.codec_name || '',
+        language: normLang(s.tags && s.tags.language),
+        title: (s.tags && s.tags.title) || '',
+        default: !!(s.disposition && s.disposition.default),
+        forced: !!(s.disposition && s.disposition.forced),
+        text: codecIsText(s.codec_name),
+        image: codecIsImage(s.codec_name)
+    }));
+    let meta = null;
+    const st = (j.streams || []).find(s => s.codec_type === 'video') || {};
+    let fps = null;
+    const m = String(st.avg_frame_rate || '').match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+    if (m && Number(m[2]) > 0) fps = Number(m[1]) / Number(m[2]);
+    const size = Number(j.format && j.format.size) || 0;
+    const durationMs = Math.round((Number(j.format && j.format.duration) || 0) * 1000);
+    if (size > 0 && durationMs > 0 && Number(st.width) > 0 && Number(st.height) > 0 && fps && fps > 0 && st.codec_name) {
+        meta = { size, durationMs, w: Number(st.width) || 0, h: Number(st.height) || 0, vcodec: String(st.codec_name || ''), fps };
+    }
+    return { subs, meta };
 }
 
 /* ---------- 提取 ---------- */
@@ -472,8 +483,20 @@ module.exports = {
                 return all.some(it => ids.has(it.id) && String(it.source || '').startsWith('embed:'));
             } catch (e) { return false; }
         }
+        /* v1.4.0：clean 标记持久化（kv embedsub_clean）——已探测过无文本字幕的视频，
+           重启/重扫直接跳过，不再远程重探测（全库重扫代价大） */
+        async function isMarkedClean(vid) {
+            try { const m = (await ctx.store.kvGet('embedsub_clean')) || {}; return !!m[vid]; } catch (e) { return false; }
+        }
+        async function markClean(vid) {
+            try {
+                const m = (await ctx.store.kvGet('embedsub_clean')) || {};
+                if (!m[vid]) { m[vid] = Date.now(); await ctx.store.kvSet('embedsub_clean', m); }
+            } catch (e) {}
+        }
         async function scanOne(vid, url) {
             if (await alreadyHasEmbedSubs(vid)) return { skipped: true };
+            if (await isMarkedClean(vid)) return { skipped: true };
             const fm = await ensureFfmpeg();
             if (!fm.ok) return { error: 'ffmpeg 不可用' };
             const fp = ffprobeBin();
@@ -481,41 +504,50 @@ module.exports = {
             const source = parseSource(url);
             if (!source) return { skipped: true };
             if (source.type === 'url' && !(await isSafeUrl(source.url))) return { skipped: true };
-            /* v1.3.0：先探测指纹元数据并落档（宿主有 fingerprint 服务时）；碰撞（同文件已有
-               别的 vid）→ 宿主自动合并，后续提取挂到存活 vid，不再产生重复视频码 */
+            /* v1.4.0：单次 ffprobe 同时取字幕轨与指纹元数据；碰撞（同文件已有别的 vid）→
+               宿主自动合并，后续提取挂到存活 vid，不再产生重复视频码 */
             let liveVid = vid;
-            if (ctx.fingerprint) {
+            const pr = await probeAll(fp.bin, source);
+            if (pr.meta && ctx.fingerprint) {
                 try {
-                    const meta = await probeMeta(fp.bin, source);
-                    if (meta && meta.size > 0 && meta.durationMs > 0 && meta.w > 0 && meta.h > 0 && meta.fps > 0 && meta.vcodec) {
-                        liveVid = await ctx.fingerprint.record(vid, { meta });
-                        if (liveVid !== vid) ctx.logger.info('embed-sub', '指纹命中既有视频: vid ' + vid + ' → ' + liveVid + '（已合并）');
-                    }
+                    liveVid = await ctx.fingerprint.record(vid, { meta: pr.meta });
+                    if (liveVid !== vid) ctx.logger.info('embed-sub', '指纹命中既有视频: vid ' + vid + ' → ' + liveVid + '（已合并）');
                 } catch (e) { ctx.logger.warn('embed-sub', '指纹落档失败: vid=' + vid + ' — ' + (e.message || e)); }
             }
-            const streams = await detectStreams(fp.bin, source);
-            const textStreams = streams.filter(s => s.text);
-            if (!textStreams.length) return { clean: true };
+            const textStreams = pr.subs.filter(s => s.text);
+            if (!textStreams.length) { await markClean(liveVid); return { clean: true }; }
             for (const st of textStreams) {
                 await extractOne(source, st, '', '', liveVid, fm.bin);
             }
             return { extracted: textStreams.length };
         }
+        /* v1.4.0：自动扫描并发受控队列（autoConcurrency，默认 2）——原先每事件并行 scanOne，
+           全库重扫时十几个并发 ffprobe/ffmpeg 远程读打满网盘出口带宽，反噬扫描与字幕下载 */
+        const autoQueue = [];
+        let autoActive = 0;
+        const qMax = () => { const n = Number(config && config.autoConcurrency); return Number.isFinite(n) && n >= 1 && n <= 8 ? Math.floor(n) : 2; };
+        function pumpAuto() {
+            while (autoActive < qMax() && autoQueue.length) {
+                const job = autoQueue.shift();
+                autoActive++;
+                ctx.logger.info('embed-sub', '自动扫描开始: vid=' + job.vid + '（排队中 ' + autoQueue.length + '）');
+                scanOne(job.vid, job.url)
+                    .then((r) => {
+                        if (r.extracted) ctx.logger.info('embed-sub', '自动扫描: ' + job.url + ' 提取 ' + r.extracted + ' 条内封字幕入字幕库（vid=' + job.vid + '）');
+                        else if (r.clean) ctx.logger.info('embed-sub', '自动扫描: ' + job.url + ' 无内封文本字幕（vid=' + job.vid + '，已记忆跳过）');
+                        else if (r.skipped) ctx.logger.info('embed-sub', '自动扫描跳过: vid=' + job.vid + '（已有内封字幕/已记忆/链接不安全）');
+                        else if (r.error) { autoScanned.delete(job.vid); ctx.logger.error('embed-sub', '自动扫描失败(下次访问重试): ' + r.error); }
+                    })
+                    .catch((e) => { autoScanned.delete(job.vid); ctx.logger.error('embed-sub', '自动扫描异常(下次访问重试): ' + (e.message || e)); })
+                    .finally(() => { autoActive--; pumpAuto(); });
+            }
+        }
         ctx.on('video:created', (p) => {
             if (!p || !p.vid || !p.url) return;
             if (autoScanned.has(p.vid)) return;
-            autoScanned.add(p.vid); /* 先占位防并发重复扫描；失败时下方释放，下次访问自动重试 */
-            ctx.logger.info('embed-sub', '自动扫描开始: vid=' + p.vid);
-            setTimeout(() => {
-                scanOne(p.vid, p.url)
-                    .then((r) => {
-                        if (r.extracted) ctx.logger.info('embed-sub', '自动扫描: ' + p.url + ' 提取 ' + r.extracted + ' 条内封字幕入字幕库（vid=' + p.vid + '）');
-                        else if (r.clean) ctx.logger.info('embed-sub', '自动扫描: ' + p.url + ' 无内封文本字幕（vid=' + p.vid + '）');
-                        else if (r.skipped) ctx.logger.info('embed-sub', '自动扫描跳过: vid=' + p.vid + '（已有内封字幕或链接不安全）');
-                        else if (r.error) { autoScanned.delete(p.vid); ctx.logger.error('embed-sub', '自动扫描失败(下次访问重试): ' + r.error); }
-                    })
-                    .catch((e) => { autoScanned.delete(p.vid); ctx.logger.error('embed-sub', '自动扫描异常(下次访问重试): ' + (e.message || e)); });
-            }, 1500);
+            autoScanned.add(p.vid); /* 先占位防重复入队；失败时释放，下次访问自动重试 */
+            autoQueue.push({ vid: p.vid, url: p.url });
+            pumpAuto();
         });
 
         /* 全量扫描：遍历已注册视频，逐个检测并自动提取（去重同上） */
