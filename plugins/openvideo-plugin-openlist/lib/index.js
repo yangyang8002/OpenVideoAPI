@@ -60,6 +60,111 @@ module.exports = {
             res.json({ code: 0, data: { name: data.name || '', size: data.size || 0, link } });
         }));
 
+        /* ── 整个文件夹扫描（含子目录）：后台注册全部视频，进度进顶栏任务列表 ── */
+        const VEXT = ['mp4', 'mkv', 'webm', 'avi', 'mov', 'flv', 'ts', 'm3u8', 'wmv', 'mpg', 'mpeg'];
+        const SCAN_CAP = 300;   /* 单次扫描视频文件上限 */
+        const SCAN_PACE = 1100; /* 每文件间隔 ms（/api/video/resolve 限流 60 次/分钟，留余量） */
+        const scan = { scanning: false, path: '', total: 0, done: 0, ok: 0, fail: 0, lastFile: '', lastSummary: '' };
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+        const isVideo = (n) => VEXT.some(x => String(n).toLowerCase().endsWith('.' + x));
+        const shortName = (p) => String(p).split('/').pop() || p;
+
+        const listDir = async (p) => {
+            const data = await api('/api/fs/list', { path: p, page: 1, per_page: 0, refresh: false });
+            return data.content || [];
+        };
+        /* 递归收集视频文件：文件在前、子目录深度优先，按名称排序，达上限即停 */
+        const collect = async (p, out, seen) => {
+            if (out.length >= SCAN_CAP) return;
+            const items = await listDir(p);
+            const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'zh');
+            const dirs = items.filter(x => x.is_dir).sort(byName);
+            const files = items.filter(x => !x.is_dir && isVideo(x.name)).sort(byName);
+            for (const f of files) {
+                if (out.length >= SCAN_CAP) return;
+                const fp = (p === '/' ? '' : p) + '/' + f.name;
+                if (!seen.has(fp)) { seen.add(fp); out.push(fp); }
+            }
+            for (const d of dirs) {
+                if (out.length >= SCAN_CAP) return;
+                await collect((p === '/' ? '' : p) + '/' + d.name, out, seen);
+            }
+        };
+        const fileLink = async (p) => {
+            const data = await api('/api/fs/get', { path: p });
+            const { base } = cfg();
+            const enc = p.split('/').map(x => encodeURIComponent(x)).join('/').replace(/^\/+/, '');
+            const sign = data.sign || '';
+            return base + '/d/' + enc + (sign ? '?sign=' + sign : '');
+        };
+
+        const runScan = async (root) => {
+            const t = ctx.tasks.add('plugin', 'OpenList 文件夹扫描', '正在收集文件清单…', 'openlist-scan-' + Date.now());
+            try {
+                ctx.logger.info('openlist', '文件夹扫描开始: ' + root);
+                const out = [], seen = new Set();
+                await collect(root, out, seen);
+                scan.total = out.length; scan.done = 0; scan.ok = 0; scan.fail = 0;
+                if (!out.length) {
+                    scan.lastSummary = '目录内未发现视频文件';
+                    ctx.tasks.finish(t.id, 'done', scan.lastSummary);
+                    ctx.logger.warn('openlist', '文件夹扫描: 未发现视频文件 (' + root + ')');
+                    return;
+                }
+                const port = process.env.PORT || 1919;
+                for (const fp of out) {
+                    scan.lastFile = shortName(fp);
+                    ctx.tasks.finish(t.id, 'running', (scan.done + 1) + '/' + scan.total + ' · 成功 ' + scan.ok + ' · 失败 ' + scan.fail + ' · ' + scan.lastFile);
+                    let ok = false, why = '';
+                    for (let i = 0; i < 2 && !ok; i++) {   /* 失败重试一次 */
+                        try {
+                            const link = await fileLink(fp);
+                            const r = await ctx.http.get('http://127.0.0.1:' + port + '/api/video/resolve?url=' + encodeURIComponent(link), { timeout: 30000 });
+                            const j = await r.json().catch(() => null);
+                            if (j && j.code === 0 && j.data && j.data.vid) ok = true;
+                            else why = (j && j.msg) || ('resolve code ' + (j && j.code));
+                        } catch (e) { why = e.message; }
+                        if (!ok && i === 0) await sleep(3000);
+                    }
+                    if (ok) scan.ok++; else { scan.fail++; ctx.logger.warn('openlist', '注册失败: ' + fp + ' — ' + why); }
+                    scan.done++;
+                    ctx.tasks.finish(t.id, 'running', scan.done + '/' + scan.total + ' · 成功 ' + scan.ok + ' · 失败 ' + scan.fail + ' · ' + scan.lastFile);
+                    if (scan.done < scan.total) await sleep(SCAN_PACE);
+                }
+                const capped = scan.total >= SCAN_CAP;
+                scan.lastSummary = '完成：共 ' + scan.total + ' 个视频' + (capped ? '（达 ' + SCAN_CAP + ' 上限）' : '') + '，成功注册 ' + scan.ok + '，失败 ' + scan.fail;
+                ctx.tasks.finish(t.id, (scan.fail && !scan.ok) ? 'fail' : 'done', scan.lastSummary);
+                ctx.logger.info('openlist', '文件夹扫描结束: ' + scan.lastSummary);
+            } catch (e) {
+                scan.lastSummary = '扫描出错: ' + (e.message || e);
+                ctx.tasks.finish(t.id, 'fail', scan.lastSummary);
+                ctx.logger.error('openlist', '文件夹扫描异常: ' + (e.message || e));
+            } finally {
+                scan.scanning = false;
+            }
+        };
+
+        /* 启动扫描：单并发守卫，立即返回后台执行（需管理员登录：header 或 dp_admin cookie） */
+        const needAdmin = (req) => {
+            if (!ctx.isAdmin || !ctx.isAdmin(req)) { const e = new Error('需要管理员登录'); e.status = 401; throw e; }
+        };
+        ctx.router.post('/api/plugin/openlist/scan', wrap(async (req, res) => {
+            needAdmin(req);
+            if (scan.scanning) { const e = new Error('已有文件夹扫描进行中，请稍候'); e.status = 409; throw e; }
+            const p = String((req.body || {}).path || '/');
+            const { base } = cfg();
+            if (!base) { const e = new Error('未配置 OpenList 地址（请在插件设置中填写 baseUrl）'); e.status = 503; throw e; }
+            scan.scanning = true; scan.path = p; scan.total = 0; scan.done = 0; scan.ok = 0; scan.fail = 0; scan.lastFile = ''; scan.lastSummary = '';
+            runScan(p).catch(() => {});
+            res.json({ code: 0, data: { started: true, path: p } });
+        }));
+
+        /* 扫描状态（面板轮询，需管理员） */
+        ctx.router.get('/api/plugin/openlist/scan/status', wrap(async (req, res) => {
+            needAdmin(req);
+            res.json({ code: 0, data: Object.assign({}, scan) });
+        }));
+
         /* 管理面板：网盘文件浏览页（管理员鉴权） */
         ctx.pages.register({ route: '/plugin/openlist/panel', file: 'lib/client/panel.html', title: 'OpenList 文件浏览', auth: true });
     },

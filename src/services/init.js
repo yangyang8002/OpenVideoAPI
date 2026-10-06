@@ -6,7 +6,7 @@ const { PluginManager } = require('../../lib/plugin');
 
 module.exports = {
     define(ctx) {
-        const { readConfig, DEFAULT_CONFIG, DB_TYPES, S, hashPassword, APP_VERSION, API_START_TIME, writeConfig, applyTrustProxy, restartServer, pluginLogPush, pluginLogs, app, getNpmRegistry, checkAdminAuth } = ctx;
+        const { readConfig, DEFAULT_CONFIG, DB_TYPES, S, hashPassword, APP_VERSION, API_START_TIME, writeConfig, applyTrustProxy, restartServer, pluginLogPush, pluginLogs, app, getNpmRegistry, addUpdateTask, finishUpdateTask, checkAdminAuth } = ctx;
 
     /* ── 原 server.js L3938-3938 ── */
     /* ==================== 存储初始化（可热切换，见数据库管理） ==================== */
@@ -91,7 +91,8 @@ module.exports = {
                 pluginLog: pluginLogPush,
                 isAdmin: (req) => !!checkAdminAuth(req)
             });
-            S.pluginManager._injectServices({ app: appService, logger: loggerService });
+            const tasksService = { add: addUpdateTask, finish: finishUpdateTask };
+            S.pluginManager._injectServices({ app: appService, logger: loggerService, tasks: tasksService });
             S.pluginManager.loadState();
             await S.pluginManager.loadEnabled();
         } catch (e) {

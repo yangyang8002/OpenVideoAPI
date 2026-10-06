@@ -27,6 +27,10 @@
 <h2>浏览 OpenList 目录树 · 注册视频到播放库（自动触发内封字幕扫描） · 复制播放链接</h2>
 <div class="card">
   <div class="crumbs" id="crumbs">/</div>
+  <div style="margin:6px 0 2px">
+    <button id="scanBtn" onclick="scanFolder()">扫描此文件夹（含子目录）</button>
+    <span class="msg" id="scanStat" style="margin-left:6px"></span>
+  </div>
   <div class="msg" id="stat">加载中...</div>
   <div id="tbl" style="margin-top:8px"></div>
 </div>
@@ -105,6 +109,35 @@ document.getElementById('tbl').addEventListener('click', function (e) {
     });
   }
 });
+/* ── 整个文件夹扫描（含子目录）：后台任务 + 顶栏任务列表进度 ── */
+var scanTimer = null;
+function scanStat(s, cls) { var el = document.getElementById('scanStat'); el.textContent = s || ''; el.className = 'msg ' + (cls || ''); }
+function pollScan() {
+  fetch('/api/plugin/openlist/scan/status').then(function (r) { return r.json(); }).then(function (d) {
+    var s = (d && d.data) || {};
+    if (s.scanning) {
+      document.getElementById('scanBtn').disabled = true;
+      scanStat('扫描中 ' + (s.done || 0) + '/' + (s.total || '?') + ' · 成功 ' + (s.ok || 0) + ' · 失败 ' + (s.fail || 0) + (s.lastFile ? ' · ' + s.lastFile : ''), 'warn');
+      if (!scanTimer) scanTimer = setInterval(pollScan, 2000);
+    } else {
+      if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
+      document.getElementById('scanBtn').disabled = false;
+      if (s.lastSummary) scanStat(s.lastSummary, (s.fail && !s.ok) ? 'err' : 'ok');
+    }
+  }).catch(function () {});
+}
+function scanFolder() {
+  if (scanTimer) return;
+  scanStat('正在启动扫描...', 'warn');
+  fetch('/api/plugin/openlist/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: CWD }) })
+    .then(function (r) { return r.json(); }).then(function (d) {
+      if (d.code !== 0) { scanStat(d.msg || '启动失败', 'err'); return; }
+      toast('后台扫描已启动：' + CWD + '（进度可在右上角任务列表查看）');
+      pollScan();
+      scanTimer = setInterval(pollScan, 2000);
+    }).catch(function () { scanStat('启动失败', 'err'); });
+}
+pollScan();
 loadStatus();
 </script>
 </body>
