@@ -67,15 +67,15 @@ module.exports = {
     /* ── 原 server.js L3556-3564 ── */
     app.post('/api/admin/plugins/update', checkAdmin, async (req, res) => {
         const { name } = req.body || {};
-        const task = addUpdateTask('plugin', name || '', 'npm 更新（保留配置与启用状态，本地包自动切换 npm 来源）');
-        try {
-            await S.pluginManager.update(name);
-            finishUpdateTask(task.id, 'done', '已更新到最新版');
-            res.json({ code: 0, msg: '插件 ' + name + ' 已更新' });
-        } catch (e) {
-            finishUpdateTask(task.id, 'failed', safeErrMsg(e));
-            res.status(400).json({ code: 1, msg: '更新失败: ' + safeErrMsg(e) });
+        if (!name || !S.pluginManager.list().some(p => p.name === name)) {
+            return res.status(400).json({ code: 1, msg: '插件不存在: ' + (name || '') });
         }
+        /* 立即响应，后台执行更新（npm 可能数分钟；进度与结果见顶栏任务列表，完成后自动重载） */
+        const task = addUpdateTask('plugin', name, 'npm 后台更新（保留配置与启用状态，本地包自动切换 npm 来源）');
+        res.json({ code: 0, msg: '插件 ' + name + ' 更新已在后台执行，完成后自动重载；进度见顶栏任务列表' });
+        S.pluginManager.update(name)
+            .then(() => finishUpdateTask(task.id, 'done', '已更新到最新版并重载'))
+            .catch((e) => finishUpdateTask(task.id, 'failed', safeErrMsg(e)));
     });
 
     /* ── 原 server.js L3566-3566 ── */
