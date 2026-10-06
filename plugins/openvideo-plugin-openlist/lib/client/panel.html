@@ -33,8 +33,10 @@
     <button id="scanBtn" onclick="scanFolder()">扫描此文件夹（含子目录）</button>
     <button id="pauseBtn" class="gray" onclick="scanPauseToggle()" style="display:none">暂停</button>
     <button id="stopBtn" class="gray" onclick="scanControl('stop')" style="display:none">停止扫描</button>
+    <button id="retryBtn" onclick="retryScan()" style="display:none">重试失败项</button>
     <span class="msg" id="scanStat" style="margin-left:6px"></span>
   </div>
+  <div id="failList" style="display:none;margin:6px 0 0;font-size:11px;color:#ef4444;word-break:break-all"></div>
   <div class="msg" id="stat">加载中...</div>
   <div id="tbl" style="margin-top:8px"></div>
 </div>
@@ -132,17 +134,26 @@ function pollScan() {
     var s = (d && d.data) || {};
     SCANST = s;
     var btn = document.getElementById('scanBtn'), pb = document.getElementById('pauseBtn'), sb = document.getElementById('stopBtn');
+    var rb = document.getElementById('retryBtn'), fl = document.getElementById('failList');
     if (s.scanning) {
       btn.disabled = true;
       pb.style.display = ''; sb.style.display = '';
+      rb.style.display = 'none'; fl.style.display = 'none';
       pb.textContent = s.paused ? '继续' : '暂停';
-      var base = (s.done || 0) + '/' + (s.total || '?') + ' · 成功 ' + (s.ok || 0) + ' · 失败 ' + (s.fail || 0) + ' · 字幕 ' + (s.subs || 0);
-      scanStat(s.paused ? '⏸ 已暂停 · ' + base : '扫描中 ' + base + (s.lastFile ? ' · ' + s.lastFile : ''), 'warn');
+      var retry = s.mode === 'retry';
+      var base = (s.done || 0) + '/' + (s.total || '?') + (retry ? ' · 恢复 ' : ' · 成功 ') + (s.ok || 0) + (retry ? ' · 仍失败 ' : ' · 失败 ') + (s.fail || 0) + ' · 字幕 ' + (s.subs || 0);
+      scanStat(s.paused ? '⏸ 已暂停 · ' + base : (retry ? '重试中 ' : '扫描中 ') + base + (s.lastFile ? ' · ' + s.lastFile : ''), 'warn');
       if (!scanTimer) scanTimer = setInterval(pollScan, 2000);
     } else {
       if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
       btn.disabled = false;
       pb.style.display = 'none'; sb.style.display = 'none';
+      var fails = s.failed || [];
+      if (fails.length) {
+        rb.style.display = ''; rb.textContent = '重试失败项（' + fails.length + '）';
+        fl.style.display = '';
+        fl.textContent = '失败清单：' + fails.slice(0, 20).map(function (x) { return x.path + (x.why ? ' — ' + x.why : ''); }).join('；') + (fails.length > 20 ? '；…共 ' + fails.length + ' 个' : '');
+      } else { rb.style.display = 'none'; fl.style.display = 'none'; }
       if (s.lastSummary) scanStat(s.lastSummary, (s.fail && !s.ok) ? 'err' : 'ok');
     }
   }).catch(function () {});
@@ -162,6 +173,17 @@ function scanFolder() {
     .then(function (r) { return r.json(); }).then(function (d) {
       if (d.code !== 0) { scanStat(d.msg || '启动失败', 'err'); return; }
       toast('后台扫描已启动：' + CWD + '（进度可在右上角任务列表查看）');
+      pollScan();
+      scanTimer = setInterval(pollScan, 2000);
+    }).catch(function () { scanStat('启动失败', 'err'); });
+}
+function retryScan() {
+  if (scanTimer) return;
+  scanStat('正在启动重试...', 'warn');
+  fetch('/api/plugin/openlist/scan/retry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+    .then(function (r) { return r.json(); }).then(function (d) {
+      if (d.code !== 0) { scanStat(d.msg || '启动失败', 'err'); return; }
+      toast('失败重试已启动（' + ((d.data && d.data.count) || 0) + ' 个文件），进度可在右上角任务列表查看');
       pollScan();
       scanTimer = setInterval(pollScan, 2000);
     }).catch(function () { scanStat('启动失败', 'err'); });

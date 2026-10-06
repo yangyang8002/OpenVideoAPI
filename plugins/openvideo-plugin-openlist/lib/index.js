@@ -4,6 +4,7 @@
  * 「复制播放链接」生成 /player/?url=<OpenList /d/ 链接> 直达播放页 */
 /* 1.4 扫描增强：上限可在插件设置调整（scanCap，默认 5000）；扫描时把目录下同名外挂字幕文件
  * （Movie.srt / Movie.zh.srt / Movie.zh-CN.ass…多语言可多份）下载进本地字幕库并挂载到视频 */
+/* 1.7 失败重试：扫描失败项留存清单（路径+原因），面板「重试失败项」一键只重扫失败文件 */
 
 const fs = require('fs');
 const path = require('path');
@@ -91,7 +92,8 @@ module.exports = {
         /* 单次扫描视频文件上限：插件设置 scanCap（默认 5000；外挂字幕文件不计入上限） */
         const scanCap = () => { const n = Number(config && config.scanCap); return Number.isFinite(n) && n > 0 ? Math.floor(n) : 5000; };
         const TICK = 400;          /* 暂停等待的轮询切片 ms */
-        const scan = { scanning: false, paused: false, stopRequested: false, taskId: 0, path: '', total: 0, done: 0, ok: 0, fail: 0, subs: 0, lastFile: '', lastSummary: '' };
+        const scan = { scanning: false, paused: false, stopRequested: false, taskId: 0, path: '', mode: 'scan', total: 0, done: 0, ok: 0, fail: 0, subs: 0, failed: [], lastFile: '', lastSummary: '' };
+        let lastSubMap = new Map();   /* 最近一次扫描的外挂字幕映射，失败重试复用 */
         const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         const isVideo = (n) => VEXT.some(x => String(n).toLowerCase().endsWith('.' + x));
         const shortName = (p) => String(p).split('/').pop() || p;
@@ -220,6 +222,37 @@ module.exports = {
             }
         };
 
+        /* 注册单个文件（fileLink → resolve，携带驱动全文件哈希指纹）：失败内联重试一次（429 多退 5s）；
+         * 返回 {ok, vid, why}，暂停窗口中被手动停止返回 {stop:true} */
+        const registerOne = async (fp) => {
+            const port = process.env.PORT || 1919;
+            let ok = false, why = '', newVid = '';
+            for (let i = 0; i < 2 && !ok; i++) {
+                if (i > 0 && await waitTurn() === 'stop') return { stop: true };
+                try {
+                    const fl = await fileLink(fp);
+                    /* v1.6.0：携带驱动全文件哈希做指纹身份（同文件改名/换盘实例复用旧 vid） */
+                    const qs = '?url=' + encodeURIComponent(fl.link) + (fl.hashes.length ? '&fp=' + encodeURIComponent(JSON.stringify({ hashes: fl.hashes })) : '');
+                    const r = await ctx.http.get('http://127.0.0.1:' + port + '/api/video/resolve' + qs, { timeout: 30000 });
+                    const j = await r.json().catch(() => null);
+                    if (j && j.code === 0 && j.data && j.data.vid) { ok = true; newVid = String(j.data.vid); }
+                    else why = (j && j.msg) || ('resolve code ' + (j && j.code));
+                } catch (e) { why = e.message; }
+                if (!ok && i === 0) await sleep(/429|频繁/.test(String(why)) ? 5000 : 3000);
+            }
+            return { ok, vid: newVid, why };
+        };
+        /* 注册成功后的收尾：网盘目录写备注（m01421）+ 同名外挂字幕挂载；返回新挂载字幕数 */
+        const afterOk = async (vid, fp, subMap) => {
+            try {
+                const ndir = fp.slice(0, fp.lastIndexOf('/')) || '/';
+                const notes = (await ctx.store.kvGet('video_notes')) || {};
+                if (notes[vid] !== ndir) { notes[vid] = ndir; await ctx.store.kvSet('video_notes', notes); }
+            } catch (e) { ctx.logger.warn('openlist', '备注写入失败: ' + fp + ' — ' + (e.message || e)); }
+            try { return (await mountSubs(vid, fp, subMap)) || 0; }
+            catch (e) { ctx.logger.warn('openlist', '字幕挂载失败: ' + fp + ' — ' + (e.message || e)); return 0; }
+        };
+
         const runScan = async (root) => {
             const t = ctx.tasks.add('plugin', 'OpenList 文件夹扫描', '正在收集文件清单…', 'openlist-scan-' + Date.now());
             scan.taskId = t.id;
@@ -229,7 +262,8 @@ module.exports = {
                 const out = [], seen = new Set(), subMap = new Map();
                 const CAP = scanCap();
                 await collect(root, out, seen, CAP, subMap);
-                scan.total = out.length; scan.done = 0; scan.ok = 0; scan.fail = 0; scan.subs = 0;
+                lastSubMap = subMap;
+                scan.total = out.length; scan.done = 0; scan.ok = 0; scan.fail = 0; scan.subs = 0; scan.failed = [];
                 let subFiles = 0; for (const l of subMap.values()) subFiles += l.length;
                 if (subFiles) ctx.logger.info('openlist', '发现外挂字幕候选 ' + subFiles + ' 个，将按同名规则挂载');
                 if (!out.length) {
@@ -238,38 +272,20 @@ module.exports = {
                     ctx.logger.warn('openlist', '文件夹扫描: 未发现视频文件 (' + root + ')');
                     return;
                 }
-                const port = process.env.PORT || 1919;
                 for (const fp of out) {
                     if (await waitTurn() === 'stop') { manualStop = true; break; }
                     scan.lastFile = shortName(fp);
                     ctx.tasks.finish(t.id, 'running', (scan.done + 1) + '/' + scan.total + ' · 成功 ' + scan.ok + ' · 失败 ' + scan.fail + (scan.subs ? ' · 字幕 +' + scan.subs : '') + ' · ' + scan.lastFile);
-                    let ok = false, why = '', newVid = '';
-                    for (let i = 0; i < 2 && !ok; i++) {   /* 失败重试一次（重试前重新等窗口；429 多退 5s） */
-                        if (i > 0 && await waitTurn() === 'stop') { manualStop = true; break; }
-                        try {
-                            const fl = await fileLink(fp);
-                            const link = fl.link;
-                            /* v1.6.0：携带驱动全文件哈希做指纹身份（同文件改名/换盘实例复用旧 vid） */
-                            const qs = '?url=' + encodeURIComponent(link) + (fl.hashes.length ? '&fp=' + encodeURIComponent(JSON.stringify({ hashes: fl.hashes })) : '');
-                            const r = await ctx.http.get('http://127.0.0.1:' + port + '/api/video/resolve' + qs, { timeout: 30000 });
-                            const j = await r.json().catch(() => null);
-                            if (j && j.code === 0 && j.data && j.data.vid) { ok = true; newVid = String(j.data.vid); }
-                            else why = (j && j.msg) || ('resolve code ' + (j && j.code));
-                        } catch (e) { why = e.message; }
-                        if (!ok && i === 0) await sleep(/429|频繁/.test(String(why)) ? 5000 : 3000);
-                    }
-                    if (manualStop) break;
-                    if (ok) {
+                    const res = await registerOne(fp);
+                    if (res.stop) { manualStop = true; break; }
+                    if (res.ok) {
                         scan.ok++;
-                        /* m01421：备注项写入该视频在网盘所处的目录路径（后台视频列表展示） */
-                        try {
-                            const ndir = fp.slice(0, fp.lastIndexOf('/')) || '/';
-                            const notes = (await ctx.store.kvGet('video_notes')) || {};
-                            if (notes[newVid] !== ndir) { notes[newVid] = ndir; await ctx.store.kvSet('video_notes', notes); }
-                        } catch (e) { ctx.logger.warn('openlist', '备注写入失败: ' + fp + ' — ' + (e.message || e)); }
-                        try { scan.subs += await mountSubs(newVid, fp, subMap); }
-                        catch (e) { ctx.logger.warn('openlist', '字幕挂载失败: ' + fp + ' — ' + (e.message || e)); }
-                    } else { scan.fail++; ctx.logger.warn('openlist', '注册失败: ' + fp + ' — ' + why); }
+                        scan.subs += await afterOk(res.vid, fp, subMap);
+                    } else {
+                        scan.fail++;
+                        scan.failed.push({ path: fp, why: res.why || '未知原因' });
+                        ctx.logger.warn('openlist', '注册失败: ' + fp + ' — ' + res.why);
+                    }
                     scan.done++;
                     ctx.tasks.finish(t.id, 'running', scan.done + '/' + scan.total + ' · 成功 ' + scan.ok + ' · 失败 ' + scan.fail + (scan.subs ? ' · 字幕 +' + scan.subs : '') + ' · ' + scan.lastFile);
                 }
@@ -279,7 +295,7 @@ module.exports = {
                     ctx.logger.info('openlist', '文件夹扫描被手动停止: ' + scan.lastSummary);
                 } else {
                     const capped = scan.total >= CAP;
-                    scan.lastSummary = '完成：共 ' + scan.total + ' 个视频' + (capped ? '（达 ' + CAP + ' 上限）' : '') + '，成功注册 ' + scan.ok + '，失败 ' + scan.fail + '，字幕挂载 ' + scan.subs;
+                    scan.lastSummary = '完成：共 ' + scan.total + ' 个视频' + (capped ? '（达 ' + CAP + ' 上限）' : '') + '，成功注册 ' + scan.ok + '，失败 ' + scan.fail + '，字幕挂载 ' + scan.subs + (scan.fail ? '（失败项可重试）' : '');
                     ctx.tasks.finish(t.id, (scan.fail && !scan.ok) ? 'fail' : 'done', scan.lastSummary);
                     ctx.logger.info('openlist', '文件夹扫描结束: ' + scan.lastSummary);
                 }
@@ -288,6 +304,50 @@ module.exports = {
                 ctx.tasks.finish(t.id, 'fail', scan.lastSummary);
                 ctx.logger.error('openlist', '文件夹扫描异常: ' + (e.message || e));
             } finally {
+                scan.scanning = false; scan.paused = false; scan.stopRequested = false;
+            }
+        };
+
+        /* ── 失败重试（1.7）：只重扫上次扫描留存的失败清单；复用其外挂字幕映射，成功即移出清单 ── */
+        const runRetry = async () => {
+            const list = scan.failed.slice();
+            const t = ctx.tasks.add('plugin', 'OpenList 失败重试', '准备重试 ' + list.length + ' 个失败文件…', 'openlist-retry-' + Date.now());
+            scan.taskId = t.id;
+            scan.mode = 'retry';
+            let manualStop = false;
+            const keep = [];
+            try {
+                ctx.logger.info('openlist', '失败重试开始: ' + list.length + ' 个文件');
+                scan.total = list.length; scan.done = 0; scan.ok = 0; scan.fail = 0; scan.subs = 0; scan.lastFile = '';
+                for (let i = 0; i < list.length; i++) {
+                    const fp = list[i].path;
+                    if (await waitTurn() === 'stop') { manualStop = true; for (const x of list.slice(i)) keep.push(x); break; }
+                    scan.lastFile = shortName(fp);
+                    ctx.tasks.finish(t.id, 'running', (scan.done + 1) + '/' + scan.total + ' · 恢复 ' + scan.ok + ' · 仍失败 ' + scan.fail + ' · ' + scan.lastFile);
+                    const res = await registerOne(fp);
+                    if (res.stop) { manualStop = true; for (const x of list.slice(i)) keep.push(x); break; }
+                    if (res.ok) {
+                        scan.ok++;
+                        scan.subs += await afterOk(res.vid, fp, lastSubMap);
+                        ctx.logger.info('openlist', '重试成功: ' + fp);
+                    } else {
+                        scan.fail++;
+                        keep.push({ path: fp, why: res.why || list[i].why || '未知原因' });
+                        ctx.logger.warn('openlist', '重试仍失败: ' + fp + ' — ' + res.why);
+                    }
+                    scan.done++;
+                    ctx.tasks.finish(t.id, 'running', scan.done + '/' + scan.total + ' · 恢复 ' + scan.ok + ' · 仍失败 ' + scan.fail + ' · ' + scan.lastFile);
+                }
+                if (manualStop) scan.lastSummary = '重试已手动停止：恢复 ' + scan.ok + '，仍失败 ' + keep.length + '（可再次重试）';
+                else scan.lastSummary = '重试完成：恢复 ' + scan.ok + ' 个' + (keep.length ? '，仍失败 ' + keep.length + ' 个（可再次重试）' : '，失败清单已清空');
+                ctx.tasks.finish(t.id, (keep.length && !scan.ok) ? 'fail' : 'done', scan.lastSummary);
+                ctx.logger.info('openlist', '失败重试结束: ' + scan.lastSummary);
+            } catch (e) {
+                scan.lastSummary = '重试出错: ' + (e.message || e);
+                ctx.tasks.finish(t.id, 'fail', scan.lastSummary);
+                ctx.logger.error('openlist', '失败重试异常: ' + (e.message || e));
+            } finally {
+                scan.failed = keep;
                 scan.scanning = false; scan.paused = false; scan.stopRequested = false;
             }
         };
@@ -302,7 +362,7 @@ module.exports = {
             const p = String((req.body || {}).path || '/');
             const { base } = cfg();
             if (!base) { const e = new Error('未配置 OpenList 地址（请在插件设置中填写 baseUrl）'); e.status = 503; throw e; }
-            scan.scanning = true; scan.paused = false; scan.stopRequested = false; scan.taskId = 0; scan.path = p; scan.total = 0; scan.done = 0; scan.ok = 0; scan.fail = 0; scan.subs = 0; scan.lastFile = ''; scan.lastSummary = '';
+            scan.scanning = true; scan.paused = false; scan.stopRequested = false; scan.taskId = 0; scan.path = p; scan.mode = 'scan'; scan.total = 0; scan.done = 0; scan.ok = 0; scan.fail = 0; scan.subs = 0; scan.failed = []; scan.lastFile = ''; scan.lastSummary = ''; lastSubMap = new Map();
             runScan(p).catch(() => {});
             res.json({ code: 0, data: { started: true, path: p } });
         }));
@@ -324,6 +384,17 @@ module.exports = {
             else { const e = new Error('action 必须是 pause / resume / stop'); e.status = 400; throw e; }
             ctx.logger.info('openlist', '文件夹扫描控制: ' + act);
             res.json({ code: 0, data: { action: act, paused: scan.paused, stopRequested: scan.stopRequested } });
+        }));
+
+        /* 重试失败项（1.7，需管理员）：只重扫上次扫描留存的失败清单，暂停/停止同样可用 */
+        ctx.router.post('/api/plugin/openlist/scan/retry', wrap(async (req, res) => {
+            needAdmin(req);
+            if (scan.scanning) { const e = new Error('已有文件夹扫描进行中，请稍候'); e.status = 409; throw e; }
+            if (!scan.failed.length) { const e = new Error('当前没有可重试的失败记录'); e.status = 400; throw e; }
+            const count = scan.failed.length;
+            scan.scanning = true; scan.paused = false; scan.stopRequested = false;
+            runRetry().catch(() => {});
+            res.json({ code: 0, data: { started: true, count } });
         }));
 
         /* 管理面板：网盘文件浏览页（管理员鉴权） */
