@@ -1,0 +1,30 @@
+{
+  "name": "openvideo-plugin-openlist",
+  "version": "1.0.0",
+  "description": "OpenList/AList 网盘接入：后台浏览网盘目录树，一键注册视频到播放库并生成播放链接（注册即触发内封字幕自动扫描）",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "keywords": ["openvideo", "plugin", "openlist", "alist", "cloud"],
+  "files": ["lib", "README.md"],
+  "openvideoPlugin": {
+    "name": "openlist",
+    "description": "OpenList 网盘接入：服务端代理 OpenList API（令牌不落浏览器），面板浏览目录树、注册视频、生成播放链接",
+    "inject": ["http", "logger"],
+    "schema": [
+      {
+        "key": "baseUrl",
+        "label": "OpenList 地址",
+        "type": "string",
+        "default": "",
+        "hint": "如 https://pan.example.com（留空则插件功能不可用）"
+      },
+      {
+        "key": "token",
+        "label": "OpenList 令牌",
+        "type": "string",
+        "default": "",
+        "hint": "OpenList 后台生成的 API Token；游客可访问的网盘可留空"
+      }
+    ]
+  }
+}
