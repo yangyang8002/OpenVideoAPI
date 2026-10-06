@@ -108,7 +108,16 @@ module.exports = {
         const want = names && names.length ? names : null;
         const pkg = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8'));
         const frontNames = want ? want.filter(n => FRONTEND_DEPS.some(d => d.name === n)) : FRONTEND_DEPS.map(d => d.name);
-        const backNames = want ? want.filter(n => !FRONTEND_DEPS.some(d => d.name === n)) : Object.keys(pkg.dependencies || {});
+        /* 未点名时只更新「过时」的服务端依赖（getDeps 比对 current vs latest）——避免全树重装；点名则按点名执行 */
+        let backNames;
+        if (want) backNames = want.filter(n => !FRONTEND_DEPS.some(d => d.name === n));
+        else {
+            try {
+                const data = await getDeps(true);
+                const outdated = (data.list || []).filter(x => x.type === 'dependency' && x.latest && (x.current !== x.latest || x.current === 'latest'));
+                backNames = outdated.map(x => x.name);
+            } catch (e) { backNames = Object.keys(pkg.dependencies || {}); }
+        }
         /* 前端依赖：改写 public/<page> 中的 CDN 版本（无需重启，刷新页面生效） */
         const updated = [];
         for (const n of frontNames) {
