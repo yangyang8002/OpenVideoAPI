@@ -26,7 +26,7 @@
   <file path="lib/backends/sqlite.js" sha256="625b1d8600c2a0f25a243e4f42d3d929e57a44e11e11e03f9f2f9d003b667735" size="2453"/>
   <file path="lib/cloud.js" sha256="308b1af14d7dc73bd24d83e7e438af38db87c4636662b4e423596c98e777dc56" size="10419"/>
   <file path="lib/model.js" sha256="a14168580c90f41cf496e1bcd27e07eb6cd749478f4b3e21ffdf99372395e586" size="6161"/>
-  <file path="lib/plugin.js" sha256="a51ec5ebc887dde07efa9182ea7976e6b277e2b073b869c68db5a815f16aee7c" size="54363"/>
+  <file path="lib/plugin.js" sha256="a463cc8dbec7681c3594704d1dc8f8dd7e2baca38912fdddb985b967f7392eec" size="55188"/>
   <file path="lib/proxy.js" sha256="52a453c81a8c6c7acfd4a625baba397feddd9ba46e635a558840647b5f893ebe" size="5032"/>
   <file path="lib/store.js" sha256="3faea07157f49e97fde41da68aa4974ff614a1bfa88e42078bef83fb0bc58f1c" size="32608"/>
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
@@ -55,10 +55,10 @@
   <file path="plugins/openvideo-plugin-otp/lib/index.js" sha256="a199c3d55ead7cc498601f2765ad9857c32c2009039645d95ceba60730dd47f2" size="14297"/>
   <file path="plugins/openvideo-plugin-otp/package.json" sha256="8d1d3a177f481e0b72c88da90349383bcd514d5c5c54b1ba568715502f6f0a54" size="2134"/>
   <file path="public/CUSTOM_THEME.md" sha256="a4394eb9fd4e0d7b68d0273fd957ec17cadfa2a0481aa28f5f55298c006008c0" size="3271"/>
-  <file path="public/admin.html" sha256="9da8756d9ec7983020fc82aab849bb06329d13c72cca0ea81e203996258cf98e" size="334843"/>
+  <file path="public/admin.html" sha256="c0cc7cd6de57a5bec0ce22bb12360e4f9dcd9be45da504b52dddffad139c692e" size="337237"/>
   <file path="public/favicon-128.png" sha256="de8371137f6c9648f8728550e71de67fb5460771062ec1b45970909a1e5dd3dc" size="2034"/>
   <file path="public/favicon.svg" sha256="ca0f3061d459fc5636914978579613a6a8b626dc69123909eceee07d2f3c8d9f" size="555"/>
-  <file path="public/i18n.js" sha256="dab7a4eca12823a2d84effc5f5620ad4564bd7b6bef3210a6fa09c3f7a34ed22" size="309960"/>
+  <file path="public/i18n.js" sha256="3c26c4b7cccb001ee41dc567b2bb5fb79fda7e6f1cffa24cabb7880953adbee5" size="310296"/>
   <file path="public/player.html" sha256="dbefab8f8c94982fb17b3793a57f892d8eb6723def65fd5d4045d4385eb41fd7" size="105712"/>
   <file path="public/settings.css" sha256="843fac84629e5dc0593a472be61c95d477ecc99aa126dacb7bddccb1d54cc0ed" size="6985"/>
   <file path="public/settings.js" sha256="8ab2a51489cedbc4a813c6e1114f5f4480db31eeac81b6715db94843d0611065" size="27679"/>
@@ -86,9 +86,9 @@
   <file path="src/routes/banned.js" sha256="d9d006fd946199862e0581b3c0faeaf97ff88a74bfdbf377c12aee1e10dde80b" size="5404"/>
   <file path="src/routes/danmu.js" sha256="e4c96d5514b5d0c5d3783d5e8d22596354f6457728420157859500cb48054ebd" size="8689"/>
   <file path="src/routes/db.js" sha256="7a20f0323a24c958cbde47d197c1a36f11bab2a5457174ba4fd7f80b185763c2" size="6566"/>
-  <file path="src/routes/deps.js" sha256="141e76598990dea7fde6c593a54570ac90dd918915e609a5990f96e77c59e902" size="9447"/>
+  <file path="src/routes/deps.js" sha256="5712635bcd95a142f230edeb5dfa136fa44fd7ad9ce894f1fb76f8e794b96c2c" size="9787"/>
   <file path="src/routes/files.js" sha256="3db48b250b2fe56562ad943752456a3124f87dec4364cbcb012a58c5498f7c61" size="11421"/>
-  <file path="src/routes/plugins.js" sha256="4ce8d26b21adbc807b44c61423bc0dfcf29bfe227c3eab03d61a1a8f65abac99" size="10374"/>
+  <file path="src/routes/plugins.js" sha256="8a3ca91ec144ef04bcd1c5ccf9fc39595bfb370e25c16b0d8a446093cb69c5c2" size="10679"/>
   <file path="src/routes/public.js" sha256="ea811430046f66b000036f3e64ca035ee87e0a771a3d1dfc9897e2d53e798b28" size="4187"/>
   <file path="src/routes/security.js" sha256="431daa509ca24639765c0f7126f387683839639b009199df2c6e8686c35b166a" size="11151"/>
   <file path="src/routes/subtitle.js" sha256="c1fc4f84caf9312125e45f21936ad2e50f15a73018e8cf48689a082d183a811d" size="17360"/>
