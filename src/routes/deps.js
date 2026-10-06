@@ -134,7 +134,8 @@ module.exports = {
         let bgMsg = '';
         if (backNames.length) {
             const depTasks = {};
-            for (const n of backNames) depTasks[n] = addUpdateTask('dep', n, 'npm install ' + n + '@latest（后台执行）');
+            const batch = 'deps-' + Date.now();
+            for (const n of backNames) depTasks[n] = addUpdateTask('dep', n, 'npm install ' + n + '@latest（后台执行）', batch);
             /* npm 在包目录执行：包内 package.json 的依赖全部可解析；装进包内嵌套 node_modules（优先级高于外层，不剪外层应用树——appDir 方案曾致外层 399 包被 extraneous 清理，已回退） */
             let nl = 'ignore';
             try { fs.mkdirSync(path.join(ROOT_DIR, 'logs'), { recursive: true }); } catch (e) {}
@@ -161,8 +162,9 @@ module.exports = {
             bgMsg = '服务端依赖已在后台逐个更新（' + backNames.length + ' 个），完成后需重启服务生效（顶栏任务列表可查看每个依赖的实时进度）';
         }
         if (updated.length) {
+            const fbatch = 'front-' + Date.now();
             for (const u of updated) {
-                const ft = addUpdateTask('dep', u, '前端 CDN 依赖版本已改写');
+                const ft = addUpdateTask('dep', u, '前端 CDN 依赖版本已改写', fbatch);
                 finishUpdateTask(ft.id, 'done', u + '（刷新页面生效）');
             }
         }

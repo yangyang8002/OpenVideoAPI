@@ -71,7 +71,7 @@ module.exports = {
             return res.status(400).json({ code: 1, msg: '插件不存在: ' + (name || '') });
         }
         /* 立即响应，后台执行更新（npm 可能数分钟；进度与结果见顶栏任务列表，完成后自动重载） */
-        const task = addUpdateTask('plugin', name, 'npm 后台更新（保留配置与启用状态，本地包自动切换 npm 来源）');
+        const task = addUpdateTask('plugin', name, 'npm 后台更新（保留配置与启用状态，本地包自动切换 npm 来源）', 'plugin-' + Date.now());
         res.json({ code: 0, msg: '插件 ' + name + ' 更新已在后台执行，完成后自动重载；进度见顶栏任务列表' });
         S.pluginManager.update(name)
             .then(() => finishUpdateTask(task.id, 'done', '已更新到最新版并重载'))

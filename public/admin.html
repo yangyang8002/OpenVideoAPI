@@ -2898,14 +2898,40 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                         var body = document.getElementById('taskListBody'), em = document.getElementById('taskEmpty');
                         if (!rows.length) { body.innerHTML = ''; em.style.display = 'block'; return; }
                         em.style.display = 'none';
-                        body.innerHTML = rows.map(function (x) {
-                            var col = x.status === 'failed' ? 'var(--danger)' : x.status === 'running' ? 'var(--warn)' : 'var(--success)';
-                            return '<div style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border)">' +
-                                '<span class="pl-chip" style="color:var(--primary)">' + esc(TYPE_LBL[x.type] || x.type) + '</span>' +
-                                '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="' + esc(x.name) + '">' + esc(x.name) + '</span>' +
-                                '<span class="pl-chip" style="color:' + col + '">' + esc(ST_LBL[x.status] || x.status) + '</span>' +
-                                '<span style="font-size:10px;color:var(--text3)">' + esc(new Date(x.at).toLocaleTimeString('zh-CN')) + '</span></div>';
-                        }).join('');
+                        /* 按 batch 分组：每批渲染进度条（完成/总数+百分比填充），无批任务不显条 */
+                        var groups = {};
+                        rows.forEach(function (x) {
+                            var k = x.batch || '__none__';
+                            (groups[k] = groups[k] || []).push(x);
+                        });
+                        var html = '';
+                        Object.keys(groups).forEach(function (k) {
+                            var g = groups[k];
+                            if (k !== '__none__') {
+                                var done = g.filter(function (x) { return x.status !== 'running'; }).length;
+                                var pct = Math.round(done * 100 / g.length);
+                                html += '<div style="margin:4px 0 6px">' +
+                                    '<div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);margin-bottom:3px">' +
+                                    '<b style="color:var(--text)">' + esc(TYPE_LBL[g[0].type] || g[0].type) + '</b>' +
+                                    '<span>' + t('进度') + ' ' + done + '/' + g.length + '</span></div>' +
+                                    '<div style="height:6px;border-radius:3px;background:var(--surface2);overflow:hidden">' +
+                                    '<div style="height:100%;width:' + pct + '%;background:var(--primary);border-radius:3px;transition:width .3s"></div></div></div>';
+                            }
+                            html += g.map(function (x) {
+                                var col = x.status === 'failed' ? 'var(--danger)' : x.status === 'running' ? 'var(--warn)' : 'var(--success)';
+                                return '<div style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border)">' +
+                                    '<span class="pl-chip" style="color:var(--primary)">' + esc(TYPE_LBL[x.type] || x.type) + '</span>' +
+                                    '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="' + esc(x.name) + '">' + esc(x.name) + '</span>' +
+                                    '<span class="pl-chip" style="color:' + col + '">' + esc(ST_LBL[x.status] || x.status) + '</span>' +
+                                    '<span style="font-size:10px;color:var(--text3)">' + esc(new Date(x.at).toLocaleTimeString('zh-CN')) + '</span></div>';
+                            }).join('');
+                        });
+                        body.innerHTML = html;
+                        /* 有任务进行且弹层打开时 5 秒加速轮询（闲时 15 秒） */
+                        if (running && pop.style.display !== 'none' && !window._tpQ) {
+                            window._tpQ = true;
+                            setTimeout(function () { window._tpQ = false; if (pop.style.display !== 'none') loadAdminTasks(); }, 5000);
+                        }
                     }).catch(function () {});
             };
             setInterval(function () { if (adminToken) loadAdminTasks(); }, 15000);
