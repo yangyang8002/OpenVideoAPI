@@ -331,7 +331,7 @@ module.exports = {
     /* 播放器按 ID 加载字幕内容 */
 
     /* 内封字幕提取进度查询：该 vid（含同身份签名实例）已入库的插件内封字幕数量与语言（播放器轮询弹窗用） */
-    app.get('/api/subtitle/has', writeRateLimit(120, 60000), async (req, res) => {
+    app.get('/api/subtitle/has', async (req, res) => {
         const vid = String(req.query.vid || '').trim();
         if (!vid) return res.status(400).json({ code: 1, msg: '缺少 vid' });
         try {
