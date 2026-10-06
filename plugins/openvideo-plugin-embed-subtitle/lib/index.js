@@ -464,9 +464,11 @@ module.exports = {
             return { extracted: textStreams.length };
         }
         ctx.on('video:created', (p) => {
+            ctx.logger.info('embed-sub', 'A-触发: vid=' + (p && p.vid) + ' 已扫描=' + (p && autoScanned.has(p.vid)));
             if (!p || !p.vid || !p.url) return;
             if (autoScanned.has(p.vid)) return;
             autoScanned.add(p.vid); /* 先占位防并发重复扫描；失败时下方释放，下次访问自动重试 */
+            ctx.logger.info('embed-sub', 'B-扫描开始: vid=' + p.vid);
             setTimeout(() => {
                 scanOne(p.vid, p.url)
                     .then((r) => {
