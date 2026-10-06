@@ -35,7 +35,8 @@ module.exports = {
     /* ── 原 server.js L3466-3469 ── */
     function npmRegistryArg() {
         const reg = getNpmRegistry();
-        return reg ? '--registry="' + reg + '"' : '';
+        /* spawn 场景 argv 不经 shell 解析，禁止内嵌引号（曾致 npm 收到字面引号值报 invalid config） */
+        return reg ? '--registry=' + reg : '';
     }
 
     /* ── 原 server.js L3471-3471 ── */
