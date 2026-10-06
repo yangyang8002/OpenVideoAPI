@@ -35,6 +35,9 @@ module.exports = {
     function writeRateLimit(max, windowMs) {
         return (req, res, next) => {
             const ip = req.clientIp || req.ip || 'unknown';
+            /* 本机自调用（插件后台任务等）放行：trust proxy 默认 'loopback'（仅信任同主机代理），
+             * 外部客户端无法让 req.ip 解析成回环地址，此放行不会解除真实访客的限速 */
+            if (ip === '127.0.0.1' || ip === '::1' || ip === 'localhost') return next();
             const now = Date.now();
             let arr = writeLimiterBuckets.get(ip);
             if (!arr) { arr = []; writeLimiterBuckets.set(ip, arr); }

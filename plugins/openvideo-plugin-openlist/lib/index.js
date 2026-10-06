@@ -62,10 +62,8 @@ module.exports = {
 
         /* ── 整个文件夹扫描（含子目录）：后台注册全部视频，进度进顶栏任务列表 ── */
         const VEXT = ['mp4', 'mkv', 'webm', 'avi', 'mov', 'flv', 'ts', 'm3u8', 'wmv', 'mpg', 'mpeg'];
-        const SCAN_CAP = 300;      /* 单次扫描视频文件上限 */
-        const RESOLVE_LIMIT = 58;  /* resolve 自调用滑动窗口配额（本机 IP 限流 60 次/分钟，留余量） */
-        const RESOLVE_WINDOW = 60000;
-        const TICK = 400;          /* 暂停/限流等待的轮询切片 ms */
+        const SCAN_CAP = 1000;     /* 单次扫描视频文件上限 */
+        const TICK = 400;          /* 暂停等待的轮询切片 ms */
         const scan = { scanning: false, paused: false, stopRequested: false, taskId: 0, path: '', total: 0, done: 0, ok: 0, fail: 0, lastFile: '', lastSummary: '' };
         const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         const isVideo = (n) => VEXT.some(x => String(n).toLowerCase().endsWith('.' + x));
@@ -100,11 +98,9 @@ module.exports = {
             return base + '/d/' + enc + (sign ? '?sign=' + sign : '');
         };
 
-        /* resolve 滑动窗口自适应限速：前 RESOLVE_LIMIT 个全速直发，之后按 60s 窗口自动节流（≈1 个/秒）。
-         * 比固定 1.1s 间隔快得多：小文件夹几乎瞬间完成，大文件夹不再浪费前 58 个的等待 */
-        const rwin = [];
-        const rwinPrune = () => { const now = Date.now(); while (rwin.length && rwin[0] <= now - RESOLVE_WINDOW) rwin.shift(); };
-        /* 等待可发起下一个 resolve：返回 'go' 或 'stop'；暂停期间挂起并把「⏸ 已暂停」写进任务详情 */
+        /* 宿主 writeRateLimit 已对本机回环自调用放行限速（trust proxy='loopback' 下外部不可伪造回环），
+         * resolve 全速直发，不再做滑动窗口节流；这里只处理暂停/停止（旧版宿主若仍限速，429 重试退避兜底）。
+         * 返回 'go' 或 'stop'；暂停期间挂起并把「⏸ 已暂停」写进任务详情 */
         const waitTurn = async () => {
             let pauseMarked = false;
             while (true) {
@@ -119,9 +115,7 @@ module.exports = {
                     continue;
                 }
                 if (pauseMarked) { pauseMarked = false; ctx.logger.info('openlist', '文件夹扫描已继续'); }
-                rwinPrune();
-                if (rwin.length < RESOLVE_LIMIT) return 'go';
-                await sleep(TICK);
+                return 'go';
             }
         };
 
@@ -150,7 +144,6 @@ module.exports = {
                         if (i > 0 && await waitTurn() === 'stop') { manualStop = true; break; }
                         try {
                             const link = await fileLink(fp);
-                            rwin.push(Date.now());
                             const r = await ctx.http.get('http://127.0.0.1:' + port + '/api/video/resolve?url=' + encodeURIComponent(link), { timeout: 30000 });
                             const j = await r.json().catch(() => null);
                             if (j && j.code === 0 && j.data && j.data.vid) ok = true;
