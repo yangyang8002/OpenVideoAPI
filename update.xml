@@ -51,9 +51,9 @@
   <file path="plugins/openvideo-plugin-ip-ban/lib/index.js" sha256="d50759b8df550261b7a817e4a825d7dfc03134ec2b54f5728644de5dbb3f865c" size="15967"/>
   <file path="plugins/openvideo-plugin-ip-ban/package.json" sha256="88fdf060f9903b5b425b4697763f097990f0bcee0b73b0a4c2d7233a77da5554" size="3396"/>
   <file path="plugins/openvideo-plugin-openlist/README.md" sha256="71f365442e6e5dbfff8a2a0408bdc9ad3debddc716f560577956ccd5d98d8a58" size="655"/>
-  <file path="plugins/openvideo-plugin-openlist/lib/client/panel.html" sha256="9dbfd555010c535ccb43ecd283a324d8a21ae907593c22671f8b5a17a8c4580b" size="9632"/>
-  <file path="plugins/openvideo-plugin-openlist/lib/index.js" sha256="9d3c0e0dabd6cc023ed27c4c71a8b72a2946112127c75d9294ec030b2abbd526" size="13303"/>
-  <file path="plugins/openvideo-plugin-openlist/package.json" sha256="476e03bc6df134f4ea4c6ed038cce3e76cce29b74bd388331192e299407c11ad" size="1092"/>
+  <file path="plugins/openvideo-plugin-openlist/lib/client/panel.html" sha256="cc08e713c8049b802d14c5357a759a9a569e096da1b7474f438ef22615ef9ac3" size="9664"/>
+  <file path="plugins/openvideo-plugin-openlist/lib/index.js" sha256="62689c6e3e3e251c492eefeebda876ad46d3d66ee5fdcdcb366df7b7db14e22c" size="19960"/>
+  <file path="plugins/openvideo-plugin-openlist/package.json" sha256="9b4bfa7f405c66cfd26b09d236a014bb2f02f02ee52f5911d376d589a2d20d15" size="1640"/>
   <file path="plugins/openvideo-plugin-otp/README.md" sha256="842425470e92812f21be21b067ca53fb3d93c867ee035596d613b6a007e39b14" size="3940"/>
   <file path="plugins/openvideo-plugin-otp/lib/client/admin/otp.js" sha256="3780f7e10380ae3877fca9dc9655d4d25085a02ce0d175fed95d40ccd88414be" size="28258"/>
   <file path="plugins/openvideo-plugin-otp/lib/client/login/otp.js" sha256="46d3bc1d6053f6ba96b7edc9d67cf48ac49b8932f44b76904ef213efa8886da5" size="5031"/>
