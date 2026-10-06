@@ -26,7 +26,7 @@
   <file path="lib/backends/sqlite.js" sha256="625b1d8600c2a0f25a243e4f42d3d929e57a44e11e11e03f9f2f9d003b667735" size="2453"/>
   <file path="lib/cloud.js" sha256="308b1af14d7dc73bd24d83e7e438af38db87c4636662b4e423596c98e777dc56" size="10419"/>
   <file path="lib/model.js" sha256="a14168580c90f41cf496e1bcd27e07eb6cd749478f4b3e21ffdf99372395e586" size="6161"/>
-  <file path="lib/plugin.js" sha256="a463cc8dbec7681c3594704d1dc8f8dd7e2baca38912fdddb985b967f7392eec" size="55188"/>
+  <file path="lib/plugin.js" sha256="7c34366e91dd6ab84301093756f9942f2d8946b25a1167fab07b37878cf811ff" size="55654"/>
   <file path="lib/proxy.js" sha256="52a453c81a8c6c7acfd4a625baba397feddd9ba46e635a558840647b5f893ebe" size="5032"/>
   <file path="lib/store.js" sha256="3faea07157f49e97fde41da68aa4974ff614a1bfa88e42078bef83fb0bc58f1c" size="32608"/>
   <file path="nginx.conf.example" sha256="bfbc0c107882def10bcecfd008c10bfdd54115c0fe50538c9be3615167469e78" size="2119"/>
@@ -88,7 +88,7 @@
   <file path="src/routes/db.js" sha256="7a20f0323a24c958cbde47d197c1a36f11bab2a5457174ba4fd7f80b185763c2" size="6566"/>
   <file path="src/routes/deps.js" sha256="5712635bcd95a142f230edeb5dfa136fa44fd7ad9ce894f1fb76f8e794b96c2c" size="9787"/>
   <file path="src/routes/files.js" sha256="3db48b250b2fe56562ad943752456a3124f87dec4364cbcb012a58c5498f7c61" size="11421"/>
-  <file path="src/routes/plugins.js" sha256="8a3ca91ec144ef04bcd1c5ccf9fc39595bfb370e25c16b0d8a446093cb69c5c2" size="10679"/>
+  <file path="src/routes/plugins.js" sha256="0e91a27ae7edd46ee6e103785ac9aec3603967f9134c6986d4e80ed4af1f725f" size="10953"/>
   <file path="src/routes/public.js" sha256="ea811430046f66b000036f3e64ca035ee87e0a771a3d1dfc9897e2d53e798b28" size="4187"/>
   <file path="src/routes/security.js" sha256="431daa509ca24639765c0f7126f387683839639b009199df2c6e8686c35b166a" size="11151"/>
   <file path="src/routes/subtitle.js" sha256="c1fc4f84caf9312125e45f21936ad2e50f15a73018e8cf48689a082d183a811d" size="17360"/>
