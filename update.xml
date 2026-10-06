@@ -55,7 +55,7 @@
   <file path="plugins/openvideo-plugin-otp/lib/index.js" sha256="a199c3d55ead7cc498601f2765ad9857c32c2009039645d95ceba60730dd47f2" size="14297"/>
   <file path="plugins/openvideo-plugin-otp/package.json" sha256="8d1d3a177f481e0b72c88da90349383bcd514d5c5c54b1ba568715502f6f0a54" size="2134"/>
   <file path="public/CUSTOM_THEME.md" sha256="a4394eb9fd4e0d7b68d0273fd957ec17cadfa2a0481aa28f5f55298c006008c0" size="3271"/>
-  <file path="public/admin.html" sha256="cb14bc029e12d91e277e20205dc4dee7c551a0d69e89783ff3530002718f069d" size="334757"/>
+  <file path="public/admin.html" sha256="9da8756d9ec7983020fc82aab849bb06329d13c72cca0ea81e203996258cf98e" size="334843"/>
   <file path="public/favicon-128.png" sha256="de8371137f6c9648f8728550e71de67fb5460771062ec1b45970909a1e5dd3dc" size="2034"/>
   <file path="public/favicon.svg" sha256="ca0f3061d459fc5636914978579613a6a8b626dc69123909eceee07d2f3c8d9f" size="555"/>
   <file path="public/i18n.js" sha256="dab7a4eca12823a2d84effc5f5620ad4564bd7b6bef3210a6fa09c3f7a34ed22" size="309960"/>
