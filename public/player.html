@@ -158,11 +158,6 @@
         .bi-btn:hover{background:var(--surface);border-color:var(--bili-pink);color:var(--bili-pink)}
         .bi-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-        /* Screenshot float */
-        .bili-screenshot{position:absolute;right:clamp(10px,3vw,14px);top:50%;transform:translateY(-50%);width:var(--shot);height:var(--shot);border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:8;transition:all .2s;opacity:0;pointer-events:none}
-        .art-video-player.art-control-show .bili-screenshot,.art-video-player.art-hover .bili-screenshot{opacity:1;pointer-events:auto}
-        .bili-screenshot:hover{background:rgba(0,0,0,.55);color:var(--bili-pink);transform:translateY(-50%) scale(1.08)}
-        .bili-screenshot svg{width:calc(var(--shot)*.5);height:calc(var(--shot)*.5);stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
         /* Overflow */
         .bili-overflow-panel{position:absolute;right:clamp(8px,3vw,12px);bottom:calc(var(--art-control-height)+env(safe-area-inset-bottom,0px)+6px);background:rgba(24,24,28,.94);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:10px;display:none;flex-direction:column;padding:4px;z-index:30;min-width:130px}
@@ -941,7 +936,7 @@
                 position:'right',
                 html:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
                 tooltip:t('截图'),style:{order:6},
-                click:function(){var vv=this.video;if(vv&&vv.readyState>=2){try{var cv=document.createElement('canvas');cv.width=vv.videoWidth;cv.height=vv.videoHeight;cv.getContext('2d').drawImage(vv,0,0);var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='screenshot-'+Date.now()+'.png';a.click();showToast(t('截图已保存'))}catch(e){showToast(t('截图失败（可能因跨域限制）'),true)}}else{showToast(t('视频未就绪'),true)}}
+                click:function(){var vv=this.video;if(vv&&vv.readyState>=2)serverShot(vv.currentTime);else showToast(t('视频未就绪'),true)}
             }]
         };
 
@@ -1010,7 +1005,7 @@
 
             /* Custom UI */
             setTimeout(function(){
-                setupCommentBox();buildDmSettingsPanel();injectScreenshotFloat();injectStatsPanel();setupOverflow();buildInfoArea(decoded,vid,danmakuData.length);
+                setupCommentBox();buildDmSettingsPanel();injectStatsPanel();setupOverflow();buildInfoArea(decoded,vid,danmakuData.length);
             },600);
         }catch(e){showError(t('播放器初始化失败: ')+e.message)}
     }
@@ -1343,16 +1338,7 @@
         if(vid2)addTag('vid: '+vid2);
         var acts=document.getElementById('biActs');acts.innerHTML='';
         function addBtn(label,icon,fn){var b=document.createElement('button');b.className='bi-btn';b.innerHTML=icon+'<span>'+esc(label)+'</span>';b.addEventListener('click',fn);acts.appendChild(b)}
-        addBtn(t('截图'),ICONS.camera(),function(){
-            if(art&&art.video&&art.video.readyState>=2){
-                try{
-                    var cv=document.createElement('canvas');cv.width=art.video.videoWidth;cv.height=art.video.videoHeight;
-                    cv.getContext('2d').drawImage(art.video,0,0);
-                    var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='screenshot-'+Date.now()+'.png';a.click();
-                    showToast(t('截图已保存'));
-                }catch(e6){showToast(t('截图失败'),true)}
-            }else showToast(t('视频未就绪'),true);
-        });
+        addBtn(t('截图'),ICONS.camera(),function(){serverShot()});
         addBtn(t('复制链接'),ICONS.link(),function(){copyText(location.href)});
         addBtn(t('嵌入代码'),ICONS.code(),function(){
             var src=location.origin+'/player/?url='+encodeURIComponent(url||'');
@@ -1367,11 +1353,20 @@
         }
     }
 
-    /* ===== Screenshot ===== */
-    function injectScreenshotFloat(){
-        var app=document.querySelector('.art-video-player');if(!app||document.querySelector('.bili-screenshot'))return;
-        var btn=document.createElement('button');btn.className='bili-screenshot';btn.title=t('截图');btn.innerHTML=ICONS.camera();
-        btn.addEventListener('click',function(e){e.stopPropagation();if(art&&art.video&&art.video.readyState>=2){try{var cv=document.createElement('canvas');cv.width=art.video.videoWidth;cv.height=art.video.videoHeight;cv.getContext('2d').drawImage(art.video,0,0);var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='screenshot-'+Date.now()+'.png';a.click();showToast(t('截图已保存'))}catch(e){showToast(t('截图失败'),true)}}else{showToast(t('视频未就绪'),true)}});
+    /* ===== Screenshot（服务端 ffmpeg 抓帧：跨域视频不受 canvas 污染限制） ===== */
+    function serverShot(time){
+        if(!art||!art.video||art.video.readyState<2){showToast(t('视频未就绪'),true);return;}
+        var su=(art.option&&art.option.url)||'';
+        if(!su){showToast(t('视频未就绪'),true);return;}
+        showToast(t('截图中...'));
+        fetch('/api/video/screenshot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:su,time:time||art.video.currentTime})})
+            .then(function(r){return r.json()}).then(function(d){
+                if(d.code===0&&d.data&&d.data.image){
+                    var a=document.createElement('a');a.href=d.data.image;a.download='screenshot-'+Date.now()+'.jpg';a.click();
+                    showToast(t('截图已保存'));
+                }else showToast(d.msg||t('截图失败'),true);
+            }).catch(function(){showToast(t('截图失败'),true)});
+    }('canvas');cv.width=art.video.videoWidth;cv.height=art.video.videoHeight;cv.getContext('2d').drawImage(art.video,0,0);var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='screenshot-'+Date.now()+'.png';a.click();showToast(t('截图已保存'))}catch(e){showToast(t('截图失败'),true)}}else{showToast(t('视频未就绪'),true)}});
         app.appendChild(btn);
     }
 

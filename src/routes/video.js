@@ -21,6 +21,41 @@ module.exports = {
         }
     });
 
+    /* 视频截图：服务端 ffmpeg 抓帧（跨域视频 canvas 会被污染，服务端无此限制） */
+    app.post('/api/video/screenshot', writeRateLimit(10, 60000), async (req, res) => {
+        const { url, time } = req.body || {};
+        const u = String(url || '').trim();
+        if (!u || !isValidVideoUrl(u)) return res.status(400).json({ code: 1, msg: '缺少或非法的 url 参数' });
+        const t = Math.max(0, Math.min(parseFloat(time) || 0, 86400));
+        const fs = require('fs');
+        const path = require('path');
+        const os = require('os');
+        const { spawn } = require('child_process');
+        let ffBin = 'ffmpeg';
+        try { if (fs.existsSync('/usr/bin/ffmpeg')) ffBin = '/usr/bin/ffmpeg'; } catch (e) {}
+        const file = path.join(os.tmpdir(), 'ovshot-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg');
+        const child = spawn(ffBin, ['-hide_banner', '-loglevel', 'error', '-ss', String(t), '-i', u, '-frames:v', '1', '-q:v', '3', '-y', file]);
+        let err = '';
+        child.stderr && child.stderr.on('data', (d) => { err += d; });
+        const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (e) {} }, 60000);
+        child.on('error', (e) => {
+            clearTimeout(timer);
+            return res.status(500).json({ code: 1, msg: '截图失败：ffmpeg 不可用（' + (e.message || '') + '）' });
+        });
+        child.on('exit', (code) => {
+            clearTimeout(timer);
+            try {
+                if (code === 0 && fs.existsSync(file) && fs.statSync(file).size > 0) {
+                    const b64 = fs.readFileSync(file).toString('base64');
+                    try { fs.unlinkSync(file); } catch (e) {}
+                    return res.json({ code: 0, data: { image: 'data:image/jpeg;base64,' + b64 } });
+                }
+                try { fs.unlinkSync(file); } catch (e) {}
+            } catch (e) {}
+            res.status(500).json({ code: 1, msg: '截图失败：无法读取视频画面（' + String(err || '').slice(-160) + '）' });
+        });
+    });
+
     /* ── 原 server.js L1282-1308 ── */
     /* 任意 CDN 签名直链的身份归一：剥离轮换的签名/会话参数（t/s/r/bzs/ur/urn/bzp）与纯装饰参数（filename），
        同一视频的不同签名实例映射到同一 vid（弹幕/字幕不丢）；存储仍保留完整链接（播放/ffprobe 可用） */
