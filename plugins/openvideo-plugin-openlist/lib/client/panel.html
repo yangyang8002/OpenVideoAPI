@@ -10,7 +10,8 @@
   h1 { font-size: 18px; margin-bottom: 4px; }
   h2 { font-size: 12px; color: #9aa3b2; font-weight: normal; margin-top: 0; }
   .crumbs { font-size: 12px; margin: 8px 0; color: #9aa3b2; word-break: break-all; }
-  .crumbs a { color: #60a5fa; cursor: pointer; text-decoration: none; }
+  .crumbs a { color: #60a5fa; cursor: pointer; text-decoration: none; padding: 1px 5px; border-radius: 4px; }
+  .crumbs a:hover { background: #1f2937; }
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #232833; }
   th { color: #9aa3b2; font-weight: normal; }
@@ -28,6 +29,7 @@
 <div class="card">
   <div class="crumbs" id="crumbs">/</div>
   <div style="margin:6px 0 2px">
+    <button id="upBtn" class="gray" onclick="goUp()" style="display:none">⬆ 上一级</button>
     <button id="scanBtn" onclick="scanFolder()">扫描此文件夹（含子目录）</button>
     <button id="pauseBtn" class="gray" onclick="scanPauseToggle()" style="display:none">暂停</button>
     <button id="stopBtn" class="gray" onclick="scanControl('stop')" style="display:none">停止扫描</button>
@@ -53,11 +55,12 @@ function loadStatus() {
       toast('未配置：请在后台 插件 → openlist 设置中填写 baseUrl' + (d.data && d.data.base ? '' : ''), true);
       return;
     }
-    listPath('/');
+    listPath('/', true);
   }).catch(function () { toast('加载失败', true); });
 }
-function listPath(p) {
+function listPath(p, fromPop) {
   CWD = p || '/';
+  if (!fromPop) navPush(CWD);
   toast('加载中...');
   fetch('/api/plugin/openlist/list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: CWD }) })
     .then(function (r) { return r.json(); }).then(function (d) {
@@ -67,6 +70,8 @@ function listPath(p) {
       var acc = '';
       for (var i = 0; i < parts.length; i++) { acc += '/' + parts[i]; cr += ' <a data-p="' + esc(acc) + '">' + esc(parts[i]) + '</a> /'; }
       document.getElementById('crumbs').innerHTML = cr;
+      var up = document.getElementById('upBtn');
+      if (CWD && CWD !== '/') { up.style.display = ''; up.title = '返回 ' + parentPath(CWD); } else { up.style.display = 'none'; up.title = ''; }
       var rows = [];
       d.data.dirs.forEach(function (x) { rows.push('<tr><td class="name dir" data-d="' + esc(x.name) + '">📁 ' + esc(x.name) + '</td><td>—</td><td></td></tr>'); });
       d.data.files.forEach(function (x) {
@@ -88,6 +93,13 @@ function withLink(name, fn) {
       return d.data.link;
     }).catch(function () { toast('获取链接失败', true); });
 }
+function parentPath(p) { var s = String(p || '/').replace(/\/+$/, ''); if (!s || s === '/') return '/'; var i = s.lastIndexOf('/'); return i <= 0 ? '/' : s.slice(0, i); }
+function goUp() { if (CWD && CWD !== '/') listPath(parentPath(CWD)); }
+function navPush(p) { try { history.pushState({ p: p }, '', location.pathname + '#p=' + encodeURIComponent(p)); } catch (e) {} }
+window.addEventListener('popstate', function (e) {
+  var p = (e.state && e.state.p) || (location.hash.indexOf('#p=') === 0 ? decodeURIComponent(location.hash.slice(3)) : '/');
+  listPath(p, true);
+});
 document.getElementById('crumbs').addEventListener('click', function (e) {
   var a = e.target.closest('a'); if (!a) return; listPath(a.getAttribute('data-p'));
 });

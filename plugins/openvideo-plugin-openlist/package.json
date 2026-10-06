@@ -1,15 +1,29 @@
 {
   "name": "openvideo-plugin-openlist",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "OpenList/AList 网盘接入：后台浏览网盘目录树，一键注册视频到播放库并生成播放链接（注册即触发内封字幕自动扫描）",
   "main": "lib/index.js",
   "license": "MIT",
-  "keywords": ["openvideo", "plugin", "openlist", "alist", "cloud"],
-  "files": ["lib", "README.md"],
+  "keywords": [
+    "openvideo",
+    "plugin",
+    "openlist",
+    "alist",
+    "cloud"
+  ],
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "openvideoPlugin": {
     "name": "openlist",
     "description": "OpenList 网盘接入：服务端代理 OpenList API（令牌不落浏览器），面板浏览目录树、注册视频、生成播放链接",
-    "inject": ["http", "logger", "tasks", "store"],
+    "inject": [
+      "http",
+      "logger",
+      "tasks",
+      "store"
+    ],
     "schema": [
       {
         "key": "baseUrl",
