@@ -57,13 +57,19 @@ module.exports = {
     });
 
     /* ── 原 server.js L1282-1308 ── */
-    /* 任意 CDN 签名直链的身份归一：剥离轮换的签名/会话参数（t/s/r/bzs/ur/urn/bzp）与纯装饰参数（filename），
-       同一视频的不同签名实例映射到同一 vid（弹幕/字幕不丢）；存储仍保留完整链接（播放/ffprobe 可用） */
+    /* 任意 CDN/OpenList 签名直链的身份归一：剥离轮换的签名/会话参数（t/s/r/bzs/ur/urn/bzp/sign——
+       sign 为 OpenList/AList 轮换签名：主应用未配云端实例时 normalizeOpenlistUrl 不生效，此处兜底，
+       否则同一视频每次取到新签名就分裂出新 vid，扫描时挂载的字幕随之丢失）与纯装饰参数（filename），
+       且路径段统一解码后重编码（原始中文与 %E6… 百分号编码形式归一到同一身份）；
+       同一视频的不同签名/编码实例映射到同一 vid（弹幕/字幕不丢）；存储仍保留完整链接（播放/ffprobe 可用） */
     function signFreeId(u) {
         try {
             const p = new URL(u);
             if (!/^https?:$/.test(p.protocol)) return u;
-            for (const k of ['t', 's', 'r', 'bzs', 'ur', 'urn', 'bzp', 'filename']) p.searchParams.delete(k);
+            for (const k of ['t', 's', 'r', 'bzs', 'ur', 'urn', 'bzp', 'filename', 'sign']) p.searchParams.delete(k);
+            p.pathname = p.pathname.split('/').map((seg) => {
+                try { return encodeURIComponent(decodeURIComponent(seg)); } catch (e) { return seg; }
+            }).join('/');
             const q = p.searchParams.toString();
             return p.origin + p.pathname + (q ? '?' + q : '');
         } catch (e) { return u; }

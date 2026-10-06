@@ -20,12 +20,16 @@ module.exports = {
         res.json({ code: 0, data: { url } });
     });
 
-    /* CDN 签名直链身份归一（与 video.js 同策略）：剥离轮换签名/会话参数与装饰参数，签名变化不影响字幕关联 */
+    /* CDN/OpenList 签名直链身份归一（与 video.js 同策略）：剥离轮换签名/会话参数（含 OpenList 的 sign）与装饰参数，
+       路径段编码归一（原始中文与百分号编码同身份），签名/编码变化不影响字幕关联 */
     function signFreeId(u) {
         try {
             const p = new URL(u);
             if (!/^https?:$/.test(p.protocol)) return u;
-            for (const k of ['t', 's', 'r', 'bzs', 'ur', 'urn', 'bzp', 'filename']) p.searchParams.delete(k);
+            for (const k of ['t', 's', 'r', 'bzs', 'ur', 'urn', 'bzp', 'filename', 'sign']) p.searchParams.delete(k);
+            p.pathname = p.pathname.split('/').map((seg) => {
+                try { return encodeURIComponent(decodeURIComponent(seg)); } catch (e) { return seg; }
+            }).join('/');
             const q = p.searchParams.toString();
             return p.origin + p.pathname + (q ? '?' + q : '');
         } catch (e) { return u; }
