@@ -2,6 +2,31 @@
 /* OpenList 网盘接入插件：服务端代理 /api/fs/list 与 /api/fs/get（避免浏览器跨域与令牌泄露），
  * 面板浏览网盘目录树；「注册到库」走主项目 /api/video/resolve（联动内封字幕自动扫描）；
  * 「复制播放链接」生成 /player/?url=<OpenList /d/ 链接> 直达播放页 */
+/* 1.4 扫描增强：上限可在插件设置调整（scanCap，默认 5000）；扫描时把目录下同名外挂字幕文件
+ * （Movie.srt / Movie.zh.srt / Movie.zh-CN.ass…多语言可多份）下载进本地字幕库并挂载到视频 */
+
+const fs = require('fs');
+const path = require('path');
+
+/* 定位应用根（含 data/ 与 server.js 的目录），兼容 plugins/<name>/lib 与 node_modules 布局 */
+function findRoot() {
+    let dir = __dirname;
+    for (let i = 0; i < 8; i++) {
+        if (fs.existsSync(path.join(dir, 'data')) && fs.existsSync(path.join(dir, 'server.js'))) return dir;
+        const next = path.dirname(dir);
+        if (next === dir) break;
+        dir = next;
+    }
+    return path.resolve(__dirname, '..', '..');
+}
+const ROOT = findRoot();
+const SUB_DIR = path.join(ROOT, 'data', 'subtitles');
+function genSubId() {
+    let s = 's';
+    const chars = '23456789abcdefghijkmnpqrstuvwxyz';
+    for (let i = 0; i < 7; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return s;
+}
 
 module.exports = {
     apply(ctx, config) {
@@ -62,9 +87,11 @@ module.exports = {
 
         /* ── 整个文件夹扫描（含子目录）：后台注册全部视频，进度进顶栏任务列表 ── */
         const VEXT = ['mp4', 'mkv', 'webm', 'avi', 'mov', 'flv', 'ts', 'm3u8', 'wmv', 'mpg', 'mpeg'];
-        const SCAN_CAP = 1000;     /* 单次扫描视频文件上限 */
+        const SEXT = ['srt', 'ass', 'ssa', 'vtt']; /* 同名外挂字幕扩展名 */
+        /* 单次扫描视频文件上限：插件设置 scanCap（默认 5000；外挂字幕文件不计入上限） */
+        const scanCap = () => { const n = Number(config && config.scanCap); return Number.isFinite(n) && n > 0 ? Math.floor(n) : 5000; };
         const TICK = 400;          /* 暂停等待的轮询切片 ms */
-        const scan = { scanning: false, paused: false, stopRequested: false, taskId: 0, path: '', total: 0, done: 0, ok: 0, fail: 0, lastFile: '', lastSummary: '' };
+        const scan = { scanning: false, paused: false, stopRequested: false, taskId: 0, path: '', total: 0, done: 0, ok: 0, fail: 0, subs: 0, lastFile: '', lastSummary: '' };
         const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         const isVideo = (n) => VEXT.some(x => String(n).toLowerCase().endsWith('.' + x));
         const shortName = (p) => String(p).split('/').pop() || p;
@@ -73,21 +100,24 @@ module.exports = {
             const data = await api('/api/fs/list', { path: p, page: 1, per_page: 0, refresh: false });
             return data.content || [];
         };
-        /* 递归收集视频文件：文件在前、子目录深度优先，按名称排序，达上限即停 */
-        const collect = async (p, out, seen) => {
-            if (out.length >= SCAN_CAP || scan.stopRequested) return;
+        /* 递归收集视频文件 + 目录内全部外挂字幕文件：文件在前、子目录深度优先，按名称排序，达上限即停 */
+        const collect = async (p, out, seen, cap, subMap) => {
+            if (out.length >= cap || scan.stopRequested) return;
             const items = await listDir(p);
             const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'zh');
             const dirs = items.filter(x => x.is_dir).sort(byName);
-            const files = items.filter(x => !x.is_dir && isVideo(x.name)).sort(byName);
+            const files = items.filter(x => !x.is_dir).sort(byName);
+            const subs = files.filter(x => SEXT.some(e => String(x.name).toLowerCase().endsWith('.' + e)));
+            if (subs.length) subMap.set(p, subs.map(x => ({ name: x.name, path: (p === '/' ? '' : p) + '/' + x.name })));
             for (const f of files) {
-                if (out.length >= SCAN_CAP) return;
+                if (!isVideo(f.name)) continue;
+                if (out.length >= cap) return;
                 const fp = (p === '/' ? '' : p) + '/' + f.name;
                 if (!seen.has(fp)) { seen.add(fp); out.push(fp); }
             }
             for (const d of dirs) {
-                if (out.length >= SCAN_CAP || scan.stopRequested) return;
-                await collect((p === '/' ? '' : p) + '/' + d.name, out, seen);
+                if (out.length >= cap || scan.stopRequested) return;
+                await collect((p === '/' ? '' : p) + '/' + d.name, out, seen, cap, subMap);
             }
         };
         const fileLink = async (p) => {
@@ -96,6 +126,66 @@ module.exports = {
             const enc = p.split('/').map(x => encodeURIComponent(x)).join('/').replace(/^\/+/, '');
             const sign = data.sign || '';
             return base + '/d/' + enc + (sign ? '?sign=' + sign : '');
+        };
+
+        /* ── 同名外挂字幕挂载：Movie.srt / Movie.zh.srt / Movie.zh-CN.ass 等（一个视频可挂多份多语言） ── */
+        const LANG_ALIAS = { zh:'zh', chs:'zh', sc:'zh', cn:'zh', zho:'zh', chi:'zh', 'zh-hans':'zh', 'zh-cn':'zh', 'zh-sg':'zh', cht:'tc', tc:'tc', zht:'tc', 'zh-hant':'tc', 'zh-tw':'tc', 'zh-hk':'tc', 'zh-mo':'tc', ja:'ja', jp:'ja', jpn:'ja', ko:'ko', kr:'ko', kor:'ko', en:'en', eng:'en', de:'de', ger:'de', deu:'de', fr:'fr', fra:'fr', fre:'fr', ru:'ru', rus:'ru', es:'es', spa:'es', pt:'pt', por:'pt', it:'it', ita:'it', th:'th', tha:'th', vi:'vi', vie:'vi', id:'id', ind:'id', ar:'ar', ara:'ar', hi:'hi', hin:'hi' };
+        const parseLangTag = (t) => {
+            const k = String(t).toLowerCase();
+            if (LANG_ALIAS[k]) return LANG_ALIAS[k];
+            if (/^[a-z]{2}(-[a-z]{2,4})?$/.test(k)) return k; /* 未知但形如语言码 → 原样保留 */
+            return '';
+        };
+        /* 文件名与视频basename匹配：无中缀（Movie.srt）或中缀是语言标记（Movie.zh.srt）才挂；
+         * 中缀不是语言（如 chs&eng、default、注释名）→ 跳过，防误挂 */
+        const subMatch = (base, ent) => {
+            if (!ent.name.startsWith(base + '.')) return null;
+            const rest = ent.name.slice(base.length + 1);
+            const m = /^(?:([a-zA-Z][a-zA-Z0-9-]{0,7}).)?(srt|ass|ssa|vtt)$/i.exec(rest);
+            if (!m) return null;
+            if (!m[1]) return { lang: '', tag: '', ext: m[2].toLowerCase() };
+            const lang = parseLangTag(m[1]);
+            if (!lang) return null; /* 中缀不是语言标记（如 chs&eng、default）→ 跳过防误挂 */
+            return { lang, tag: m[1], ext: m[2].toLowerCase() };
+        };
+        /* 下载字幕进本地字幕库（type=local，source=openlist:<网盘路径> 持久去重）并关联 vid；返回新下载数 */
+        const mountSubs = async (vid, fp, subMap) => {
+            if (!vid || config.mountSubs === false) return 0;
+            const dir = fp.slice(0, fp.lastIndexOf('/')) || '/';
+            const base = shortName(fp).replace(/.[^.]+$/, '');
+            const ents = subMap.get(dir) || [];
+            const cands = [];
+            for (const e of ents) {
+                const mt = subMatch(base, e);
+                if (mt) cands.push({ path: e.path, name: e.name, lang: mt.lang, tag: mt.tag, ext: mt.ext });
+            }
+            if (!cands.length) return 0;
+            if (!fs.existsSync(SUB_DIR)) fs.mkdirSync(SUB_DIR, { recursive: true });
+            const subsMap = await ctx.store.videoSubsAll();
+            const all = await ctx.store.subtitleAll();
+            const bySrc = new Map();
+            for (const s of (all || [])) bySrc.set(String(s.source || ''), s);
+            if (!Array.isArray(subsMap[vid])) subsMap[vid] = subsMap[vid] || [];
+            let added = 0, linked = 0;
+            for (const c of cands) {
+                const src = 'openlist:' + c.path;
+                let item = bySrc.get(src);
+                if (!item) {
+                    const link = await fileLink(c.path);
+                    const r = await ctx.http.get(link, { timeout: 30000 });
+                    const text = await r.text();
+                    if (!text || text.length > 20 * 1024 * 1024 || /^s*</.test(text)) throw new Error('字幕下载失败: ' + c.name);
+                    const safe = base.replace(/[^w.一-鿿-]+/g, '_').slice(0, 60);
+                    const saveName = 'ol' + Date.now().toString(36) + '-' + safe + '.' + (c.lang || c.tag || 'sub') + '.' + c.ext;
+                    fs.writeFileSync(path.join(SUB_DIR, saveName), text);
+                    item = { id: genSubId(), name: (base + '.' + (c.tag || c.lang || c.ext)).slice(0, 100), lang: c.lang, langs: c.lang ? [c.lang] : [], langName: '', type: 'local', url: '', content: '', file: saveName, localized: true, createdAt: Date.now(), source: src };
+                    await ctx.store.subtitleAdd(item);
+                    added++;
+                }
+                if (!subsMap[vid].includes(item.id)) { subsMap[vid].push(item.id); linked++; }
+            }
+            if (linked) await ctx.store.videoSubsWrite(subsMap);
+            return added;
         };
 
         /* 宿主 writeRateLimit 已对本机回环自调用放行限速（trust proxy='loopback' 下外部不可伪造回环），
@@ -125,9 +215,12 @@ module.exports = {
             let manualStop = false;
             try {
                 ctx.logger.info('openlist', '文件夹扫描开始: ' + root);
-                const out = [], seen = new Set();
-                await collect(root, out, seen);
-                scan.total = out.length; scan.done = 0; scan.ok = 0; scan.fail = 0;
+                const out = [], seen = new Set(), subMap = new Map();
+                const CAP = scanCap();
+                await collect(root, out, seen, CAP, subMap);
+                scan.total = out.length; scan.done = 0; scan.ok = 0; scan.fail = 0; scan.subs = 0;
+                let subFiles = 0; for (const l of subMap.values()) subFiles += l.length;
+                if (subFiles) ctx.logger.info('openlist', '发现外挂字幕候选 ' + subFiles + ' 个，将按同名规则挂载');
                 if (!out.length) {
                     scan.lastSummary = '目录内未发现视频文件';
                     ctx.tasks.finish(t.id, 'done', scan.lastSummary);
@@ -138,31 +231,35 @@ module.exports = {
                 for (const fp of out) {
                     if (await waitTurn() === 'stop') { manualStop = true; break; }
                     scan.lastFile = shortName(fp);
-                    ctx.tasks.finish(t.id, 'running', (scan.done + 1) + '/' + scan.total + ' · 成功 ' + scan.ok + ' · 失败 ' + scan.fail + ' · ' + scan.lastFile);
-                    let ok = false, why = '';
+                    ctx.tasks.finish(t.id, 'running', (scan.done + 1) + '/' + scan.total + ' · 成功 ' + scan.ok + ' · 失败 ' + scan.fail + (scan.subs ? ' · 字幕 +' + scan.subs : '') + ' · ' + scan.lastFile);
+                    let ok = false, why = '', newVid = '';
                     for (let i = 0; i < 2 && !ok; i++) {   /* 失败重试一次（重试前重新等窗口；429 多退 5s） */
                         if (i > 0 && await waitTurn() === 'stop') { manualStop = true; break; }
                         try {
                             const link = await fileLink(fp);
                             const r = await ctx.http.get('http://127.0.0.1:' + port + '/api/video/resolve?url=' + encodeURIComponent(link), { timeout: 30000 });
                             const j = await r.json().catch(() => null);
-                            if (j && j.code === 0 && j.data && j.data.vid) ok = true;
+                            if (j && j.code === 0 && j.data && j.data.vid) { ok = true; newVid = String(j.data.vid); }
                             else why = (j && j.msg) || ('resolve code ' + (j && j.code));
                         } catch (e) { why = e.message; }
                         if (!ok && i === 0) await sleep(/429|频繁/.test(String(why)) ? 5000 : 3000);
                     }
                     if (manualStop) break;
-                    if (ok) scan.ok++; else { scan.fail++; ctx.logger.warn('openlist', '注册失败: ' + fp + ' — ' + why); }
+                    if (ok) {
+                        scan.ok++;
+                        try { scan.subs += await mountSubs(newVid, fp, subMap); }
+                        catch (e) { ctx.logger.warn('openlist', '字幕挂载失败: ' + fp + ' — ' + (e.message || e)); }
+                    } else { scan.fail++; ctx.logger.warn('openlist', '注册失败: ' + fp + ' — ' + why); }
                     scan.done++;
-                    ctx.tasks.finish(t.id, 'running', scan.done + '/' + scan.total + ' · 成功 ' + scan.ok + ' · 失败 ' + scan.fail + ' · ' + scan.lastFile);
+                    ctx.tasks.finish(t.id, 'running', scan.done + '/' + scan.total + ' · 成功 ' + scan.ok + ' · 失败 ' + scan.fail + (scan.subs ? ' · 字幕 +' + scan.subs : '') + ' · ' + scan.lastFile);
                 }
                 if (manualStop) {
-                    scan.lastSummary = '已手动停止：完成 ' + scan.done + '/' + scan.total + '，成功注册 ' + scan.ok + '，失败 ' + scan.fail;
+                    scan.lastSummary = '已手动停止：完成 ' + scan.done + '/' + scan.total + '，成功注册 ' + scan.ok + '，失败 ' + scan.fail + '，字幕挂载 ' + scan.subs;
                     ctx.tasks.finish(t.id, 'done', scan.lastSummary);
                     ctx.logger.info('openlist', '文件夹扫描被手动停止: ' + scan.lastSummary);
                 } else {
-                    const capped = scan.total >= SCAN_CAP;
-                    scan.lastSummary = '完成：共 ' + scan.total + ' 个视频' + (capped ? '（达 ' + SCAN_CAP + ' 上限）' : '') + '，成功注册 ' + scan.ok + '，失败 ' + scan.fail;
+                    const capped = scan.total >= CAP;
+                    scan.lastSummary = '完成：共 ' + scan.total + ' 个视频' + (capped ? '（达 ' + CAP + ' 上限）' : '') + '，成功注册 ' + scan.ok + '，失败 ' + scan.fail + '，字幕挂载 ' + scan.subs;
                     ctx.tasks.finish(t.id, (scan.fail && !scan.ok) ? 'fail' : 'done', scan.lastSummary);
                     ctx.logger.info('openlist', '文件夹扫描结束: ' + scan.lastSummary);
                 }
@@ -185,7 +282,7 @@ module.exports = {
             const p = String((req.body || {}).path || '/');
             const { base } = cfg();
             if (!base) { const e = new Error('未配置 OpenList 地址（请在插件设置中填写 baseUrl）'); e.status = 503; throw e; }
-            scan.scanning = true; scan.paused = false; scan.stopRequested = false; scan.taskId = 0; scan.path = p; scan.total = 0; scan.done = 0; scan.ok = 0; scan.fail = 0; scan.lastFile = ''; scan.lastSummary = '';
+            scan.scanning = true; scan.paused = false; scan.stopRequested = false; scan.taskId = 0; scan.path = p; scan.total = 0; scan.done = 0; scan.ok = 0; scan.fail = 0; scan.subs = 0; scan.lastFile = ''; scan.lastSummary = '';
             runScan(p).catch(() => {});
             res.json({ code: 0, data: { started: true, path: p } });
         }));

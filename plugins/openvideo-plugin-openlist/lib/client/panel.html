@@ -124,7 +124,7 @@ function pollScan() {
       btn.disabled = true;
       pb.style.display = ''; sb.style.display = '';
       pb.textContent = s.paused ? '继续' : '暂停';
-      var base = (s.done || 0) + '/' + (s.total || '?') + ' · 成功 ' + (s.ok || 0) + ' · 失败 ' + (s.fail || 0);
+      var base = (s.done || 0) + '/' + (s.total || '?') + ' · 成功 ' + (s.ok || 0) + ' · 失败 ' + (s.fail || 0) + ' · 字幕 ' + (s.subs || 0);
       scanStat(s.paused ? '⏸ 已暂停 · ' + base : '扫描中 ' + base + (s.lastFile ? ' · ' + s.lastFile : ''), 'warn');
       if (!scanTimer) scanTimer = setInterval(pollScan, 2000);
     } else {
