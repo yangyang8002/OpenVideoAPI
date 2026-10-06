@@ -5,7 +5,7 @@ const fs = require('fs');
 
 module.exports = {
     mount(ctx) {
-        const { app, checkAdmin, S, safeErrMsg, getPluginConfig, ROOT_DIR, DEFAULT_PLUGIN_REGISTRY, PLUGIN_REGISTRY_MIRRORS, pluginLogs, checkAdminAuth } = ctx;
+        const { app, checkAdmin, S, safeErrMsg, getPluginConfig, ROOT_DIR, DEFAULT_PLUGIN_REGISTRY, PLUGIN_REGISTRY_MIRRORS, pluginLogs, checkAdminAuth, addUpdateTask, finishUpdateTask } = ctx;
 
     /* ── 原 server.js L3508-3510 ── */
     app.get('/api/admin/plugins', checkAdmin, (req, res) => {
@@ -66,11 +66,14 @@ module.exports = {
 
     /* ── 原 server.js L3556-3564 ── */
     app.post('/api/admin/plugins/update', checkAdmin, async (req, res) => {
+        const { name } = req.body || {};
+        const task = addUpdateTask('plugin', name || '', 'npm 更新（保留配置与启用状态，本地包自动切换 npm 来源）');
         try {
-            const { name } = req.body || {};
             await S.pluginManager.update(name);
+            finishUpdateTask(task.id, 'done', '已更新到最新版');
             res.json({ code: 0, msg: '插件 ' + name + ' 已更新' });
         } catch (e) {
+            finishUpdateTask(task.id, 'failed', safeErrMsg(e));
             res.status(400).json({ code: 1, msg: '更新失败: ' + safeErrMsg(e) });
         }
     });

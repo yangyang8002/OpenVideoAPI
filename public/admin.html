@@ -1543,6 +1543,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
 
             <div class="card">
                 <h3><span class="dot" style="background:var(--primary);box-shadow:0 0 6px var(--primary)"></span>npm 依赖
+                    <button class="btn btn-sm" id="depsCheckBtn" style="margin-left:10px" onclick="checkDeps()">检测更新</button>
                     <button class="btn btn-sm btn-primary" style="margin-left:10px" onclick="updateAllDeps()">更新全部</button>
                 </h3>
                 <div class="cfg-hint">npm 依赖版本检查（缓存 30 分钟）；更新在后台执行 npm install，完成后需重启服务生效</div>
@@ -3908,6 +3909,33 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
                         </tr>`).join('');
                     }
                 }).catch(() => {});
+        }
+        function checkDeps() {
+            var btn = document.getElementById('depsCheckBtn');
+            if (btn) { btn.disabled = true; btn.textContent = '检测中…'; }
+            fetch('/api/admin/deps?force=1', { headers: authHeaders() })
+                .then(function (r) { return r.json(); }).then(function (d) {
+                    if (btn) { btn.disabled = false; btn.textContent = '检测更新'; }
+                    if (d.code !== 0) return;
+                    var deps = d.data.list || [];
+                    var outdated = deps.filter(function (x) { return x.latest && (x.current !== x.latest || x.current === 'latest'); });
+                    var tb = document.getElementById('depsTbody');
+                    if (!deps.length) { tb.innerHTML = '<tr><td colspan="5"><div class="empty-state">暂无依赖</div></td></tr>'; }
+                    else {
+                        tb.innerHTML = deps.map(function (x) {
+                            var od = x.latest && (x.current !== x.latest || x.current === 'latest');
+                            var tag = x.type === 'frontend' ? '<span class="pl-chip" style="margin-right:6px">前端 CDN</span>' : '';
+                            return '<tr>' +
+                                '<td style="font-family:monospace;font-size:12px">' + tag + esc(x.name) + '</td>' +
+                                '<td>' + esc(x.current) + '</td>' +
+                                '<td style="color:' + (od ? 'var(--success)' : 'var(--text3)') + '">' + esc(x.latest || '—') + '</td>' +
+                                '<td>' + (od ? '<span style="color:var(--warn)">可更新</span>' : '<span style="color:var(--success)">最新</span>') + '</td>' +
+                                '<td><button class="btn btn-sm btn-primary" ' + (od ? '' : 'disabled') + ' onclick="updateDep(\'' + esc(x.name) + '\')">更新</button></td>' +
+                                '</tr>';
+                        }).join('');
+                    }
+                    toast(outdated.length ? ('检测完成：' + outdated.length + ' 个依赖可更新') : '检测完成：全部依赖已是最新', true);
+                }).catch(function () { if (btn) { btn.disabled = false; btn.textContent = '检测更新'; } });
         }
         function updateDep(name) {
             fetch('/api/admin/deps/update', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ names: [name] }) })

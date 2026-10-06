@@ -66,7 +66,9 @@ module.exports = {
                 changedFiles: info.changedFiles || []
             };
         } catch (e) {}
-        /* 插件更新信息：npm 来源支持在线更新 */
+        /* 插件更新信息：npm 与本地（官方注册表内）来源均支持在线热更新——本地包更新时自动切换为 npm 来源 */
+        let registryNames = null;
+        try { registryNames = new Set((JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'plugin-registry.json'), 'utf8')).plugins || []).map(x => x.name)); } catch (e) {}
         const plugins = S.pluginManager ? S.pluginManager.list().map(p => ({
             name: p.name,
             enabled: p.enabled,
@@ -74,7 +76,7 @@ module.exports = {
             source: p.source.type,
             version: (p.info && p.info.package && p.info.package.version) || (p.source && p.source.version) || '',
             description: (p.info && (p.info.package || {}).description) || '',
-            updatable: p.source.type === 'npm'
+            updatable: p.source.type === 'npm' || (registryNames && registryNames.has(p.name))
         })) : [];
         const result = { list, checkedAt: now, version, plugins };
         S.depsCache = { at: now, data: result };
