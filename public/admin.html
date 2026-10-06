@@ -2499,6 +2499,8 @@ tbody tr:hover { background: color-mix(in srgb, var(--md-on-surface) 5%, transpa
         }
 
         function logout() {
+            /* v26.10.1: 服务端清除会话 cookie（插件面板 iframe 依赖） */
+            try { fetch('/api/admin/logout', { method: 'POST' }); } catch (e) {}
             adminToken = ''; adminUser = '';
             try { localStorage.removeItem('ap_token'); } catch (e) {}
             stopDashPanel();

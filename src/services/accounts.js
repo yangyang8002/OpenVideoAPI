@@ -103,7 +103,12 @@ module.exports = {
     /* ── 原 server.js L461-465 ── */
     function checkAdminAuth(req) {
         const auth = req.headers.authorization || '';
-        const token = auth.startsWith('Bearer ') ? auth.slice(7) : ((req.body && req.body.token) || req.headers['x-admin-token']);
+        let token = auth.startsWith('Bearer ') ? auth.slice(7) : ((req.body && req.body.token) || req.headers['x-admin-token']);
+        /* v26.10.1: cookie 会话兜底——auth:true 插件面板（iframe/顶层页面）无法携带 header 时用 dp_admin cookie 鉴权 */
+        if (!token && req.headers.cookie) {
+            const m = /(?:^|;\s*)dp_admin=([^;]+)/.exec(req.headers.cookie);
+            if (m) { try { token = decodeURIComponent(m[1]); } catch (e) { token = m[1]; } }
+        }
         return verifyToken(token);
     }
 

@@ -83,7 +83,17 @@ module.exports = {
         await logLogin(ip, username, true, 'ok');
         if (S.pluginManager) S.pluginManager.emit('admin:login-ok', { username, ip });
         const token = generateToken(username);
+        /* v26.10.1: 同步签发 HttpOnly 会话 cookie（SameSite=Lax 仅同站发送；插件 auth 面板 iframe 依赖它） */
+        const sessSec = ((readConfig().security || {}).sessionMinutes || 120) * 60;
+        const secure = (req.secure || String(req.headers['x-forwarded-proto'] || '') === 'https') ? '; Secure' : '';
+        res.setHeader('Set-Cookie', 'dp_admin=' + token + '; Path=/; Max-Age=' + sessSec + '; SameSite=Lax; HttpOnly' + secure);
         res.json({ code: 0, msg: '登录成功', data: { token, username, name: account.name || username, firstRun: !!(readConfig().security || {}).firstRun } });
+    });
+
+    /* v26.10.1: 登出清除会话 cookie（HttpOnly 只能服务端清除） */
+    app.post('/api/admin/logout', (req, res) => {
+        res.setHeader('Set-Cookie', 'dp_admin=; Path=/; Max-Age=0; SameSite=Lax; HttpOnly');
+        res.json({ code: 0, msg: '已退出' });
     });
 
     /* ── 原 server.js L1408-1408 ── */
