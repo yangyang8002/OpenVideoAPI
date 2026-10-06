@@ -85,7 +85,7 @@ module.exports = {
     },
 
     mount(ctx) {
-        const { app, checkAdmin, getDeps, safeErrMsg, ROOT_DIR, FRONTEND_DEPS, npmRegistryArg } = ctx;
+        const { app, checkAdmin, getDeps, safeErrMsg, ROOT_DIR, FRONTEND_DEPS, npmRegistryArg, addUpdateTask, finishUpdateTask } = ctx;
 
     /* ── 原 server.js L3386-3393 ── */
     app.get('/api/admin/deps', checkAdmin, async (req, res) => {
@@ -137,8 +137,14 @@ module.exports = {
                 stdio: 'ignore'
             });
             child.unref();
+            const task = addUpdateTask('dep', backNames.join(', '), 'npm install ' + backNames.length + ' 个依赖（后台）');
+            child.on('exit', (code) => finishUpdateTask(task.id, code === 0 ? 'done' : 'failed', 'npm 退出码 ' + code));
             console.log('[依赖] 更新进程已启动: ' + backNames.join(', '));
-            bgMsg = '服务端依赖更新已在后台执行（' + backNames.length + ' 个），完成后需重启服务生效';
+            bgMsg = '服务端依赖更新已在后台执行（' + backNames.length + ' 个），完成后需重启服务生效（顶栏任务列表可查看进度）';
+        }
+        if (updated.length) {
+            const ft = addUpdateTask('dep', updated.join(', '), '前端 CDN 依赖版本已改写');
+            finishUpdateTask(ft.id, 'done', '已更新: ' + updated.join(', ') + '（刷新页面生效）');
         }
         const parts = [];
         if (updated.length) parts.push('前端依赖已更新: ' + updated.join(', ') + '（刷新页面生效）');

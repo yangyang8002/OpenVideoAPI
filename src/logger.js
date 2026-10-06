@@ -13,7 +13,20 @@ module.exports = {
     /* ── 原 server.js L40-40 ── */
     const appLogs = [];
     const debugLogs = [];
+    /* 后台任务注册表（依赖更新/插件安装/程序更新/重启）——供顶栏任务列表展示 */
+    const updateTasks = [];
+    let taskSeq = 1;
+    function addUpdateTask(type, name, detail) {
+        const t = { id: taskSeq++, type, name, status: 'running', detail: detail || '', at: new Date().toISOString() };
+        updateTasks.push(t);
+        if (updateTasks.length > MAX_LOG) updateTasks.shift();
+        return t;
+    }
+    function finishUpdateTask(id, status, detail) {
+        const t = updateTasks.find(x => x.id === id);
+        if (t) { t.status = status || 'done'; if (detail) t.detail = detail; t.at = new Date().toISOString(); }
+    }
 
-        Object.assign(ctx, { MAX_LOG, MAX_LOG, appLogs, appLogs, debugLogs, debugLogs });
+        Object.assign(ctx, { MAX_LOG, MAX_LOG, appLogs, appLogs, debugLogs, debugLogs, updateTasks, updateTasks, addUpdateTask, addUpdateTask, finishUpdateTask, finishUpdateTask });
     },
 };

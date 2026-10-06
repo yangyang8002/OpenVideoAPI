@@ -228,7 +228,7 @@ module.exports = {
     },
 
     mount(ctx) {
-        const { app, checkAdmin, readConfig, DEFAULT_API_RULES, apiLayers, API_START_TIME, apiTotals, getRetentionDays, writeConfig, invalidateApiConfig, appLogs, debugLogs, DEFAULT_NAV, applyTrustProxy, S, ipTotals, listBackups, ROOT_DIR, APP_VERSION, safeErrMsg, restartServer, getNpmRegistry, getPluginConfig, SETTINGS_SCHEMA, SETTINGS_DOMAIN_ORDER, settingsResolve, settingsValuesFromConfig, validateSettingsValues, settingsDeepSet, settingsCoerce, getBackupCfg, checkBackupSchedule } = ctx;
+        const { app, checkAdmin, readConfig, DEFAULT_API_RULES, apiLayers, API_START_TIME, apiTotals, getRetentionDays, writeConfig, invalidateApiConfig, appLogs, debugLogs, updateTasks, DEFAULT_NAV, applyTrustProxy, S, ipTotals, listBackups, ROOT_DIR, APP_VERSION, safeErrMsg, restartServer, getNpmRegistry, getPluginConfig, SETTINGS_SCHEMA, SETTINGS_DOMAIN_ORDER, settingsResolve, settingsValuesFromConfig, validateSettingsValues, settingsDeepSet, settingsCoerce, getBackupCfg, checkBackupSchedule } = ctx;
 
     /* ── 原 server.js L1526-1529 ── */
     app.get('/api/admin/config', checkAdmin, (req, res) => {
@@ -286,6 +286,11 @@ module.exports = {
     app.get('/api/admin/debug-logs', checkAdmin, (req, res) => {
         const limit = Math.min(parseInt(req.query.limit) || 100, 500);
         res.json({ code: 0, data: debugLogs.slice(-limit).reverse() });
+    });
+
+    /* 后台任务列表：依赖更新 / 插件安装 / 程序更新 / 重启 */
+    app.get('/api/admin/tasks', checkAdmin, (req, res) => {
+        res.json({ code: 0, data: updateTasks.slice().reverse() });
     });
 
     /* ── 原 server.js L1803-1833 ── */
