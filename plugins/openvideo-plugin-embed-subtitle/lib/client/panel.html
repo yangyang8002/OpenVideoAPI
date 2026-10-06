@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>内封字幕分析</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0f1115; color: #e8e8ea; max-width: 1080px; margin: 30px auto; padding: 0 16px; }
+  .card { background: #171a21; border: 1px solid #2a2f3a; border-radius: 12px; padding: 14px 18px; margin-bottom: 14px; }
+  h1 { font-size: 18px; margin-bottom: 4px; }
+  h2 { font-size: 12px; color: #9aa3b2; font-weight: normal; margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #232833; vertical-align: top; }
+  th { color: #9aa3b2; font-weight: normal; }
+  .url { max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+  button { background: #2563eb; color: #fff; border: 0; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; margin-right: 6px; }
+  button.gray { background: #374151; }
+  .chip { display: inline-block; border-radius: 4px; padding: 1px 6px; font-size: 11px; margin-right: 4px; }
+  .ok { color: #3ecf8e; } .warn { color: #f59e0b; } .err { color: #ef4444; }
+  .tracks { margin-top: 8px; }
+  .subs span { display: inline-block; background: #0c0e12; border: 1px solid #2a2f3a; border-radius: 4px; padding: 2px 8px; margin: 2px 4px 2px 0; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>embed-subtitle · 视频字幕分析面板</h1>
+<h2>逐视频 ffprobe 检测内封字幕轨道 · 一键提取入字幕库 · 查看已关联字幕</h2>
+<div class="card">
+  <button class="gray" id="btn-refresh">刷新列表</button> <span id="stat" class="warn">加载中...</span>
+  <div id="tbl" style="margin-top:10px"></div>
+</div>
+<script>
+var VIDEOS = [];
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function loadVideos() {
+  document.getElementById('stat').textContent = '加载中...';
+  fetch('/api/plugin/embed-sub/videos').then(function (r) { return r.json(); }).then(function (d) {
+    if (d.code !== 0) { document.getElementById('stat').textContent = '加载失败: ' + (d.msg || ''); return; }
+    VIDEOS = d.data.videos || [];
+    document.getElementById('stat').textContent = VIDEOS.length + ' 个视频';
+    document.getElementById('tbl').innerHTML = '<table><tr><th>vid</th><th>视频地址</th><th>已关联字幕</th><th>操作</th></tr>' +
+      VIDEOS.map(function (v, i) {
+        return '<tr><td>' + esc(v.vid) + '</td>' +
+          '<td><span class="url" title="' + esc(v.url) + '">' + esc(v.url) + '</span></td>' +
+          '<td class="subs">' + (v.subs && v.subs.length ? v.subs.map(function (s) { return '<span>' + esc(s.name || s.id) + ' · ' + esc(s.lang || '?') + '</span>'; }).join('') : '<span class="warn">无</span>') + '</td>' +
+          '<td><button data-i="' + i + '" data-act="ana">分析</button></td></tr>' +
+          '<tr id="row-' + i + '" style="display:none"><td colspan="4" class="tracks" id="cell-' + i + '"></td></tr>';
+      }).join('') + '</table>';
+  }).catch(function () { document.getElementById('stat').textContent = '加载失败'; });
+}
+function analyze(i) {
+  var v = VIDEOS[i], cell = document.getElementById('cell-' + i), row = document.getElementById('row-' + i);
+  if (row.style.display !== 'none') { row.style.display = 'none'; return; }
+  row.style.display = ''; cell.innerHTML = '<span class="warn">检测中（远程文件可能需要数十秒）...</span>';
+  fetch('/api/plugin/embed-sub/detect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: v.url }) })
+    .then(function (r) { return r.json(); }).then(function (d) {
+      if (d.code !== 0) { cell.innerHTML = '<span class="err">' + esc(d.msg || '检测失败') + '</span>'; return; }
+      var st = d.data.streams || [], txt = st.filter(function (s) { return s.text; });
+      if (!st.length) { cell.innerHTML = '<span class="warn">无字幕轨道</span>'; return; }
+      var html = '<table><tr><th>轨道</th><th>编码</th><th>语言</th><th>标题</th><th>类型</th></tr>' +
+        st.map(function (s) { return '<tr><td>' + esc(s.index) + '</td><td>' + esc(s.codec || '') + '</td><td>' + esc(s.language || '') + '</td><td>' + esc(s.title || '') + '</td><td>' + (s.text ? '<span class="chip ok">文本</span>' : '<span class="chip warn">图形</span>') + '</td></tr>'; }).join('') + '</table>';
+      if (txt.length) html += '<div style="margin-top:8px"><button data-i="' + i + '" data-act="ext">提取全部 ' + txt.length + ' 条文本轨道</button> <span id="ex-' + i + '" class="warn"></span></div>';
+      else html += '<div class="warn" style="margin-top:8px">无文本轨道（图形字幕无法提取为文本）</div>';
+      cell.innerHTML = html;
+    }).catch(function () { cell.innerHTML = '<span class="err">检测失败</span>'; });
+}
+function extractAll(i) {
+  var v = VIDEOS[i], el = document.getElementById('ex-' + i);
+  if (el) el.textContent = '提取中（大文件可能需要数分钟）...';
+  fetch('/api/plugin/embed-sub/detect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: v.url }) })
+    .then(function (r) { return r.json(); }).then(function (d) {
+      if (d.code !== 0) { if (el) el.textContent = d.msg || '检测失败'; return null; }
+      var idx = (d.data.streams || []).filter(function (s) { return s.text; }).map(function (s) { return s.index; });
+      if (!idx.length) { if (el) el.textContent = '无文本轨道'; return null; }
+      return fetch('/api/plugin/embed-sub/extract-all', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ file: v.url, indexes: idx, vid: v.vid }) })
+        .then(function (r2) { return r2.json(); }).then(function (d2) {
+          if (el) el.textContent = d2.code === 0 ? '已提取入库（稍后刷新列表查看）' : (d2.msg || '提取失败');
+          setTimeout(loadVideos, 1500);
+        });
+    }).catch(function () { if (el) el.textContent = '提取失败'; });
+}
+document.getElementById('btn-refresh').addEventListener('click', loadVideos);
+document.getElementById('tbl').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  var i = parseInt(b.getAttribute('data-i'), 10);
+  if (b.getAttribute('data-act') === 'ext') extractAll(i); else analyze(i);
+});
+loadVideos();
+</script>
+</body>
+</html>

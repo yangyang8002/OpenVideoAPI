@@ -500,6 +500,23 @@ module.exports = {
             res.json({ code: 0, msg: '全量扫描完成', data: { scanned, extracted, skipped, failed } });
         }));
 
+        /* 视频字幕分析面板：列出全部注册视频及其已关联字幕（供面板页使用） */
+        ctx.router.get('/api/plugin/embed-sub/videos', wrap(async (req, res) => {
+            const videos = await ctx.store.videosAll();
+            const subsMap = await ctx.store.videoSubsAll();
+            const all = await ctx.store.subtitleAll();
+            const list = Object.entries(videos).map(([vid, url]) => {
+                const ids = Array.isArray(subsMap[vid]) ? subsMap[vid] : [];
+                const subs = ids.map(id => all.find(s => s.id === id)).filter(Boolean)
+                    .map(s => ({ id: s.id, name: s.name || '', lang: s.lang || '', source: String(s.source || '') }));
+                return { vid, url, subCount: subs.length, subs };
+            });
+            res.json({ code: 0, data: { videos: list } });
+        }));
+
+        /* 管理面板入口：视频字幕分析页（管理员鉴权，未登录 302 后台登录页） */
+        ctx.pages.register({ route: '/plugin/embed-sub/panel', file: 'lib/client/panel.html', title: '内封字幕分析', auth: true });
+
         /* 后台预检：若 ffmpeg 缺失则立即启动懒下载（不阻塞服务，首次调用前完成即可） */
         if (!resolveBinary('ffmpeg') || !fs.existsSync(resolveBinary('ffmpeg'))) {
             ensureFfmpeg().catch(() => {});
