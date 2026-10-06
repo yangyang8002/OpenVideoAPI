@@ -29,6 +29,8 @@
   <div class="crumbs" id="crumbs">/</div>
   <div style="margin:6px 0 2px">
     <button id="scanBtn" onclick="scanFolder()">扫描此文件夹（含子目录）</button>
+    <button id="pauseBtn" class="gray" onclick="scanPauseToggle()" style="display:none">暂停</button>
+    <button id="stopBtn" class="gray" onclick="scanControl('stop')" style="display:none">停止扫描</button>
     <span class="msg" id="scanStat" style="margin-left:6px"></span>
   </div>
   <div class="msg" id="stat">加载中...</div>
@@ -111,21 +113,36 @@ document.getElementById('tbl').addEventListener('click', function (e) {
 });
 /* ── 整个文件夹扫描（含子目录）：后台任务 + 顶栏任务列表进度 ── */
 var scanTimer = null;
+var SCANST = {};
 function scanStat(s, cls) { var el = document.getElementById('scanStat'); el.textContent = s || ''; el.className = 'msg ' + (cls || ''); }
 function pollScan() {
   fetch('/api/plugin/openlist/scan/status').then(function (r) { return r.json(); }).then(function (d) {
     var s = (d && d.data) || {};
+    SCANST = s;
+    var btn = document.getElementById('scanBtn'), pb = document.getElementById('pauseBtn'), sb = document.getElementById('stopBtn');
     if (s.scanning) {
-      document.getElementById('scanBtn').disabled = true;
-      scanStat('扫描中 ' + (s.done || 0) + '/' + (s.total || '?') + ' · 成功 ' + (s.ok || 0) + ' · 失败 ' + (s.fail || 0) + (s.lastFile ? ' · ' + s.lastFile : ''), 'warn');
+      btn.disabled = true;
+      pb.style.display = ''; sb.style.display = '';
+      pb.textContent = s.paused ? '继续' : '暂停';
+      var base = (s.done || 0) + '/' + (s.total || '?') + ' · 成功 ' + (s.ok || 0) + ' · 失败 ' + (s.fail || 0);
+      scanStat(s.paused ? '⏸ 已暂停 · ' + base : '扫描中 ' + base + (s.lastFile ? ' · ' + s.lastFile : ''), 'warn');
       if (!scanTimer) scanTimer = setInterval(pollScan, 2000);
     } else {
       if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
-      document.getElementById('scanBtn').disabled = false;
+      btn.disabled = false;
+      pb.style.display = 'none'; sb.style.display = 'none';
       if (s.lastSummary) scanStat(s.lastSummary, (s.fail && !s.ok) ? 'err' : 'ok');
     }
   }).catch(function () {});
 }
+function scanControl(action) {
+  fetch('/api/plugin/openlist/scan/control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action }) })
+    .then(function (r) { return r.json(); }).then(function (d) {
+      if (d.code !== 0) { scanStat(d.msg || '操作失败', 'err'); return; }
+      pollScan();
+    }).catch(function () { scanStat('操作失败', 'err'); });
+}
+function scanPauseToggle() { scanControl(SCANST.paused ? 'resume' : 'pause'); }
 function scanFolder() {
   if (scanTimer) return;
   scanStat('正在启动扫描...', 'warn');
