@@ -1366,8 +1366,6 @@
                     showToast(t('截图已保存'));
                 }else showToast(d.msg||t('截图失败'),true);
             }).catch(function(){showToast(t('截图失败'),true)});
-    }('canvas');cv.width=art.video.videoWidth;cv.height=art.video.videoHeight;cv.getContext('2d').drawImage(art.video,0,0);var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='screenshot-'+Date.now()+'.png';a.click();showToast(t('截图已保存'))}catch(e){showToast(t('截图失败'),true)}}else{showToast(t('视频未就绪'),true)}});
-        app.appendChild(btn);
     }
 
     /* ===== Stats ===== */
