@@ -133,17 +133,16 @@ module.exports = {
         if (backNames.length) {
             const depTasks = {};
             for (const n of backNames) depTasks[n] = addUpdateTask('dep', n, 'npm install ' + n + '@latest（后台执行）');
-            /* npm 在真实依赖树所在目录执行：npm 包部署时上溯到外层应用目录（node_modules 的父级），源码部署即 ROOT_DIR */
-            const appDir = path.basename(path.dirname(ROOT_DIR)) === 'node_modules' ? path.dirname(path.dirname(ROOT_DIR)) : ROOT_DIR;
+            /* npm 在包目录执行：包内 package.json 的依赖全部可解析；装进包内嵌套 node_modules（优先级高于外层，不剪外层应用树——appDir 方案曾致外层 399 包被 extraneous 清理，已回退） */
             let nl = 'ignore';
-            try { fs.mkdirSync(path.join(appDir, 'logs'), { recursive: true }); } catch (e) {}
-            try { nl = fs.openSync(path.join(appDir, 'logs', 'deps-update.log'), 'a'); } catch (e) {}
+            try { fs.mkdirSync(path.join(ROOT_DIR, 'logs'), { recursive: true }); } catch (e) {}
+            try { nl = fs.openSync(path.join(ROOT_DIR, 'logs', 'deps-update.log'), 'a'); } catch (e) {}
             (async () => {
                 for (const n of backNames) {
                     try {
                         const code = await new Promise((resolve) => {
                             const child = require('child_process').spawn('npm', ['install', '--no-audit', '--no-fund', '--package-lock=false', '--no-save', n + '@latest', ...(npmRegistryArg() ? [npmRegistryArg()] : [])], {
-                                cwd: appDir,
+                                cwd: ROOT_DIR,
                                 detached: true,
                                 stdio: ['ignore', nl, nl]
                             });
