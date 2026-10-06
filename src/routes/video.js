@@ -22,17 +22,32 @@ module.exports = {
     });
 
     /* ── 原 server.js L1282-1308 ── */
+    /* 任意 CDN 签名直链的身份归一：剥离轮换的签名/会话参数（t/s/r/bzs/ur/urn/bzp）与纯装饰参数（filename），
+       同一视频的不同签名实例映射到同一 vid（弹幕/字幕不丢）；存储仍保留完整链接（播放/ffprobe 可用） */
+    function signFreeId(u) {
+        try {
+            const p = new URL(u);
+            if (!/^https?:$/.test(p.protocol)) return u;
+            for (const k of ['t', 's', 'r', 'bzs', 'ur', 'urn', 'bzp', 'filename']) p.searchParams.delete(k);
+            const q = p.searchParams.toString();
+            return p.origin + p.pathname + (q ? '?' + q : '');
+        } catch (e) { return u; }
+    }
+
     app.get('/api/video/resolve', writeRateLimit(60, 60000), async (req, res) => {
         const url = (req.query.url || '').trim();
         if (!url || !isValidVideoUrl(url)) return res.status(400).json({ code: 1, msg: '缺少或非法的 url 参数' });
         /* OpenList 签名链接归一化：vid 基于剥掉签名参数的规范链接，签名变化不产生新 vid */
         const key = normalizeOpenlistUrl(url);
+        const nid = signFreeId(key);
         const videos = await S.store.videosAll();
         let existing = null;
         for (const [vid, u] of Object.entries(videos)) {
-            if (u === key) { existing = vid; break; }
+            if (u === key || signFreeId(u) === nid) { existing = vid; break; }
         }
         if (existing) {
+            /* 命中旧签名实例：刷新存储为最新签名链接（resolve-link 播放解析始终用新链） */
+            if (videos[existing] !== key) { try { await S.store.videoSet(existing, key); } catch (e) {} }
             if (S.pluginManager) S.pluginManager.emit('video:created', { vid: existing, url: key, source: 'map' });
             return res.json({ code: 0, data: { vid: existing, source: 'map' } });
         }
