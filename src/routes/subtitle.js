@@ -27,6 +27,13 @@ module.exports = {
             const p = new URL(u);
             if (!/^https?:$/.test(p.protocol)) return u;
             for (const k of ['t', 's', 'r', 'bzs', 'ur', 'urn', 'bzp', 'filename', 'sign']) p.searchParams.delete(k);
+            /* 云存储 AWS SigV4 / OBS 签名与跟踪参数（天翼云盘等）：X-Amz-Signature/Date 随时间轮换
+               （X-Amz-Expires 通常仅数小时），剥离后同一文件不同签名窗口归一到同一 vid */
+            const volatile = [];
+            for (const k of p.searchParams.keys()) {
+                if (/^x-amz-/i.test(k) || /^x-obs-/i.test(k) || k.toLowerCase() === 'response-content-disposition') volatile.push(k);
+            }
+            for (const k of volatile) p.searchParams.delete(k);
             p.pathname = p.pathname.split('/').map((seg) => {
                 try { return encodeURIComponent(decodeURIComponent(seg)); } catch (e) { return seg; }
             }).join('/');
