@@ -23,6 +23,7 @@ const MODS = {
     accounts: require('./services/accounts'),
     videos: require('./services/videos'),
     subtitles: require('./services/subtitles'),
+    fingerprint: require('./services/fingerprint'),
     danmu: require('./services/danmu'),
     db: require('./services/db'),
     backup: require('./services/backup'),
@@ -47,7 +48,7 @@ const MODS = {
 };
 
 /* 定义顺序 = 原文件初始化依赖顺序（后面的模块可引用前面挂到 ctx 的名字） */
-const DEFINE_ORDER = ['logger', 'config', 'apiStats', 'requestLog', 'headers', 'firstRun', 'pow', 'rateLimit', 'accounts', 'geo', 'mwSecurity', 'danmu', 'videos', 'rtAdmin', 'db', 'backup', 'subtitles', 'plugins', 'updateCheck', 'rtDeps', 'bannedRefresh', 'errorHandler', 'init'];
+const DEFINE_ORDER = ['logger', 'config', 'apiStats', 'requestLog', 'headers', 'firstRun', 'pow', 'rateLimit', 'accounts', 'geo', 'mwSecurity', 'danmu', 'videos', 'rtAdmin', 'db', 'backup', 'subtitles', 'fingerprint', 'plugins', 'updateCheck', 'rtDeps', 'bannedRefresh', 'errorHandler', 'init'];
 /* 路由挂载顺序 = 原 server.js 中路由注册出现顺序 */
 const MOUNT_ORDER = ['pow', 'rtDanmu', 'rtVideo', 'rtAuth', 'rtAdmin', 'rtFiles', 'rtBanned', 'rtPublic', 'rtSecurity', 'rtDb', 'rtBackup', 'rtSubtitle', 'rtDeps', 'rtPlugins', 'rtUpdate'];
 

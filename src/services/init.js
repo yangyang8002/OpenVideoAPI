@@ -92,7 +92,7 @@ module.exports = {
                 isAdmin: (req) => !!checkAdminAuth(req)
             });
             const tasksService = { add: addUpdateTask, finish: finishUpdateTask };
-            S.pluginManager._injectServices({ app: appService, logger: loggerService, tasks: tasksService });
+            S.pluginManager._injectServices({ app: appService, logger: loggerService, tasks: tasksService, ...(S.fingerprint ? { fingerprint: S.fingerprint } : {}) });
             S.pluginManager.loadState();
             await S.pluginManager.loadEnabled();
         } catch (e) {

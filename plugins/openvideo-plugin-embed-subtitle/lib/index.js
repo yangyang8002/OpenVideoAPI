@@ -219,6 +219,32 @@ async function detectStreams(ffprobe, source) {
     return streams;
 }
 
+/* ---------- v1.3.0：指纹元数据探测（format.size/duration + 首个视频流宽高/编码/帧率） ---------- */
+async function probeMeta(ffprobe, source) {
+    const args = ['-v', 'error', '-select_streams', 'v:0',
+        '-show_entries', 'stream=codec_name,width,height,avg_frame_rate:format=size,duration', '-of', 'json'];
+    if (source.type === 'url') args.push('-rw_timeout', '30000000');
+    args.push(source.type === 'url' ? source.url : source.path);
+    const r = await run(ffprobe, args, 30000);
+    if (!r.ok) return null;
+    try {
+        const j = JSON.parse(r.out);
+        const st = (j.streams || [])[0] || {};
+        let fps = null;
+        const fr = String(st.avg_frame_rate || '');
+        const m = fr.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+        if (m && Number(m[2]) > 0) fps = Number(m[1]) / Number(m[2]);
+        return {
+            size: Number(j.format && j.format.size) || 0,
+            durationMs: Math.round((Number(j.format && j.format.duration) || 0) * 1000),
+            w: Number(st.width) || 0,
+            h: Number(st.height) || 0,
+            vcodec: String(st.codec_name || ''),
+            fps
+        };
+    } catch (e) { return null; }
+}
+
 /* ---------- 提取 ---------- */
 function extFor(codec) {
     const c = String(codec || '').toLowerCase();
@@ -455,11 +481,23 @@ module.exports = {
             const source = parseSource(url);
             if (!source) return { skipped: true };
             if (source.type === 'url' && !(await isSafeUrl(source.url))) return { skipped: true };
+            /* v1.3.0：先探测指纹元数据并落档（宿主有 fingerprint 服务时）；碰撞（同文件已有
+               别的 vid）→ 宿主自动合并，后续提取挂到存活 vid，不再产生重复视频码 */
+            let liveVid = vid;
+            if (ctx.fingerprint) {
+                try {
+                    const meta = await probeMeta(fp.bin, source);
+                    if (meta && meta.size > 0 && meta.durationMs > 0 && meta.w > 0 && meta.h > 0 && meta.fps > 0 && meta.vcodec) {
+                        liveVid = await ctx.fingerprint.record(vid, { meta });
+                        if (liveVid !== vid) ctx.logger.info('embed-sub', '指纹命中既有视频: vid ' + vid + ' → ' + liveVid + '（已合并）');
+                    }
+                } catch (e) { ctx.logger.warn('embed-sub', '指纹落档失败: vid=' + vid + ' — ' + (e.message || e)); }
+            }
             const streams = await detectStreams(fp.bin, source);
             const textStreams = streams.filter(s => s.text);
             if (!textStreams.length) return { clean: true };
             for (const st of textStreams) {
-                await extractOne(source, st, '', '', vid, fm.bin);
+                await extractOne(source, st, '', '', liveVid, fm.bin);
             }
             return { extracted: textStreams.length };
         }

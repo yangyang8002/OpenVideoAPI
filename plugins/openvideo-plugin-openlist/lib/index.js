@@ -125,7 +125,18 @@ module.exports = {
             const { base } = cfg();
             const enc = p.split('/').map(x => encodeURIComponent(x)).join('/').replace(/^\/+/, '');
             const sign = data.sign || '';
-            return base + '/d/' + enc + (sign ? '?sign=' + sign : '');
+            const link = base + '/d/' + enc + (sign ? '?sign=' + sign : '');
+            /* v1.6.0：驱动全文件哈希（如 189CloudPC 免费提供 md5）→ 随注册传给 resolve 做指纹身份 */
+            const hashes = [];
+            try {
+                const hi = data.hash_info || {};
+                const src = (typeof hi === 'string') ? JSON.parse(hi) : hi;
+                for (const alg of ['md5', 'sha1', 'sha256']) {
+                    const v = String((src && src[alg]) || '').toLowerCase();
+                    if (/^[0-9a-f]{8,64}$/.test(v)) hashes.push({ alg, value: v });
+                }
+            } catch (e) {}
+            return { link, hashes };
         };
 
         /* ── 同名外挂字幕挂载：Movie.srt / Movie.zh.srt / Movie.zh-CN.ass 等（一个视频可挂多份多语言） ── */
@@ -236,8 +247,11 @@ module.exports = {
                     for (let i = 0; i < 2 && !ok; i++) {   /* 失败重试一次（重试前重新等窗口；429 多退 5s） */
                         if (i > 0 && await waitTurn() === 'stop') { manualStop = true; break; }
                         try {
-                            const link = await fileLink(fp);
-                            const r = await ctx.http.get('http://127.0.0.1:' + port + '/api/video/resolve?url=' + encodeURIComponent(link), { timeout: 30000 });
+                            const fl = await fileLink(fp);
+                            const link = fl.link;
+                            /* v1.6.0：携带驱动全文件哈希做指纹身份（同文件改名/换盘实例复用旧 vid） */
+                            const qs = '?url=' + encodeURIComponent(link) + (fl.hashes.length ? '&fp=' + encodeURIComponent(JSON.stringify({ hashes: fl.hashes })) : '');
+                            const r = await ctx.http.get('http://127.0.0.1:' + port + '/api/video/resolve' + qs, { timeout: 30000 });
                             const j = await r.json().catch(() => null);
                             if (j && j.code === 0 && j.data && j.data.vid) { ok = true; newVid = String(j.data.vid); }
                             else why = (j && j.msg) || ('resolve code ' + (j && j.code));

@@ -108,9 +108,30 @@ module.exports = {
                 return res.json({ code: 0, data: { vid: legacyId, source: 'legacy' } });
             } catch (e) { return res.status(507).json({ code: 1, msg: '映射表已满' }); }
         }
+        /* v26.11 指纹级联：URL 身份/legacy 均未命中时，按调用方随链提供的指纹
+           （T0 驱动全文件哈希 → T1 元数据复合；openlist 扫描注册等场景）匹配档案——
+           命中即复用旧 vid，刷新存储为当前链接并补录指纹，不再新建（同文件改名/换盘/搬家不掉字幕弹幕） */
+        let fp = null;
+        if (S.fingerprint) {
+            try { const raw = JSON.parse(String(req.query.fp || '') || 'null'); if (raw && typeof raw === 'object' && !Array.isArray(raw)) fp = raw; } catch (e) { fp = null; }
+            if (fp) {
+                const hit = await S.fingerprint.match(fp);
+                if (hit && videos[hit] !== undefined) {
+                    let live = hit;
+                    try { if (videos[live] !== key) await S.store.videoSet(live, key); } catch (e) {}
+                    try { live = await S.fingerprint.record(hit, fp); } catch (e) {}
+                    if (S.pluginManager) S.pluginManager.emit('video:created', { vid: live, url: key, source: 'fp' });
+                    return res.json({ code: 0, data: { vid: live, source: 'fp' } });
+                }
+                /* 指纹空/非法则不落档 */
+                if (!S.fingerprint.sanitizeHashes(fp.hashes).length && !Object.keys(S.fingerprint.sanitizeMetaFields(fp.meta)).length) fp = null;
+            }
+        }
         const vid = await genVideoId();
         try {
             await S.store.videoSet(vid, key);
+            /* 新建同时落档指纹（若提供且有效）——同文件日后其他实例由此命中 */
+            if (fp && S.fingerprint) { try { await S.fingerprint.record(vid, fp); } catch (e) {} }
             if (S.pluginManager) S.pluginManager.emit('video:created', { vid, url: key, source: 'new' });
             res.json({ code: 0, data: { vid, source: 'new' } });
         } catch (e) {

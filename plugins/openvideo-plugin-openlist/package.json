@@ -1,6 +1,6 @@
 {
   "name": "openvideo-plugin-openlist",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "OpenList/AList 网盘接入：后台浏览网盘目录树，一键注册视频到播放库并生成播放链接（注册即触发内封字幕自动扫描）",
   "main": "lib/index.js",
   "license": "MIT",
