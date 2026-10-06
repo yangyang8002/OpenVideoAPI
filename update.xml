@@ -102,7 +102,7 @@
   <file path="src/services/db.js" sha256="fba2a44c4447998ae86438fd71f7240a1146a7027614f7e682482f90c2c8a389" size="4782"/>
   <file path="src/services/geo.js" sha256="8c6aa13e6c82747730eda2101db6da8684a489b30264c2eb424dab5f01fc6623" size="13712"/>
   <file path="src/services/init.js" sha256="f65ec365cf6d64608ce4efaa2af770e639d44fb4f5d02d80dbad17ba6194818c" size="5617"/>
-  <file path="src/services/plugins.js" sha256="95655b454016464ca559b26aa3027f0b4d106d977bf599899a95b1e57d733ef5" size="7148"/>
+  <file path="src/services/plugins.js" sha256="5273efdaaf91bfaa1d4ab8745e4f55cd9fd8c13b6c2f3eccd1f6eb4e4ef5faaf" size="7270"/>
   <file path="src/services/subtitles.js" sha256="446a38dca03b03f59ff91eea780d90e8e21d9e1e49080dc8e241eecafb91b4d2" size="11496"/>
   <file path="src/services/update-check.js" sha256="99ff2fbba385abf2e6fbe4498ccd7871a6c1955b5a856e5581f53408a92a967c" size="5661"/>
   <file path="src/services/videos.js" sha256="4139f91f84e9272890c5cae577c137774d257a20f896e1e97b7b4781194cc4c3" size="2874"/>
