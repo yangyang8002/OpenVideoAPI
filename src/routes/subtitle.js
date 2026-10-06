@@ -315,7 +315,7 @@ module.exports = {
                         seen.add(id);
                         const s = all.find(x => x.id === id);
                         if (s) {
-                            const item = { id: s.id, title: s.langName || s.name, lang: (s.langs && s.langs[0]) || s.lang || '', langs: s.langs || [], url: 'subtitle:' + s.id, type: /\.(ass|ssa)$/i.test(s.file) ? 'ass' : (/\.(vtt|webvtt)$/i.test(s.file) ? 'vtt' : 'srt'), track: String(s.source || ''), library: true };
+                            const item = { id: s.id, title: s.langName || langsName(s.langs && s.langs.length ? s.langs : (s.lang ? [s.lang] : [])) || s.name, lang: (s.langs && s.langs[0]) || s.lang || '', langs: s.langs || [], url: 'subtitle:' + s.id, type: /\.(ass|ssa)$/i.test(s.file) ? 'ass' : (/\.(vtt|webvtt)$/i.test(s.file) ? 'vtt' : 'srt'), track: String(s.source || ''), library: true };
                             uniq.set(item.title + '|' + item.lang + '|' + item.type + '|' + item.track, item);
                         }
                     }

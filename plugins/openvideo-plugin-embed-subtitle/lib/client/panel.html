@@ -30,6 +30,7 @@
 </div>
 <script>
 var VIDEOS = [];
+var LN = { sc: '简体中文', chs: '简体中文', 'zh-cn': '简体中文', 'zh-hans': '简体中文', zh: '简体中文', tc: '繁體中文', cht: '繁體中文', 'zh-tw': '繁體中文', 'zh-hk': '繁體中文', 'zh-hant': '繁體中文', en: 'English', eng: 'English', ja: '日本語', jpn: '日本語', ko: '한국어', kor: '한국어', fr: 'Français', de: 'Deutsch', es: 'Español', pt: 'Português', it: 'Italiano', ru: 'Русский', ar: 'العربية', th: 'ไทย', vi: 'Tiếng Việt' };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function loadVideos() {
   document.getElementById('stat').textContent = '加载中...';
@@ -41,7 +42,7 @@ function loadVideos() {
       VIDEOS.map(function (v, i) {
         return '<tr><td>' + esc(v.vid) + '</td>' +
           '<td><span class="url" title="' + esc(v.url) + '">' + esc(v.url) + '</span></td>' +
-          '<td class="subs">' + (v.subs && v.subs.length ? v.subs.map(function (s) { return '<span>' + esc(s.name || s.id) + ' · ' + esc(s.lang || '?') + '</span>'; }).join('') : '<span class="warn">无</span>') + '</td>' +
+          '<td class="subs">' + (v.subs && v.subs.length ? v.subs.map(function (s) { var ln = LN[String(s.lang || '').toLowerCase()] || s.lang || s.name || s.id; var tr = String(s.source || '').indexOf('embed:') === 0 ? ' · 内封轨' + esc(s.source.slice(6)) : ''; return '<span>' + esc(ln) + tr + '</span>'; }).join('') : '<span class="warn">无</span>') + '</td>' +
           '<td><button data-i="' + i + '" data-act="ana">分析</button></td></tr>' +
           '<tr id="row-' + i + '" style="display:none"><td colspan="4" class="tracks" id="cell-' + i + '"></td></tr>';
       }).join('') + '</table>';
