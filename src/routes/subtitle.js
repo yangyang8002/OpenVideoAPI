@@ -20,6 +20,17 @@ module.exports = {
         res.json({ code: 0, data: { url } });
     });
 
+    /* CDN 签名直链身份归一（与 video.js 同策略）：剥离轮换签名/会话参数与装饰参数，签名变化不影响字幕关联 */
+    function signFreeId(u) {
+        try {
+            const p = new URL(u);
+            if (!/^https?:$/.test(p.protocol)) return u;
+            for (const k of ['t', 's', 'r', 'bzs', 'ur', 'urn', 'bzp', 'filename']) p.searchParams.delete(k);
+            const q = p.searchParams.toString();
+            return p.origin + p.pathname + (q ? '?' + q : '');
+        } catch (e) { return u; }
+    }
+
     /* ── 原 server.js L2954-2974 ── */
     app.get('/api/admin/subtitles', checkAdmin, async (req, res) => {
         const search = (req.query.search || '').toLowerCase();
@@ -285,25 +296,31 @@ module.exports = {
         let remote = [];
         if (/^https?:\/\//i.test(url)) remote = await detectOpenlistSubs(url);
 
-        /* 3. 已应用的字幕库字幕（按 URL 匹配所有 vid，合并去重） */
+        /* 3. 已应用的字幕库字幕（按 URL 精确或身份匹配所有 vid，跨签名实例合并，同名同轨去重） */
         let applied = [];
         try {
+            const nid = signFreeId(url);
             const videos = await S.store.videosAll();
             const subsMap = await S.store.videoSubsAll();
             const vids = [];
-            for (const [v, u] of Object.entries(videos)) { if (u === url) vids.push(v); }
+            for (const [v, u] of Object.entries(videos)) { if (u === url || signFreeId(u) === nid) vids.push(v); }
             if (vids.length) {
                 const all = await S.store.subtitleAll();
                 const seen = new Set();
+                const uniq = new Map();
                 for (const vid of vids) {
                     const ids = Array.isArray(subsMap[vid]) ? subsMap[vid] : [];
                     for (const id of ids) {
                         if (seen.has(id)) continue;
                         seen.add(id);
                         const s = all.find(x => x.id === id);
-                        if (s) applied.push({ id: s.id, title: s.langName || s.name, lang: (s.langs && s.langs[0]) || s.lang || '', langs: s.langs || [], url: 'subtitle:' + s.id, type: /\.(ass|ssa)$/i.test(s.file) ? 'ass' : (/\.(vtt|webvtt)$/i.test(s.file) ? 'vtt' : 'srt'), library: true });
+                        if (s) {
+                            const item = { id: s.id, title: s.langName || s.name, lang: (s.langs && s.langs[0]) || s.lang || '', langs: s.langs || [], url: 'subtitle:' + s.id, type: /\.(ass|ssa)$/i.test(s.file) ? 'ass' : (/\.(vtt|webvtt)$/i.test(s.file) ? 'vtt' : 'srt'), track: String(s.source || ''), library: true };
+                            uniq.set(item.title + '|' + item.lang + '|' + item.type + '|' + item.track, item);
+                        }
                     }
                 }
+                applied = Array.from(uniq.values());
             }
         } catch { /* 忽略 */ }
 
